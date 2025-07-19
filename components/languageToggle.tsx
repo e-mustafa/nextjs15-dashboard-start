@@ -1,13 +1,13 @@
 'use client';
 
+import Image from 'next/image';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { usePathname, useRouter } from 'next/navigation';
-import Image from 'next/image';
 
-import i18nConfig from '@/i18nConfig';
-import { defaultLocale, localesData, type LocalesData } from '@/configs/general';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { defaultLocale, localesData, type LocalesData } from '@/configs/general';
+import i18nConfig from '@/i18nConfig';
 
 export function LanguageToggle() {
 	const { i18n, t } = useTranslation();
@@ -17,7 +17,7 @@ export function LanguageToggle() {
 	const currentLocale = i18n.language as LocalesData;
 	const [selectedLocale, setSelectedLocale] = useState<LocalesData>(currentLocale);
 
-// get the stored language from localStorage and set it to the selectedLocale state
+	// get the stored language from localStorage and set it to the selectedLocale state
 	useEffect(() => {
 		const storedLang = localStorage.getItem('App-Language') as LocalesData | null;
 

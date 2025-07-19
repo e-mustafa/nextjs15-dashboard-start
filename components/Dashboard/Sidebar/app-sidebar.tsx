@@ -15,12 +15,12 @@ import {
 } from 'lucide-react';
 
 import { dir } from 'i18next';
-import { useTranslation } from 'react-i18next';
 
 // import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from '@/components/ui/sidebar';
+import { LanguageToggle } from '@/components/languageToggle';
+import { ModeToggle } from '@/components/modeToggle';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from '@/components/ui/sidebar-rtl';
 import { NavMain } from './nav-main';
-import { NavProjects } from './nav-projects';
 import { NavUser } from './nav-user';
 import SidebarLogo from './sidebar-logo';
 
@@ -52,14 +52,13 @@ const data = {
 	],
 	navMain: [
 		{
-			
 			title: { ar: 'الرئيسية', en: 'main' },
 			url: '/dashboard',
 			icon: SquareTerminal,
 			isActive: true,
 			items: [],
 		},
-		
+
 		{
 			group_name: { ar: 'المبيعات', en: 'sales' },
 			title: { ar: 'الطلبات', en: 'orders' },
@@ -168,7 +167,7 @@ const data = {
 			icon: GalleryVerticalEnd,
 			items: [
 				{
-					title: { en:'brand identity', ar:'ادارة العلامة التجارية' },
+					title: { en: 'brand identity', ar: 'ادارة العلامة التجارية' },
 					url: '/dashboard/store/terms_pages',
 				},
 				{
@@ -232,15 +231,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 		<Sidebar collapsible='icon' side={dir() === 'rtl' ? 'right' : 'left'} {...props} className='font-medium border-0'>
 			<SidebarHeader className='min-h-[72px]'>
 				<SidebarLogo />
-				{/* <TeamSwitcher teams={data.teams} /> */}
 			</SidebarHeader>
 
 			<SidebarContent>
-				{/* {data.navMain.map((item, index) => (
-					<NavMain key={index} items={item} title={item.title.en} />
-				))} */}
-				<NavMain items={data.navMain}  />
-				<NavProjects projects={data.projects} />
+				<NavMain items={data.navMain} />
+				{/* <NavProjects projects={data.projects} /> */}
+				<LanguageToggle />
+				<ModeToggle />
 			</SidebarContent>
 
 			<SidebarFooter>
