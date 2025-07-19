@@ -1,0 +1,80 @@
+{
+	"sidebar": {
+		"nav": {
+         "dashboard": "لوحة التحكم",
+			"home": "الرئيسية",
+			"orders": "الطلبات",
+			"abandoned_carts": "السلات المتروكة",
+
+			"products": "المنتجات",
+			"coupons": "القسائم",
+			"categories": "الفئات",
+			"brands": "الماركات",
+			"collections": "المجموعات",
+
+			"customers": "العملاء",
+			"reviews": "المراجعات",
+			"wishlists": "قوائم الرغبات",
+			"warehouses": "المخازن",
+			"suppliers": "الموردين",
+			"shipping": "الشحن",
+			"taxes": "الضرائب",
+			"inventory": "المخزون",
+			"messages": "الرسائل",
+			"discounts": "الخصومات",
+
+			"platform": "المنصة",
+			"settings": "الإعدادات",
+			"users": "المستخدمين",
+			"analytics": "التحليلات",
+			"help": "المساعدة"
+		},
+		"forms": {
+			"search": "البحث",
+			"search_placeholder": "ابحث في كل شيء...",
+			"search_no_results": "لا توجد نتائج مطابقة",
+			"search_results": "نتائج البحث",
+			"searching": "جارٍ البحث...",
+			"search_error": "حدث خطأ أثناء البحث"
+		},
+		"labels": {
+			"name": "الاسم",
+			"email": "البريد الإلكتروني",
+			"phone": "الهاتف",
+			"address": "العنوان",
+			"city": "المدينة",
+			"state": "المقاطعة",
+			"zip": "الرمز البريدي",
+			"country": "الدولة",
+			"status": "الحالة",
+			"created_at": "تاريخ الإنشاء",
+			"updated_at": "تاريخ التحديث"
+		},
+		"actions": {
+			"add": "إضافة",
+			"edit": "تعديل",
+			"delete": "حذف",
+			"save": "حفظ",
+			"cancel": "إلغاء",
+			"view": "عرض",
+			"download": "تحميل",
+			"upload": "رفع",
+			"export": "تصدير",
+			"import": "استيراد"
+		},
+		"status": {
+			"active": "نشط",
+			"inactive": "غير نشط"
+		},
+		"messages": {
+			"no_data": "لا توجد بيانات لعرضها",
+			"loading": "جارٍ التحميل...",
+			"error": "حدث خطأ، يرجى المحاولة مرة أخرى لاحقًا",
+			"success": "تمت العملية بنجاح"
+		},
+		"pagination": {
+			"previous": "السابق",
+			"next": "التالي"
+		}
+	}
+}
