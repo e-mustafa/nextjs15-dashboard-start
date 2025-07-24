@@ -42,7 +42,6 @@
 	--radius-lg: var(--radius);
 	--radius-xl: calc(var(--radius) + 4px);
 
-
 	--rmdp-primary-teal: var(--primary);
 	--rmdp-secondary-teal: var(--secondary);
 	--rmdp-shadow-teal: var(--ring);
@@ -231,6 +230,19 @@
 		background-image: linear-gradient(145deg, #eef 0%, #fff8fc 100%);
 	}
 
+	.gradient-vertical {
+		background: linear-gradient(180deg, #12141d 0%, #12151f 100%);
+	}
+
+	.gradient-gray {
+		background: linear-gradient(270deg, #37363a 0%, #353637 100%);
+	}
+
+	.gradient-blue {
+		/* background: linear-gradient(180deg, #232839 0%, #12141d 100%); */
+		background: linear-gradient(150deg, var(--accent) 0%, var(--background) 30%);
+	}
+
 	/* to remove margin while dialog/modal opened */
 	body[data-scroll-locked] {
 		@apply !mr-0;
@@ -242,12 +254,17 @@
 	}
 
 	/* add astrict to label if input is required */
-	label:has(input[required])::after,
+	label:has(input[required]),
+	label.required {
+		@apply !gap-1 after:content-['*'] after:text-destructive;
+	}
+	/* label:has(input[required])::after,
 	label.required::after {
+		@apply text-destructive;
 		content: '*';
 		vertical-align: sub;
 		@apply mx-1 h-1 text-destructive;
-	}
+	} */
 
 	.unicode,
 	input {
