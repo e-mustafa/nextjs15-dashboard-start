@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { defaultLocale, localesData, type LocalesData } from '@/configs/general';
-import i18nConfig from '@/i18nConfig';
+import i18nConfig from '@/i18n.Config';
 
 export function LanguageToggle() {
 	const { i18n, t } = useTranslation();

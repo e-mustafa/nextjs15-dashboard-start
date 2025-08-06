@@ -144,15 +144,11 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
   }
 
   return (
-    <p
-      data-slot="form-message"
-      id={formMessageId}
-      className={cn("text-destructive text-sm", className)}
-      {...props}
-    >
-      {body}
-    </p>
-  )
+		<p data-slot='form-message' id={formMessageId} className={cn('text-destructive text-sm', className)} {...props}>
+			{body}
+			{props.children}
+		</p>
+  );
 }
 
 export {

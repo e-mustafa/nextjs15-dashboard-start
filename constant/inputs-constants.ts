@@ -21,15 +21,25 @@ export const FIELD_DATA = {
 		isRequired: true,
 		// invalid: 'Invalid password',
 	},
-
-	fullName: {
-		label: 'inputs.full_name_label',
-		type: 'text',
+	confirm_password: {
+		label: 'inputs.confirm_password_label',
+		type: 'password',
 		description: null,
-		placeholder: 'inputs.full_name_placeholder',
-		startIcon: UserIcon,
+		placeholder: 'inputs.confirm_password_placeholder',
+		startIcon: LockIcon,
 		endIcon: null,
 		isRequired: true,
-		// invalid: 'Invalid full name',
+		// invalid: 'Invalid password',
 	},
+
+	// name: {
+	// 	label: 'inputs.name_label',
+	// 	type: 'text',
+	// 	description: null,
+	// 	placeholder: 'inputs.name_placeholder',
+	// 	startIcon: UserIcon,
+	// 	endIcon: null,
+	// 	isRequired: true,
+	// 	// invalid: 'Invalid full name',
+	// },
 };

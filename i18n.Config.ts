@@ -5,6 +5,7 @@ const i18nConfig = {
 	defaultLocale: defaultLocale.short,
 	prefixDefault: true,
 	localeDetection: true,
+	
 };
 
 export default i18nConfig;

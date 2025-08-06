@@ -1,8 +1,8 @@
 // i18n/initTranslations.ts
+import i18nConfig from '@/i18n.Config';
 import { createInstance, i18n, InitOptions } from 'i18next';
-import { initReactI18next } from 'react-i18next/initReactI18next';
 import resourcesToBackend from 'i18next-resources-to-backend';
-import i18nConfig from '@/i18nConfig';
+import { initReactI18next } from 'react-i18next/initReactI18next';
 
 // type Resource : same as the translation structure (useful when passing the translation directly from the server, for example)
 type Resource = {

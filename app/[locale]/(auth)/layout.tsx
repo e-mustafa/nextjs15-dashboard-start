@@ -2,13 +2,18 @@ import initTranslations from '@/app/i18n';
 import TranslationsProvider from '@/components/TranslationsProvider';
 import { Button } from '@/components/ui-custom/custom-button';
 import { Separator } from '@/components/ui/separator';
+import { prisma_DB } from '@/server/db/prisma';
 import { FigmaIcon, GithubIcon, InstagramIcon, TwitchIcon, TwitterIcon } from 'lucide-react';
 import { ReactNode } from 'react';
 
 const i18nNamespaces = ['auth'];
 export default async function AuthLayout({ children, params }: { children: ReactNode; params: { locale: string } }) {
 	const { locale } = await params;
-	const { t, resources } = await initTranslations(locale, i18nNamespaces);
+	const { resources } = await initTranslations(locale, i18nNamespaces);
+
+	const users = await prisma_DB.user.findMany();
+	console.log('users111', users);
+
 	return (
 		<TranslationsProvider locale={locale} namespaces={i18nNamespaces} resources={resources}>
 			<div className='h-screen flex items-center justify-center gradient-blue'>

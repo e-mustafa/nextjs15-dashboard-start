@@ -1,18 +1,34 @@
 import type { Metadata } from 'next';
-import { IBM_Plex_Sans_Arabic } from 'next/font/google';
+import { Cairo, Roboto } from 'next/font/google';
 import '../globals.css';
 
-import i18nConfig from '@/i18nConfig';
-import { dir } from 'i18next';
-import { ReactNode } from 'react';
 import { ThemeProvider } from '@/components/theme-provider';
 import TranslationsProvider from '@/components/TranslationsProvider';
+import { Toaster } from '@/components/ui/sonner';
+import { toasterConfig } from '@/configs/toast-config';
+import i18nConfig from '@/i18n.Config';
+import { dir } from 'i18next';
+import { ReactNode } from 'react';
+import { ToasterProps } from 'sonner';
 import initTranslations from '../i18n';
 
+// const IBM_Plex_Sans = IBM_Plex_Sans_Arabic({
+// 	variable: '--font-plex-sans',
+// 	subsets: ['arabic', 'latin'],
+// 	weight: ['400', '500', '600', '700'],
+// 	fallback: ['sans-serif'],
+// });
 
-const IBM_Plex_Sans = IBM_Plex_Sans_Arabic({
-	variable: '--font-plex-sans',
+const Cairo_Font = Cairo({
+	variable: '--font-cairo',
 	subsets: ['arabic', 'latin'],
+	weight: ['400', '500', '600', '700'],
+	fallback: ['sans-serif'],
+});
+
+const Roboto_Font = Roboto({
+	variable: '--font-roboto',
+	subsets: ['latin'],
 	weight: ['400', '500', '600', '700'],
 	fallback: ['sans-serif'],
 });
@@ -36,10 +52,11 @@ export default async function RootLayout({ children, params }: { children: React
 
 	return (
 		<html lang={locale} dir={direction} suppressHydrationWarning>
-			<body className={`${IBM_Plex_Sans.variable} antialiased`}>
+			<body className={`${locale === 'ar' ? Cairo_Font.variable : Roboto_Font.variable} antialiased`}>
 				<TranslationsProvider namespaces={i18nNamespaces} locale={locale} resources={resources}>
 					<ThemeProvider attribute='class' defaultTheme='system' enableSystem>
 						{children}
+						<Toaster {...(toasterConfig as ToasterProps)} />
 					</ThemeProvider>
 				</TranslationsProvider>
 			</body>
