@@ -1,130 +1,119 @@
 'use server';
 
-import initTranslations from '@/app/i18n';
+import { AuthResponse } from '@/components/auth/auth-form';
 import { isDEV } from '@/configs/general';
-import { Environments } from '@/constant/enums';
-import { FormResultError, ValidateFormAction } from '@/lib/utils';
-import { SchemaInput, signInSchema, signUpSchema, Tt } from '@/validation/auth-validation';
+import { SchemaInput, ValidateFormAction } from '@/lib/utils';
+import { signInSchema, signUpSchema } from '@/validation/auth-validation';
 import bcrypt from 'bcrypt';
 import { prisma_DB } from '../db/prisma';
 
-export async function unknownError(error: any, t: Tt): Promise<FormResultError> {
+export async function unknownError(error: string = 'messages.errors.error') {
 	isDEV && console.error('signup error:', error);
 
 	return {
 		success: false,
 		status: 500,
-		error: t('messages.errors.error'),
+		error,
 	};
 }
 
-export async function signinAction(formData: SchemaInput<typeof signInSchema>, locale: string) {
-	const { t } = await initTranslations(locale, ['auth']);
-
-	console.log('formData', formData);
-
-	const result = await ValidateFormAction(signInSchema, formData, locale);
-	// console.log('signin formData', formData);
-	console.log('signinAction result', result);
+export async function signinAction(formData: SchemaInput<() => typeof signInSchema>, locale: string): Promise<AuthResponse> {
+	// const { t } = await initTranslations(locale, ['auth']);
+	const result = await ValidateFormAction(() => signInSchema, formData, locale);
 
 	if (!result.success) {
-		return result;
+		return {
+			...result,
+			error: typeof result.error === 'string' ? result.error : JSON.stringify(result.error),
+		};
 	}
 
-	const { data } = result as { data: SchemaInput<typeof signInSchema> };
+	const { email, password } = result.data;
 
 	try {
-		const user = await prisma_DB.user.findUnique({
-			where: { email: data.email },
-		});
+		const user = await prisma_DB.user.findUnique({ where: { email } });
 
 		if (!user) {
 			return {
 				success: false,
+				ok: false,
 				status: 401,
-				message: t('messages.errors.account_not_found'),
-				// formData,
+				error: 'messages.errors.account_not_found',
 			};
 		}
 
-		const { password, ...userWithoutPassword } = user;
-
-		const isValidPassword = await bcrypt.compare(data.password, password!);
+		const isValidPassword = await bcrypt.compare(password, user.password!);
 		if (!isValidPassword) {
 			return {
 				success: false,
+				ok: false,
 				status: 401,
-				message: t('messages.errors.invalid_credentials'),
-				// formData,
+				error: 'messages.errors.sign_in_failed',
 			};
 		}
 
 		return {
 			success: true,
+			ok: true,
 			status: 200,
-			// user: userWithoutPassword,
-			message: t('messages.successes.sign_in_success'),
+			message: 'messages.successes.sign_in_success',
 		};
 	} catch (error: any) {
-		Environments.DEV && console.error('signup error:', error);
-		console.log('signIn Action catch error', error);
-		return unknownError(error, t);
+		return unknownError(error);
 	}
 }
 
-export async function signupAction(formData: SchemaInput<typeof signUpSchema>, locale: string) {
-	console.log('formData', formData);
-	console.log('locale', locale);
+export async function signupAction(formData: SchemaInput<() => typeof signUpSchema>, locale: string): Promise<AuthResponse> {
+	// const { t } = await initTranslations(locale, ['auth']);
+	const result = await ValidateFormAction(() => signUpSchema, formData, locale);
 
-	const { t } = await initTranslations(locale, ['auth']);
+	if (!result.success)
+		return {
+			...result,
+			error: typeof result.error === 'string' ? result.error : JSON.stringify(result.error),
+		};
 
-	const result = await ValidateFormAction(signUpSchema, formData, locale);
-	// console.log('signin formData', formData);
-	console.log('signUpAction result', result);
-	console.log('Validation Result:', result);
+	const { email, password, confirm_password } = result.data;
 
-	if (!result.success) {
-		return result;
+	if (password !== confirm_password) {
+		return {
+			success: false,
+			status: 400,
+			error: 'validation.password_mismatch',
+		};
 	}
 
-	const { data } = result;
-	console.log('Validated Data:', data);
-
 	try {
-		const user = await prisma_DB.user.findUnique({
-			where: { email: data.email },
-		});
+		const existingUser = await prisma_DB.user.findUnique({ where: { email } });
 
-		console.log('checking user', user);
-
-		if (user) {
+		if (existingUser) {
 			return {
 				success: false,
 				status: 409,
-				// error: t('messages.errors.email_already_exists'),
 				error: 'messages.errors.email_already_exists',
-				// formData,
 			};
 		}
 
-		const hashedPassword = await bcrypt.hash(data.password, 10);
+		const hashedPassword = await bcrypt.hash(password, 10);
+
 		const newUser = await prisma_DB.user.create({
-			data: { email: data.email, password: hashedPassword },
+			data: {
+				email,
+				password: hashedPassword,
+			},
 		});
 
-		if (!newUser) {
-			return unknownError('Error creating user', t);
-		}
+		if (!newUser) return unknownError();
 
-		const { password, ...userWithoutPassword } = newUser;
+		const { password: _, ...userWithoutPassword } = newUser;
 
 		return {
 			success: true,
 			status: 201,
-			user: userWithoutPassword,
-			message: t('messages.successes.sign_up_success'),
+			data: userWithoutPassword,
+			message: 'messages.successes.sign_up_success',
 		};
 	} catch (error: any) {
-		return unknownError(error, t);
+		return unknownError(error);
 	}
 }

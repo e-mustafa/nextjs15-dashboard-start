@@ -1,101 +1,77 @@
-import { msg } from '@/lib/utils';
+import { msg, SchemaInput } from '@/lib/utils';
 import { i18n } from 'i18next';
 import { z } from 'zod';
 
-console.log(
-	'msg',
-	msg('validation.min', {
-		field_name: 'inputs.password_label',
-		min: 8,
-	})
-);
-export type MessageKey = string; // message is now just a string or a string with dynamic data in JSON
-export type SchemaInput<T extends () => z.ZodTypeAny> = z.infer<ReturnType<T>>;
-
 export type Tt = i18n['t'];
-// export type SignInInput = z.infer<ReturnType<typeof signInSchema>>;
-// export type SignUpInput = z.infer<ReturnType<typeof signUpSchema>>;
-
-// Helper to encode dynamic messages
-// const msg = (key: string, values?: Record<string, any>): string => (values ? `${key}|${JSON.stringify(values)}` : key);
+export type SchemaSignUp = SchemaInput<() => typeof signUpSchema>;
+export type SchemaSignIn = SchemaInput<() => typeof signInSchema>;
 
 // fields validation --------------------------------------------------------
-export const emailField = () =>
-	z.string().trim().nonempty({ message: 'validation.email_required' }).email({ message: 'validation.invalid_email' });
+export const emailField = z
+	.string()
+	.trim()
+	.nonempty({ message: 'validation.email_required' })
+	.email({ message: 'validation.invalid_email' });
 
-export const passwordField = () =>
-	z
-		.string()
-		.nonempty({ message: 'validation.password_required' })
-		.min(8, {
-			message: msg('validation.min', {
-				field_name: 'inputs.password_label',
-				min: 8,
-			}),
-		});
+export const passwordField = z
+	.string()
+	.nonempty({ message: 'validation.password_required' })
+	.min(8, { message: msg('validation.min', { field_name: 'inputs.password_label', min: 8 }) })
+	.max(32, { message: msg('validation.max', { field_name: 'inputs.password_label', max: 32 }) });
 
-// forms schemas ----------------------------------------------------------------
-export function signUpSchema() {
-	return z
-		.object({
-			email: emailField(),
-			password: passwordField(),
-			// name: z.string().nonempty({ message: 'validation.name_required' }),
-			confirm_password: passwordField(),
-		})
-		.refine((data) => data.password === data.confirm_password, {
-			message: 'validation.confirm_password',
-			path: ['confirm_password'],
-		});
-}
+export const nameField = z.string().nonempty({ message: 'validation.name_required' });
 
-export function signInSchema() {
-	return z.object({
-		email: emailField(),
-		password: passwordField(),
+export const otpField = z
+	.string()
+	.nonempty({ message: 'validation.otp_required' })
+	.min(4, { message: 'validation.otp_required' });
+
+// forms schemas ------------------------------------------------------------
+
+export const signUpSchema = z.object({
+	email: emailField,
+	password: passwordField,
+	confirm_password: passwordField,
+}).refine((data) => data.password === data.confirm_password, {
+	message: 'validation.confirm_password',
+	path: ['confirm_password'],
+})
+
+export const signInSchema = z.object({
+	email: emailField,
+	password: passwordField,
+});
+
+export const forgotPasswordSchema = z.object({
+	password: passwordField,
+});
+
+export const resetPasswordSchema = z
+	.object({
+		password: passwordField,
+		confirm_password: passwordField,
+	})
+	.refine((data) => data.password === data.confirm_password, {
+		message: 'validation.confirm_password',
+		path: ['confirm_password'],
 	});
-}
 
-export function forgotPasswordSchema() {
-	return z.object({
-		password: passwordField(),
+export const changePasswordSchema = z
+	.object({
+		currentPassword: passwordField,
+		new_password: passwordField,
+		confirm_password: passwordField,
+	})
+	.refine((data) => data.new_password === data.confirm_password, {
+		message: 'validation.confirm_password',
+		path: ['confirm_password'],
 	});
-}
 
-export function resetPasswordSchema() {
-	return z
-		.object({
-			password: passwordField(),
-			confirm_password: passwordField(),
-		})
-		.refine((data) => data.password === data.confirm_password, {
-			message: 'validation.confirm_password',
-			path: ['confirm_password'],
-		});
-}
+export const verifyEmailSchema = z.object({
+	otp: otpField,
+});
 
-export function changePasswordSchema() {
-	return z
-		.object({
-			currentPassword: passwordField(),
-			new_password: passwordField(),
-			confirm_password: passwordField(),
-		})
-		.refine((data) => data.new_password === data.confirm_password, {
-			message: 'validation.confirm_password',
-			path: ['confirm_password'],
-		});
-}
-
-export function verifyEmailSchema() {
-	return z.object({
-		otp: z.string().min(6, { message: 'validation.otp_required' }).nonempty({ message: 'validation.otp_required' }),
-	});
-}
-
-export function changeEmailSchema() {
-	return z.object({
-		email: emailField(),
-		password: passwordField(),
-	});
-}
+export const changeEmailSchema = z.object({
+	email: emailField,
+	password: passwordField,
+});

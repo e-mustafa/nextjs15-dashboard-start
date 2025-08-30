@@ -1,4 +1,4 @@
-import { isDEV, isPROD } from '@/configs/general';
+import { isDEV } from '@/configs/general';
 import { PrismaClient } from '../../lib/generated/prisma';
 // import {PrismaClient} from '@prisma/client';
 
@@ -12,4 +12,4 @@ export const prisma_DB =
 		log: isDEV ? ['query', 'info', 'warn', 'error'] : ['error'],
 	});
 
-if (isPROD) globalForPrisma.prisma = prisma_DB;
+if (isDEV) globalForPrisma.prisma = prisma_DB;

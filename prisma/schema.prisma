@@ -16,14 +16,16 @@ datasource db {
 
 // user -----------------------------------
 model User {
-  id            String          @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String          @unique
-  emailVerified DateTime?       @map("email_verified")
+  email         String    @unique
+  emailVerified DateTime? @map("email_verified")
   image         String?
-  password      String?         @db.Text
+  password      String?   @db.Text
   accounts      Account[]
   sessions      Session[]
+  role          UserRole  @default(user)
+
   // Optional for WebAuthn support
   Authenticator Authenticator[]
 
@@ -32,6 +34,12 @@ model User {
   Post      Post[]
 
   @@map("users")
+}
+
+enum UserRole {
+  user
+  admin
+  moderator
 }
 
 model Account {

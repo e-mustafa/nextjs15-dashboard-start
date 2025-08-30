@@ -32,14 +32,14 @@ export const FIELD_DATA = {
 		// invalid: 'Invalid password',
 	},
 
-	// name: {
-	// 	label: 'inputs.name_label',
-	// 	type: 'text',
-	// 	description: null,
-	// 	placeholder: 'inputs.name_placeholder',
-	// 	startIcon: UserIcon,
-	// 	endIcon: null,
-	// 	isRequired: true,
-	// 	// invalid: 'Invalid full name',
-	// },
+	name: {
+		label: 'inputs.name_label',
+		type: 'text',
+		description: null,
+		placeholder: 'inputs.name_placeholder',
+		startIcon: UserIcon,
+		endIcon: null,
+		isRequired: true,
+		// invalid: 'Invalid full name',
+	},
 };

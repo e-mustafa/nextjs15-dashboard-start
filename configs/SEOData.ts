@@ -1,17 +1,17 @@
 export const seoData = {
 	ar: {
-		title: 'موقعنا على الويب',
+		title: 'INFINITY',
 		description: 'موقعنا على الويب',
 		keywords: ['next.js', 'i18n', 'localization'],
-      siteName: 'اسم الموقع',
-      locale: 'ar_AR',
+		siteName: 'اسم الموقع',
+		locale: 'ar_AR',
 	},
 	en: {
-		title: 'Our website',
+		title: 'INFINITY',
 		description: 'Our website',
-      keywords: ['next.js', 'i18n', 'localization'],
-      siteName: 'Site name',
-      locale: 'en_US',
+		keywords: ['next.js', 'i18n', 'localization'],
+		siteName: 'Site name',
+		locale: 'en_US',
 	},
 };
 

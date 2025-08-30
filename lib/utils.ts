@@ -12,14 +12,9 @@ export function renderErrorMessage(message: string, t: TFunction): string {
 		if (message.includes('|')) {
 			const [key, rawJson] = message.split('|');
 			const values = JSON.parse(rawJson);
-
-			// ترجمة اسم الحقل إن وجد
-			if (values.field_name) {
-				values.field_name = t(values.field_name);
-				console.log('t(values.field_name)', t(values.field_name));
-			}
-
-			return t(key, values) as string;
+			if (values.field_name) values.field_name = t(values.field_name);
+			// return t(key, values);
+			return t(key, values).toString();
 		}
 
 		return t(message);
@@ -31,24 +26,33 @@ export function renderErrorMessage(message: string, t: TFunction): string {
 
 type TranslationMsg = string | { key: string; values?: Record<string, any> };
 
-export const msg = (key: string, values?: Record<string, any>): string => {
-	return values ? `${key}|${JSON.stringify(values)}` : key;
-};
+export const msg = (key: string, values?: Record<string, any>): string =>
+	values ? `${key}|${JSON.stringify(values)}` : key;
+
+export type TError =
+	| string
+	| { [key: string]: string }
+	| { responseError: string | string[]; validationError: string | string[] }
+	| undefined;
 
 export type FormResultSuccess<T> = {
 	success: true;
+	ok: boolean;
 	data: T;
 	message?: string;
-	// error: string | { [key: string]: string | string[] } | undefined;
-	error: any;
+	error?: TError;
 };
+
 export type FormResultError = {
-	success: boolean;
+	success: false;
+	ok: false;
 	status: number;
-	error: string | { [key: string]: string } | undefined;
+	error: TError;
 	formData?: FormData;
 };
+
 export type FormResult<T> = FormResultSuccess<T> | FormResultError;
+
 export type SchemaInput<T extends () => ZodTypeAny> = z.infer<ReturnType<T>>;
 
 export async function ValidateFormAction<T extends () => ZodTypeAny>(
@@ -62,14 +66,15 @@ export async function ValidateFormAction<T extends () => ZodTypeAny>(
 	if (!result.success) {
 		return {
 			success: false,
+			ok: false,
 			status: 400,
 			error: result.error.flatten().fieldErrors,
-			// formData: formData as FormData | undefined,
 		};
 	}
 
 	return {
 		success: true,
+		ok: true,
 		data: result.data as z.infer<ReturnType<T>>,
 	};
 }

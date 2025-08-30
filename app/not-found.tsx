@@ -1,8 +1,8 @@
+import TranslationsProvider from '@/components/TranslationsProvider';
+import { defaultLocale } from '@/configs/general';
+import { headers } from 'next/headers';
 import Link from 'next/link';
 import initTranslations from './i18n';
-import TranslationsProvider from '@/components/TranslationsProvider';
-import { headers } from 'next/headers';
-import { defaultLocale } from '@/configs/general';
 
 const i18nNamespaces = ['general'];
 export default async function NotFoundPage({ params }: { params: { locale: string } }) {
@@ -10,12 +10,11 @@ export default async function NotFoundPage({ params }: { params: { locale: strin
 	// const locale = header.get('NEXT_LOCALE') || defaultLocale.short;
 
 	const headersList = await headers();
-	const locale = headersList.get('x-locale') || headersList.get('NEXT_LOCALE') || defaultLocale.short;
+	const locale = headersList.get('x-url') || headersList.get('NEXT_LOCALE') || defaultLocale.short;
 
 	console.log('locale', locale);
 	// const { locale } = await params;
 	const { t, resources } = await initTranslations(locale, i18nNamespaces);
-	
 
 	return (
 		<TranslationsProvider namespaces={i18nNamespaces} locale={locale} resources={resources}>
