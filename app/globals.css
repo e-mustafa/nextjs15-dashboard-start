@@ -1,7 +1,15 @@
+
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
-@custom-variant dark (&:is(.dark *));
+/* data-table style  */
+@import '../components/Dashboard/dataTable/data-table.css';
+
+
+
+/* @custom-variant dark (&:is(.dark *)); */
+@custom-variant dark (&:where(.dark, .dark *));
+
 
 @theme inline {
 	--color-background: var(--background);
@@ -277,4 +285,14 @@
 		text-align: match-parent;
 		text-align: -webkit-match-parent;
 	}
+
+
+
+	/* component  */
+	.stack-component {
+		@apply flex gap-3 justify-between items-center py-3 px-4 shadow-lg shadow-primary/10 rounded-md bg-muted ;
+	}
 }
+
+
+

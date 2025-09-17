@@ -1,0 +1,213 @@
+{
+	"sidebar": {
+		"nav": {
+			"dashboard": "لوحة التحكم",
+			"home": "الرئيسية",
+			"orders": "الطلبات",
+			"abandoned_carts": "السلات المتروكة",
+
+			"products": "المنتجات",
+			"coupons": "القسائم",
+			"categories": "الفئات",
+			"brands": "الماركات",
+			"collections": "المجموعات",
+
+			"customers": "العملاء",
+			"reviews": "المراجعات",
+			"wishlists": "قوائم الرغبات",
+			"warehouses": "المخازن",
+			"suppliers": "الموردين",
+			"shipping": "الشحن",
+			"taxes": "الضرائب",
+			"inventory": "المخزون",
+			"messages": "الرسائل",
+			"discounts": "الخصومات",
+
+			"platform": "المنصة",
+			"settings": "الإعدادات",
+			"users": "المستخدمين",
+			"analytics": "التحليلات",
+			"help": "المساعدة"
+		},
+		"forms": {
+			"search": "البحث",
+			"search_placeholder": "ابحث في كل شيء...",
+			"search_no_results": "لا توجد نتائج مطابقة",
+			"search_results": "نتائج البحث",
+			"searching": "جارٍ البحث...",
+			"search_error": "حدث خطأ أثناء البحث"
+		},
+		"labels": {
+			"name": "الاسم",
+			"email": "البريد الإلكتروني",
+			"phone": "الهاتف",
+			"address": "العنوان",
+			"city": "المدينة",
+			"state": "المقاطعة",
+			"zip": "الرمز البريدي",
+			"country": "الدولة",
+			"status": "الحالة",
+			"created_at": "تاريخ الإنشاء",
+			"updated_at": "تاريخ التحديث"
+		},
+		"actions": {
+			"add": "إضافة",
+			"edit": "تعديل",
+			"delete": "حذف",
+			"save": "حفظ",
+			"cancel": "إلغاء",
+			"view": "عرض",
+			"download": "تحميل",
+			"upload": "رفع",
+			"export": "تصدير",
+			"import": "استيراد"
+		},
+		"status": {
+			"active": "نشط",
+			"inactive": "غير نشط"
+		},
+		"messages": {
+			"no_data": "لا توجد بيانات لعرضها",
+			"loading": "جارٍ التحميل...",
+			"error": "حدث خطأ، يرجى المحاولة مرة أخرى لاحقًا",
+			"success": "تمت العملية بنجاح"
+		},
+		"pagination": {
+			"previous": "السابق",
+			"next": "التالي"
+		}
+	},
+
+	"general": {
+		"welcome": "مرحبًا بك في لوحة التحكم",
+		"overview": "نظرة عامة على النشاط",
+		"sales": "المبيعات",
+		"orders": "الطلبات",
+		"customers": "العملاء",
+		"products": "المنتجات",
+		"revenue": "الإيرادات",
+		"growth": "النمو",
+		"recent_orders": "الطلبات الأخيرة",
+		"top_products": "أفضل المنتجات مبيعًا",
+		"customer_activity": "نشاط العملاء"
+	},
+	"dataTable": {
+		"columns": "الأعمدة",
+		"manage_columns": "ادارة الأعمدة",
+		"show_columns": "إظهار الأعمدة",
+		"hide_columns": "إخفاء الأعمدة",
+		"scroll": "تمرير",
+		"auto_collapse": "طي تلقائي",
+		"pin_column": "تثبيت العمود",
+		"unpin__column": "إلغاء تثبيت العمود",
+		"length_menu": "عدد الصفوف لكل صفحة",
+		"collapse_or_scroll": "طي الاعمدة او السماح بالتمرير",
+		"columns_control": "التحكم بالأعمدة",
+		"filter": "تصفية",
+		"search": "بحث",
+		"rows_per_page": "الصفوف لكل صفحة",
+		"of": "من",
+		"page": "صفحة",
+		"no_data": "لا توجد بيانات لعرضها"
+	},
+	"charts": {
+		"sales_over_time": "المبيعات مع مرور الوقت",
+		"top_selling_products": "أفضل المنتجات مبيعًا",
+		"customer_demographics": "التركيبة السكانية للعملاء",
+		"traffic_sources": "مصادر الحركة"
+	},
+	"forms": {
+		"search": "بحث",
+		"search_placeholder": "ابحث في كل شيء...",
+		"search_no_results": "لا توجد نتائج مطابقة",
+		"search_results": "نتائج البحث",
+		"searching": "جارٍ البحث...",
+		"search_error": "حدث خطأ أثناء البحث",
+		"labels": {
+			"name": "الاسم",
+			"email": "البريد الإلكتروني",
+			"phone": "الهاتف",
+			"address": "العنوان",
+			"city": "المدينة",
+			"state": "المقاطعة",
+			"zip": "الرمز البريدي",
+			"country": "الدولة",
+			"status": "الحالة",
+			"created_at": "تاريخ الإنشاء",
+			"updated_at": "تاريخ التحديث"
+		},
+		"placeholders": {
+			"search": "بحث",
+			"search_placeholder": "ابحث في كل شيء...",
+			"search_no_results": "لا توجد نتائج مطابقة",
+			"search_results": "نتائج البحث",
+			"searching": "جارٍ البحث...",
+			"search_error": "حدث خطأ أثناء البحث"
+		}
+	},
+	"messages": {
+		"no_data": "لا توجد بيانات لعرضها",
+		"loading": "جارٍ التحميل...",
+		"error": "حدث خطأ، يرجى المحاولة مرة أخرى لاحقًا",
+		"success": "تمت العملية بنجاح"
+	},
+	"pagination": {
+		"previous": "السابق",
+		"next": "التالي"
+	},
+	"status": {
+		"active": "نشط",
+		"inactive": "غير نشط"
+	},
+	"actions": {
+		"add": "إضافة",
+		"edit": "تعديل",
+		"delete": "حذف",
+		"save": "حفظ",
+		"cancel": "إلغاء",
+		"view": "عرض",
+		"download": "تحميل",
+		"upload": "رفع",
+		"export": "تصدير",
+		"import": "استيراد"
+	},
+
+	"tooltips": {
+		"data_table": {
+			"manage_columns": "إدارة الأعمدة",
+			"pin_column": "تثبيت العمود",
+			"unpin_column": "إلغاء تثبيت العمود",
+			"collapse_or_scroll": "طي الأعمدة أو السماح بالتمرير",
+			"collapse_columns": "طي الأعمدة",
+			"show_collapsed_columns": "إظهار الأعمدة المخفية",
+			"show_columns": "إظهار الأعمدة",
+			"hide_columns": "إخفاء الأعمدة",
+			"expand_all": "توسيع الكل",
+			"collapse_all": "طي الكل"
+		},
+		"filter": "تصفية",
+		"search": "بحث",
+		"rows_per_page": "الصفوف لكل صفحة",
+		"of": "من",
+		"page": "صفحة",
+		"no_data": "لا توجد بيانات لعرضها",
+		"loading_records": "جارٍ التحميل...",
+		"processing": "جارٍ المعالجة...",
+		"zero_records": "لم يتم العثور على سجلات مطابقة",
+		"info": "عرض _START_ إلى _END_ من _TOTAL_ إدخالات",
+		"info_empty": "لا توجد إدخالات متاحة",
+		"info_filtered": "(تمت التصفية من _MAX_ إجمالي الإدخالات)",
+		"empty_table": "لا توجد بيانات متاحة في الجدول",
+		"search_placeholder": "ابحث في كل شيء...",
+		"search_no_results": "لا توجد نتائج مطابقة",
+		"search_results": "نتائج البحث",
+		"searching": "جارٍ البحث...",
+		"search_error": "حدث خطأ أثناء البحث"
+	},
+	"options": {
+		"yes": "نعم",
+		"no": "لا",
+		"scroll": "تمرير",
+		"auto_collapse": "طي تلقائي"
+	}
+}

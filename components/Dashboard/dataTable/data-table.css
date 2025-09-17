@@ -1,0 +1,41 @@
+
+	/* 📌 pinned columns */
+	[data-pinned='left'], [data-pinned='right'] {
+		@apply sticky start-0 z-10 bg-secondary shadow-white shadow-lg;
+	}
+
+	 /* {
+		@apply sticky right-0 z-10 bg-background shadow-[-2px_0_4px_rgba(0,0,0,0.08)];
+	} */
+
+	th[data-pinned='left'],
+	td[data-pinned='left'] {
+		@apply left-0;
+	}
+
+	th[data-pinned='right'],
+	td[data-pinned='right'] {
+		@apply right-0;
+	}
+
+	/* ✨ container scrollable */
+	.table-container {
+		@apply relative overflow-x-auto;
+	}
+/* @layer utilities {} */
+
+
+.expanded-row[data-state="selected"]{
+	@apply bg-muted/20
+}
+
+
+
+th[data-pinned="false"] .grab-handel{
+	@apply cursor-grab
+}
+
+th[data-pinned="left"] .grab-handel,
+th[data-pinned="right"] .grab-handel{
+	@apply !pointer-events-none opacity-0 
+}

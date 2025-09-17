@@ -1,0 +1,218 @@
+{
+	"sidebar": {
+		"nav": {
+			"dashboard": "Dashboard",
+			"home": "Home",
+			"orders": "Orders",
+			"abandoned_carts": "Abandoned Carts",
+
+			"products": "Products",
+			"coupons": "Coupons",
+			"categories": "Categories",
+			"brands": "Brands",
+			"collections": "Collections",
+
+			"customers": "Customers",
+			"reviews": "Reviews",
+			"wishlists": "Wishlists",
+			"warehouses": "Warehouses",
+			"suppliers": "Suppliers",
+			"shipping": "Shipping",
+			"taxes": "Taxes",
+			"inventory": "Inventory",
+			"messages": "Messages",
+			"discounts": "Discounts",
+
+			"platform": "Platform",
+			"settings": "Settings",
+			"users": "Users",
+			"analytics": "Analytics",
+			"help": "Help"
+		},
+		"forms": {
+			"search": "Search",
+			"search_placeholder": "Search everything...",
+			"search_no_results": "No matching results",
+			"search_results": "Search results",
+			"searching": "Searching...",
+			"search_error": "An error occurred while searching"
+		},
+		"labels": {
+			"name": "Name",
+			"email": "Email",
+			"phone": "Phone",
+			"address": "Address",
+			"city": "City",
+			"state": "State",
+			"zip": "ZIP Code",
+			"country": "Country",
+			"status": "Status",
+			"created_at": "Created At",
+			"updated_at": "Updated At"
+		},
+		"actions": {
+			"add": "Add",
+			"edit": "Edit",
+			"delete": "Delete",
+			"save": "Save",
+			"cancel": "Cancel",
+			"view": "View",
+			"download": "Download",
+			"upload": "Upload",
+			"export": "Export",
+			"import": "Import"
+		},
+		"status": {
+			"active": "Active",
+			"inactive": "Inactive"
+		},
+		"messages": {
+			"no_data": "No data to display",
+			"loading": "Loading...",
+			"error": "An error occurred, please try again later",
+			"success": "Operation completed successfully"
+		},
+		"pagination": {
+			"previous": "Previous",
+			"next": "Next"
+		}
+	},
+
+	"general": {
+		"welcome": "Welcome to the Dashboard",
+		"overview": "Business Overview",
+		"sales": "Sales",
+		"orders": "Orders",
+		"customers": "Customers",
+		"products": "Products",
+		"revenue": "Revenue",
+		"growth": "Growth",
+		"recent_orders": "Recent Orders",
+		"top_products": "Top Selling Products",
+		"customer_activity": "Customer Activity"
+	},
+	"dataTable": {
+		"manage_columns": "Manage Columns",
+		"pin_column": "Pin Column",
+		"unpin_column": "Unpin Column",
+		"show_columns": "Show Columns",
+		"hide_columns": "Hide Columns",
+		"scroll": "Scroll",
+		"auto_collapse": "Auto Collapse",
+		"length_menu": "Show _MENU_ entries per page",
+		"collapse_or_scroll": "Collapse or Scroll",
+		"columns_control": "Columns Control",
+		"filter": "Filter",
+		"search": "Search",
+		"rows_per_page": "Rows per page",
+		"of": "of",
+		"page": "Page",
+		"no_data": "No data to display"
+	},
+	"charts": {
+		"sales_over_time": "Sales Over Time",
+		"top_selling_products": "Top Selling Products",
+		"customer_demographics": "Customer Demographics",
+		"traffic_sources": "Traffic Sources"
+	},
+	"forms": {
+		"search": "Search",
+		"search_placeholder": "Search everything...",
+		"search_no_results": "No matching results",
+		"search_results": "Search results",
+		"searching": "Searching...",
+		"search_error": "An error occurred while searching",
+		"labels": {
+			"name": "Name",
+			"email": "Email",
+			"phone": "Phone",
+			"address": "Address",
+			"city": "City",
+			"state": "State",
+			"zip": "ZIP Code",
+			"country": "Country",
+			"status": "Status",
+			"created_at": "Created At",
+			"updated_at": "Updated At"
+		},
+		"placeholders": {
+			"search": "Search",
+			"search_placeholder": "Search everything...",
+			"search_no_results": "No matching results",
+			"search_results": "Search results",
+			"searching": "Searching...",
+			"search_error": "An error occurred while searching"
+		}
+	},
+	"messages": {
+		"no_data": "No data to display",
+		"loading": "Loading...",
+		"error": "An error occurred, please try again later",
+		"success": "Operation completed successfully"
+	},
+	"pagination": {
+		"previous": "Previous",
+		"next": "Next"
+	},
+	"status": {
+		"active": "Active",
+		"inactive": "Inactive"
+	},
+	"actions": {
+		"add": "Add",
+		"edit": "Edit",
+		"delete": "Delete",
+		"save": "Save",
+		"cancel": "Cancel",
+		"view": "View",
+		"download": "Download",
+		"upload": "Upload",
+		"export": "Export",
+		"import": "Import"
+	},
+
+	"tooltips": {
+		"data_table": {
+			"manage_columns": "Manage columns",
+			"pin_column": "تثبيت العمود",
+			"unpin_column": "إلغاء تثبيت العمود",
+			"collapse_or_scroll": "طي الأعمدة أو السماح بالتمرير",
+			"collapse_columns": "طي الأعمدة",
+			"show_collapsed_columns": "إظهار الأعمدة المخفية",
+			"show_columns": "إظهار الأعمدة",
+			"hide_columns": "إخفاء الأعمدة",
+			"expand_all": "توسيع الكل",
+			"collapse_all": "طي الكل"
+		},
+		"show_collapsed_columns": "Show collapsed columns",
+		"collapse_columns": "Collapse columns",
+		"show_columns": "Show columns",
+		"hide_columns": "Hide columns",
+		"expand_all": "Expand all",
+		"collapse_all": "Collapse all",
+		"filter": "Filter",
+		"search": "Search",
+		"rows_per_page": "Rows per page",
+		"of": "of",
+		"page": "Page",
+		"no_data": "No data to display",
+		"loading_records": "Loading...",
+		"processing": "Processing...",
+		"zero_records": "No matching records found",
+		"info": "Showing _START_ to _END_ of _TOTAL_ entries",
+		"info_empty": "No entries available",
+		"info_filtered": "(filtered from _MAX_ total entries)",
+		"empty_table": "No data available in table",
+		"search_placeholder": "Search everything...",
+		"search_no_results": "No matching results",
+		"search_results": "Search results",
+		"searching": "Searching...",
+		"search_error": "An error occurred while searching"
+	},
+	"options": {
+		"yes": "Yes",
+		"no": "No",
+		"scroll": "Scroll",
+		"auto_collapse": "Auto Collapse"
+	}
+}

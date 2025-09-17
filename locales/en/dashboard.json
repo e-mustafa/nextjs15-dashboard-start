@@ -1,0 +1,145 @@
+{
+	"common": {
+		"actions": {
+			"add": "Add",
+			"edit": "Edit",
+			"delete": "Delete",
+			"save": "Save",
+			"cancel": "Cancel",
+			"view": "View",
+			"download": "Download",
+			"upload": "Upload",
+			"export": "Export",
+			"import": "Import"
+		},
+		"status": {
+			"active": "Active",
+			"inactive": "Inactive"
+		},
+		"messages": {
+			"no_data": "No data available",
+			"loading": "Loading...",
+			"error": "An error occurred, please try again later",
+			"success": "Operation completed successfully"
+		},
+		"pagination": {
+			"previous": "Previous",
+			"next": "Next"
+		},
+		"options": {
+			"yes": "Yes",
+			"no": "No",
+			"scroll": "Scroll",
+			"auto_collapse": "Auto collapse"
+		}
+	},
+
+	"sidebar": {
+		"nav": {
+			"dashboard": "Dashboard",
+			"home": "Home",
+			"orders": "Orders",
+			"abandoned_carts": "Abandoned Carts",
+			"products": "Products",
+			"coupons": "Coupons",
+			"categories": "Categories",
+			"brands": "Brands",
+			"collections": "Collections",
+			"customers": "Customers",
+			"reviews": "Reviews",
+			"wishlists": "Wishlists",
+			"warehouses": "Warehouses",
+			"suppliers": "Suppliers",
+			"shipping": "Shipping",
+			"taxes": "Taxes",
+			"inventory": "Inventory",
+			"messages": "Messages",
+			"discounts": "Discounts",
+			"platform": "Platform",
+			"settings": "Settings",
+			"users": "Users",
+			"analytics": "Analytics",
+			"help": "Help"
+		},
+		"labels": {
+			"name": "Name",
+			"email": "Email",
+			"phone": "Phone",
+			"address": "Address",
+			"city": "City",
+			"state": "State",
+			"zip": "Zip Code",
+			"country": "Country",
+			"status": "Status",
+			"created_at": "Created At",
+			"updated_at": "Updated At"
+		}
+	},
+
+	"forms": {
+		"search": {
+			"label": "Search",
+			"placeholder": "Search everything...",
+			"no_results": "No matching results",
+			"results": "Search results",
+			"searching": "Searching...",
+			"error": "An error occurred while searching"
+		}
+	},
+
+	"general": {
+		"welcome": "Welcome to the Dashboard",
+		"overview": "Business Overview",
+		"sales": "Sales",
+		"orders": "Orders",
+		"customers": "Customers",
+		"products": "Products",
+		"revenue": "Revenue",
+		"growth": "Growth",
+		"recent_orders": "Recent Orders",
+		"top_products": "Top Selling Products",
+		"customer_activity": "Customer Activity"
+	},
+
+	"datatable": {
+		"columns": "Columns",
+		"manage_columns": "Manage Columns",
+		"show_columns": "Show Columns",
+		"hide_columns": "Hide Columns",
+		"scroll": "Scroll",
+		"auto_collapse": "Auto Collapse",
+		"pin_column": "Pin Column",
+		"unpin_column": "Unpin Column",
+		"length_menu": "Rows per page",
+		"collapse_or_scroll": "Collapse columns or allow scrolling",
+		"columns_control": "Columns Control",
+		"filter": "Filter",
+		"search": "Search",
+		"rows_per_page": "Rows per page",
+		"of": "of",
+		"page": "Page",
+		"no_data": "No data available",
+		"loading_records": "Loading...",
+		"processing": "Processing...",
+		"zero_records": "No matching records found",
+		"info": "Showing _START_ to _END_ of _TOTAL_ entries",
+		"info_empty": "No entries available",
+		"info_filtered": "(filtered from _MAX_ total entries)",
+		"empty_table": "No data available in table"
+	},
+
+	"charts": {
+		"sales_over_time": "Sales Over Time",
+		"top_selling_products": "Top Selling Products",
+		"customer_demographics": "Customer Demographics",
+		"traffic_sources": "Traffic Sources"
+	},
+
+	"tooltips": {
+		"filter": "Filter",
+		"search": "Search",
+		"rows_per_page": "Rows per page",
+		"of": "of",
+		"page": "Page"
+	}
+}

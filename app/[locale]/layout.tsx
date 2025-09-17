@@ -42,7 +42,7 @@ export function generateStaticParams() {
 	return i18nConfig.locales.map((locale) => ({ locale }));
 }
 
-const i18nNamespaces = ['general'];
+const i18nNamespaces = ['dashboard'];
 
 export default async function RootLayout({ children, params }: { children: ReactNode; params: { locale: string } }) {
 	const { locale } = await params;

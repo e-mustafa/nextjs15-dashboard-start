@@ -23,6 +23,7 @@ export default async function Home({ params }: Props) {
 			<ModeToggle />
 
 			<div className='flex flex-col items-center justify-center'>
+				<p className='text-lg font-bold mb-4'>landing page</p>
 				<Link href={`/dashboard`} className='text-blue-500 hover:underline'>
 					Go to the dashboard
 				</Link>
