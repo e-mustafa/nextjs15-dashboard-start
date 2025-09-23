@@ -30,7 +30,7 @@
 			"yes": "Yes",
 			"no": "No",
 			"scroll": "Scroll",
-			"auto_collapse": "Auto collapse"
+			"auto_collapse": "Auto Collapse"
 		}
 	},
 
@@ -68,7 +68,7 @@
 			"address": "Address",
 			"city": "City",
 			"state": "State",
-			"zip": "Zip Code",
+			"zip": "ZIP Code",
 			"country": "Country",
 			"status": "Status",
 			"created_at": "Created At",
@@ -77,6 +77,143 @@
 	},
 
 	"forms": {
+		"sections": {
+			"general_details": "General Details",
+			"seo_details": "SEO Details",
+			"details": "Details",
+			"settings": "Settings",
+			"permissions": "Permissions"
+		},
+		"labels": {
+			"name": "Name",
+			"name_ar": "Name (Arabic)",
+			"name_en": "Name (English)",
+			"description": "Description",
+			"description_ar": "Description (Arabic)",
+			"description_en": "Description (English)",
+			"title": "Title",
+			"title_ar": "Title (Arabic)",
+			"title_en": "Title (English)",
+
+			"seo_title": "SEO Title",
+			"seo_title_ar": "SEO Title (Arabic)",
+			"seo_title_en": "SEO Title (English)",
+			"seo_description": "SEO Description",
+			"seo_description_ar": "SEO Description (Arabic)",
+			"seo_description_en": "SEO Description (English)",
+			"seo_keywords": "SEO Keywords",
+			"seo_link": "SEO Link",
+
+			"first_name": "First Name",
+			"last_name": "Last Name",
+			"full_name": "Full Name",
+			"username": "Username",
+			"email": "Email",
+			"phone": "Phone",
+			"address": "Address",
+			"city": "City",
+			"state": "State",
+			"zip": "ZIP Code",
+			"country": "Country",
+			"status": "Status",
+			"password": "Password",
+			"confirm_password": "Confirm Password",
+			"current_password": "Current Password",
+			"new_password": "New Password",
+			"confirm_new_password": "Confirm New Password",
+			"role": "Role",
+			"permissions": "Permissions",
+			"search": "Search",
+
+			"slug": "Slug"
+		},
+		"placeholders": {
+			"name": "Enter name",
+			"name_ar": "Enter name (Arabic)",
+			"name_en": "Enter name (English)",
+			"description": "Enter description",
+			"description_ar": "Enter description (Arabic)",
+			"description_en": "Enter description (English)",
+			"title": "Enter title",
+			"title_ar": "Enter title (Arabic)",
+			"title_en": "Enter title (English)",
+			"link": "Enter link",
+
+			"seo_link": "Enter SEO link",
+			"seo_title_ar": "Enter SEO title (Arabic)",
+			"seo_title_en": "Enter SEO title (English)",
+			"seo_title": "Enter SEO title",
+			"seo_description": "Enter SEO description",
+			"seo_description_ar": "Enter SEO description (Arabic)",
+			"seo_description_en": "Enter SEO description (English)",
+			"seo_keywords": "Enter SEO keywords separated by commas",
+
+			"richtext": "Write here...",
+			"textarea": "Write here...",
+
+			"first_name": "Enter first name",
+			"last_name": "Enter last name",
+			"full_name": "Enter full name",
+			"username": "Enter username",
+			"email": "Enter email",
+			"phone": "Enter phone number",
+			"address": "Enter address",
+			"city": "Enter city",
+			"state": "Enter state",
+			"zip": "Enter ZIP code",
+			"country": "Select country",
+			"status": "Select status",
+			"password": "Enter password",
+			"confirm_password": "Confirm password",
+			"current_password": "Enter current password",
+			"new_password": "Enter new password",
+			"confirm_new_password": "Confirm new password",
+			"role": "Select role",
+			"permissions": "Select permissions",
+
+			"slug": "Enter slug..."
+		},
+
+		"validation": {
+			"required": "This field is required",
+			"email": "Please enter a valid email",
+			"min": "Please enter a valid value",
+			"max": "Please enter a valid value",
+			"numeric": "Please enter a valid number",
+			"integer": "Please enter a valid integer",
+			"invalid_url": "Invalid URL, enter a valid one like: https://www.google.com",
+			"invalid_phone": "Invalid phone number, enter a valid one like: +1234567890",
+			"invalid_zip": "Invalid ZIP code, enter a valid one like: 12345",
+			"invalid_color": "Invalid color, enter a valid one like: #000000",
+			"name_ar_min": "Arabic name must be at least {{min}} characters.",
+			"name_en_min": "English name must be at least {{min}} characters.",
+			"name_en_max": "English name must not exceed {{max}} characters.",
+			"name_ar_max": "Arabic name must not exceed {{max}} characters.",
+			"name_ar_required": "Arabic name is required.",
+			"name_en_required": "English name is required.",
+			"name_min": "Name must be at least {{min}} characters.",
+			"name_max": "Name must not exceed {{max}} characters.",
+			"name_required": "Name is required.",
+
+			"slug_min": "Slug must be at least {{min}} characters",
+			"slug_max": "Slug must not exceed {{max}} characters",
+			"slug_regex": "Slug must contain only lowercase letters a-z, numbers 0-9, and dashes -"
+		},
+		"descriptions": {
+			"slug": "The slug must be unique and can only contain English letters, numbers, and dashes."
+		},
+		"infos": {
+			"slug": "The slug must be unique because it is part of the website URL. It can only contain English letters, numbers, and dashes."
+		},
+		"tooltips": {
+			"hide_password": "Hide password",
+			"show_password": "Show password",
+			"slug": "The slug must be unique and cannot contain spaces. Example: my-product",
+			"seo_link": "SEO link must be unique and cannot contain spaces. Example: my-product",
+			"seo_title": "SEO title is the title that appears in search engine results.",
+			"seo_description": "SEO description is the description that appears in search engine results.",
+			"seo_keywords": "SEO keywords help improve the page ranking in search engine results."
+		},
 		"search": {
 			"label": "Search",
 			"placeholder": "Search everything...",
@@ -103,16 +240,20 @@
 
 	"datatable": {
 		"columns": "Columns",
+		"columns_control": "Columns Control",
 		"manage_columns": "Manage Columns",
 		"show_columns": "Show Columns",
 		"hide_columns": "Hide Columns",
 		"scroll": "Scroll",
+		"collapse_or_scroll": "Collapse or Scroll Columns",
 		"auto_collapse": "Auto Collapse",
+		"expand_all": "Expand All",
+		"collapse_all": "Collapse All",
+		"collapse_columns": "Collapse Columns",
+		"expand_column": "Expand Column",
 		"pin_column": "Pin Column",
 		"unpin_column": "Unpin Column",
 		"length_menu": "Rows per page",
-		"collapse_or_scroll": "Collapse columns or allow scrolling",
-		"columns_control": "Columns Control",
 		"filter": "Filter",
 		"search": "Search",
 		"rows_per_page": "Rows per page",
@@ -125,7 +266,7 @@
 		"info": "Showing _START_ to _END_ of _TOTAL_ entries",
 		"info_empty": "No entries available",
 		"info_filtered": "(filtered from _MAX_ total entries)",
-		"empty_table": "No data available in table"
+		"empty_table": "No data available in the table"
 	},
 
 	"charts": {

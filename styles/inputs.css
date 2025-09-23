@@ -1,0 +1,7 @@
+.form-section {
+	@apply w-full grid gap-6 border p-2 sm:p-4 rounded-md shadow shadow-accent;
+}
+
+.form-inputs {
+	@apply grid sm:grid-cols-2 gap-6 capitalize;
+}
