@@ -41,3 +41,6 @@ yarn-error.log*
 next-env.d.ts
 
 /lib/generated/prisma
+i18nBoost.config.ts
+
+zzz-old-files/

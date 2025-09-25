@@ -1,13 +1,16 @@
 import initTranslations from '@/app/i18n';
 import GlobalLogo from '@/components/globalLogo';
 import TranslationsProvider from '@/components/TranslationsProvider';
+import { TLocalesData } from '@/configs/general';
 import { ReactNode } from 'react';
+import { TLayoutProps } from '../layout';
 
 const i18nNamespaces = ['auth'];
 
-export default async function AuthLayout({ children, params }: { children: ReactNode; params: { locale: string } }) {
+
+export default async function AuthLayout({ children, params }: TLayoutProps) {
 	const { locale } = await params;
-	const { t, resources } = await initTranslations(locale, i18nNamespaces);
+	const { resources } = await initTranslations(i18nNamespaces, locale);
 
 	// get users from database
 	// const users = await prisma_DB.user.findMany();

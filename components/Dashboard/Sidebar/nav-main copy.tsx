@@ -14,14 +14,13 @@ import {
 	SidebarMenuSubItem,
 	useSidebar,
 } from '@/components/ui/sidebar-rtl';
-import { LocalesData } from '@/configs/general';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 
 export interface TSidebarItems {
 	// title: { ar: string; en: string };
-	group_name: Record<LocalesData, string>;
-	title: Record<LocalesData, string>;
+	group_name: Record<TLocalesData, string>;
+	title: Record<TLocalesData, string>;
 	url: string;
 	icon?: LucideIcon;
 	isActive?: boolean;
@@ -31,7 +30,7 @@ export interface TSidebarItems {
 export function NavMain({ items, title = '' }: { items: TSidebarItems[]; title: string }) {
 	// get locale
 	const { i18n } = useTranslation('dashboard');
-	const locale = i18n.language as LocalesData;
+	const locale = i18n.language as TLocalesData;
 	// const { t } = useTranslation('dashboard');
 	console.log('items', items);
 

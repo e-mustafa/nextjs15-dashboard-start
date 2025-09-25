@@ -23,7 +23,7 @@ export default async function BrandsPage() {
 						<ArrowRightIcon className='size-6 text-muted-foreground' />
 					</Link>
 				</Button>
-				Add Brand Page (Table)
+				Add Brand 
 			</div>
 
 			<Suspense fallback={<div>Loading...</div>}>

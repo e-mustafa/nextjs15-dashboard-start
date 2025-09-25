@@ -2,6 +2,7 @@ import { ChangeEvent, ElementType, ReactNode } from 'react';
 import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
 
 export type FieldTypeMap = {
+	// Base Field Types
 	text: string;
 	number: number;
 	email: string;
@@ -9,6 +10,8 @@ export type FieldTypeMap = {
 	url: string;
 	date: string;
 	time: string;
+
+	// Special Field Types
 	password: string;
 	richtext: string;
 	combobox: string | number;

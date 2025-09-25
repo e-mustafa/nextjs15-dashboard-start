@@ -146,6 +146,8 @@ export const formSections_brand: SectionConfig<TBrandFormValues>[] = [
 export default function BrandForm() {
 	const { t } = useTranslation();
 
+	// const { locale, dir, t, i18n } = useLocale();
+
 	const form = useForm<TBrandFormValues>({
 		resolver: zodResolver(formSchema_brand),
 		defaultValues: defaultValues_brand,
@@ -184,6 +186,7 @@ export default function BrandForm() {
 
 	return (
 		<Form {...form}>
+			{t('general.welcome')}
 			<form onSubmit={form.handleSubmit(onSubmit)} method='post' className='w-full grid gap-6'>
 				{formSections_brand.map((section, sectionIndex) => (
 					<div key={'section-' + sectionIndex} className='form-section'>

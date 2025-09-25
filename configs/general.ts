@@ -14,7 +14,7 @@ export const localesData = {
 		flag: '/assets/images/lang_en_flag_english.svg',
 	},
 } as const;
-export type LocalesData = keyof typeof localesData;
+export type TLocalesData = keyof typeof localesData;
 export const defaultLocale = localesData['ar'];
 
 export const config_env = {

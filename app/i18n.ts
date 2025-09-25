@@ -1,29 +1,32 @@
-// i18n/initTranslations.ts
+import { TLocalesData } from '@/configs/general';
 import i18nConfig from '@/i18n.Config';
-import { createInstance, i18n, InitOptions } from 'i18next';
+import getCurrentLocale from '@/lib/getCurrentLocale.server';
+import { createInstance, i18n, InitOptions, Resources } from 'i18next';
+import LanguageDetector from 'i18next-browser-languagedetector';
 import resourcesToBackend from 'i18next-resources-to-backend';
 import { initReactI18next } from 'react-i18next/initReactI18next';
 
-// type Resource : same as the translation structure (useful when passing the translation directly from the server, for example)
-type Resource = {
-	[language: string]: {
-		[namespace: string]: Record<string, string>;
-	};
-};
-
 export default async function initTranslations(
-	locale: string,
 	namespaces: string[],
+	locale?: TLocalesData | undefined,
 	i18nInstance?: i18n,
-	resources?: Resource
+	resources?: Resources
 ): Promise<{
 	i18n: i18n;
-	resources: Resource;
+	resources: Resources;
 	t: i18n['t'];
+	dir: 'rtl' | 'ltr';
+	locale: TLocalesData;
 }> {
-	i18nInstance = i18nInstance || createInstance();
+	// server: try to get locale from headers
+	// client: LanguageDetector is the one that determines
 
-	i18nInstance.use(initReactI18next);
+	locale = locale || (await getCurrentLocale());
+
+	i18nInstance = i18nInstance || createInstance();
+	i18nInstance
+		.use(LanguageDetector) // 👈 for client
+		.use(initReactI18next);
 
 	if (!resources) {
 		i18nInstance.use(
@@ -32,7 +35,7 @@ export default async function initTranslations(
 	}
 
 	await i18nInstance.init({
-		lng: locale,
+		lng: locale, // 👈 fallback for server
 		resources,
 		fallbackLng: i18nConfig.defaultLocale,
 		supportedLngs: i18nConfig.locales,
@@ -40,13 +43,26 @@ export default async function initTranslations(
 		fallbackNS: namespaces[0],
 		ns: namespaces,
 		preload: resources ? [] : i18nConfig.locales,
+		detection: {
+			order: ['querystring', 'localStorage', 'cookie', 'navigator', 'htmlTag'],
+			caches: ['localStorage', 'cookie'],
+			lookupQuerystring: 'locale',
+			lookupLocalStorage: 'App-Language',
+			lookupCookie: 'NEXT_LOCALE',
+		},
 	} as InitOptions);
+
+	const language = i18nInstance.language || locale;
+	const dir =
+		(await Promise.resolve(await i18nInstance.dir(language)).catch(() => (language === 'ar' ? 'rtl' : 'ltr'))) || 'ltr';
 
 	return {
 		i18n: i18nInstance,
 		resources: {
-			[locale]: i18nInstance.services.resourceStore.data[locale],
-		} as Resource,
+			[locale as TLocalesData]: i18nInstance.services.resourceStore.data[locale as TLocalesData] as unknown as string,
+		},
 		t: i18nInstance.t,
+		locale: language as TLocalesData,
+		dir,
 	};
 }

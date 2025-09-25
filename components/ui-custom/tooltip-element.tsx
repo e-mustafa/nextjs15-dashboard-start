@@ -1,4 +1,4 @@
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 export default function TooltipElement({
 	children,
@@ -10,11 +10,10 @@ export default function TooltipElement({
 	delayDuration?: number;
 }) {
 	return (
-		<TooltipProvider>
-			<Tooltip delayDuration={delayDuration}>
-				<TooltipTrigger asChild>{children}</TooltipTrigger>
-				<TooltipContent>{content}</TooltipContent>
-			</Tooltip>
-		</TooltipProvider>
+		<Tooltip delayDuration={delayDuration}>
+			<TooltipTrigger asChild>{children}</TooltipTrigger>
+			<TooltipContent>{content}</TooltipContent>
+		</Tooltip>
+		// <TooltipProvider></TooltipProvider>
 	);
 }

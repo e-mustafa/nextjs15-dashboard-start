@@ -1,8 +1,20 @@
+import initTranslations from '@/app/i18n';
+import TranslationsProvider from '@/components/TranslationsProvider';
+import { TLocalesData } from '@/configs/general';
 import { prisma_DB } from '@/server/db/prisma';
+import { TLayoutProps } from '../layout';
 
-export default async function DashboardPage() {
+const i18nNamespaces = ['dashboard'];
+
+export default async function DashboardPage({ children, params }: TLayoutProps) {
 	const products = await prisma_DB.product.findMany();
 	console.log('Products:', products);
+
+	const { locale } = await params;
+	const { t } = await initTranslations(i18nNamespaces, locale);
+
+	// const { t, resources, dir = locale === 'ar' ? 'rtl' : 'ltr' } = await initTranslations(i18nNamespaces, locale);
+
 	return (
 		// <SidebarInset className='bg-sidebar'>
 		// 	<header className='bg-sidebar min-h-[72px] flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12'>
@@ -23,6 +35,8 @@ export default async function DashboardPage() {
 		// 		<div className='min-h-[100dvh] flex-1 rounded-xl bg-muted/50 md:min-h-min' />
 		// 	</main>
 		// </SidebarInset>
-		<div>dashboard main page</div>
+		<TranslationsProvider namespaces={i18nNamespaces} locale={locale as TLocalesData}>
+			<div>{t('general.welcome')}</div>
+		</TranslationsProvider>
 	);
 }

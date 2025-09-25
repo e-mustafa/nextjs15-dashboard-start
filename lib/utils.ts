@@ -78,3 +78,4 @@ export async function ValidateFormAction<T extends () => ZodTypeAny>(
 		data: result.data as z.infer<ReturnType<T>>,
 	};
 }
+

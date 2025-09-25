@@ -9,8 +9,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui-custom/custom-form';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { seoData } from '@/configs/SEOData';
 import { defaultLocale } from '@/configs/general';
@@ -23,21 +23,22 @@ import { toast } from 'sonner';
 import ShowHidePasswordButton from '../inputs/show-hide-password-button';
 import { Separator } from '../ui/separator';
 
-export type AuthResponse = {
-	success: boolean;
-	ok?: boolean;
-	error?: string;
-	message?: string;
-	data?: any;
-} | {
-	ok: boolean;
-	error?: string;
-	status?: number;
-	url?: string | null;
-	message?: string;
-	data?: any;
-};
-
+export type AuthResponse =
+	| {
+			success: boolean;
+			ok?: boolean;
+			error?: string;
+			message?: string;
+			data?: any;
+	  }
+	| {
+			ok: boolean;
+			error?: string;
+			status?: number;
+			url?: string | null;
+			message?: string;
+			data?: any;
+	  };
 
 interface Props<T extends FieldValues> {
 	schema: ZodType<T, any, any>;
@@ -75,10 +76,9 @@ export default function AuthForm<T extends FieldValues>({ type, schema, defaultV
 						redirect: false,
 						email: (data as any).email,
 						password: (data as any).password,
-				})) as AuthResponse | undefined)
+				  })) as AuthResponse | undefined)
 				: ((await onSubmit(data, locale)) as AuthResponse | undefined);
-			
-			
+
 			console.log('res: ', res);
 
 			if (!res) return;

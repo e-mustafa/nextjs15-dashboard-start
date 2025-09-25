@@ -5,12 +5,13 @@ import '../globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import TranslationsProvider from '@/components/TranslationsProvider';
 import { Toaster } from '@/components/ui/sonner';
+import { TLocalesData } from '@/configs/general';
 import { toasterConfig } from '@/configs/toast-config';
 import i18nConfig from '@/i18n.Config';
-import { dir } from 'i18next';
 import { ReactNode } from 'react';
 import { ToasterProps } from 'sonner';
 import initTranslations from '../i18n';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 // const IBM_Plex_Sans = IBM_Plex_Sans_Arabic({
 // 	variable: '--font-plex-sans',
@@ -42,20 +43,20 @@ export function generateStaticParams() {
 	return i18nConfig.locales.map((locale) => ({ locale }));
 }
 
-const i18nNamespaces = ['dashboard'];
+const i18nNamespaces = ['general'];
 
-export default async function RootLayout({ children, params }: { children: ReactNode; params: { locale: string } }) {
+export type TLayoutProps = { children: ReactNode; params: { locale: TLocalesData } };
+
+export default async function RootLayout({ children, params }: TLayoutProps) {
 	const { locale } = await params;
-	const direction = dir(locale);
-
-	const { resources } = await initTranslations(locale, i18nNamespaces);
+	const { resources, dir } = await initTranslations(i18nNamespaces, locale);
 
 	return (
-		<html lang={locale} dir={direction} suppressHydrationWarning>
+		<html lang={locale} dir={dir} suppressHydrationWarning>
 			<body className={`${locale === 'ar' ? Cairo_Font.variable : Roboto_Font.variable} antialiased`}>
 				<TranslationsProvider namespaces={i18nNamespaces} locale={locale} resources={resources}>
 					<ThemeProvider attribute='class' defaultTheme='system' enableSystem>
-						{children}
+						<TooltipProvider>{children}</TooltipProvider>
 						<Toaster {...(toasterConfig as ToasterProps)} />
 					</ThemeProvider>
 				</TranslationsProvider>

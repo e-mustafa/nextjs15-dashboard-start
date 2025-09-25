@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { defaultLocale, localesData, type LocalesData } from '@/configs/general';
+import { defaultLocale, localesData, TLocalesData } from '@/configs/general';
 import i18nConfig from '@/i18n.Config';
 
 export function LanguageToggle() {
@@ -14,37 +14,33 @@ export function LanguageToggle() {
 	const router = useRouter();
 	const pathname = usePathname();
 
-	const currentLocale = i18n.language as LocalesData;
-	const [selectedLocale, setSelectedLocale] = useState<LocalesData>(currentLocale);
+	const currentLocale = i18n.language as TLocalesData;
+	const [selectedLocale, setSelectedLocale] = useState<TLocalesData>(currentLocale);
 
-	// get the stored language from localStorage and set it to the selectedLocale state
+	// ✅ get locale from URL
 	useEffect(() => {
-		const storedLang = localStorage.getItem('App-Language') as LocalesData | null;
+		const urlLocale = pathname.split('/')[1] as TLocalesData;
+		const finalLocale = i18nConfig.locales.includes(urlLocale) && urlLocale ? urlLocale : i18nConfig.defaultLocale;
 
-		if (storedLang && storedLang !== currentLocale) {
-			i18n.changeLanguage(storedLang);
-			setSelectedLocale(storedLang);
-
-			const newPath =
-				currentLocale === i18nConfig.defaultLocale && !i18nConfig.prefixDefault
-					? `/${storedLang}${pathname}`
-					: pathname.replace(`/${currentLocale}`, `/${storedLang}`);
-
-			router.push(newPath);
+		if (i18n.language !== finalLocale) {
+			i18n.changeLanguage(finalLocale);
 		}
-	}, []);
 
-	const handleSelect = (newLocale: LocalesData) => {
-		if (newLocale === currentLocale) return;
+		setSelectedLocale(finalLocale);
+		localStorage.setItem('App-Language', finalLocale);
+	}, [pathname, i18n.language]);
+
+	const handleSelect = (newLocale: TLocalesData) => {
+		if (newLocale === selectedLocale) return;
 
 		localStorage.setItem('App-Language', newLocale);
 		setSelectedLocale(newLocale);
 		i18n.changeLanguage(newLocale);
 
 		const newPath =
-			currentLocale === i18nConfig.defaultLocale && !i18nConfig.prefixDefault
+			selectedLocale === i18nConfig.defaultLocale && !i18nConfig.prefixDefault
 				? `/${newLocale}${pathname}`
-				: pathname.replace(`/${currentLocale}`, `/${newLocale}`);
+				: pathname.replace(`/${selectedLocale}`, `/${newLocale}`);
 
 		router.push(newPath);
 		router.refresh();
@@ -66,7 +62,7 @@ export function LanguageToggle() {
 				{Object.entries(localesData).map(([key, data]) => (
 					<DropdownMenuItem
 						key={key}
-						onClick={() => handleSelect(data.short as LocalesData)}
+						onClick={() => handleSelect(data.short as TLocalesData)}
 						className='flex items-center justify-between rtl:flex-row-reverse'
 					>
 						<div className='flex items-center gap-2 rtl:flex-row-reverse capitalize'>

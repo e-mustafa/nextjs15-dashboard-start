@@ -1,19 +1,16 @@
-import initTranslations from '../i18n';
 import ExampleClientComponent from '@/components/ExampleClientComponent';
 import { LanguageToggle } from '@/components/languageToggle';
 import { ModeToggle } from '@/components/modeToggle';
+import { TLocalesData } from '@/configs/general';
 import Link from 'next/link';
+import initTranslations from '../i18n';
+import { TLayoutProps } from './layout';
 
 const i18nNamespaces = ['general'];
 
-type Props = {
-	params: {
-		locale: string;
-	};
-};
-export default async function Home({ params }: Props) {
+export default async function Home({ params }: TLayoutProps) {
 	const { locale } = await params;
-	const { t, resources } = await initTranslations(locale, i18nNamespaces);
+	const { t } = await initTranslations(i18nNamespaces, locale as TLocalesData);
 
 	return (
 		<main>

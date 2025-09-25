@@ -87,6 +87,7 @@ import { cn } from '@/lib/utils';
 
 import TooltipElement from '@/components/ui-custom/tooltip-element';
 import { Switch } from '@/components/ui/switch';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import DebouncedInput from '@/hooks/debouncedInput';
 import useIsClient from '@/hooks/useIsClient';
 import useStorageState from '@/hooks/useStorageState';
@@ -277,37 +278,67 @@ export default function DataTableComponent() {
 	const collapsingColumn = {
 		id: 'expander',
 		header: () => (
-			<TooltipElement content={<p>{expandedRows.size > 0 ? t('datatable.collapse_all') : t('datatable.expand_all')}</p>}>
-				<Button variant='ghost' size='icon' onClick={toggleExpandRowAll}>
-					<ChevronRightIcon
-						className={cn(
-							'size-5 transform transition-all duration-300',
-							expandedRows.size > 0 ? 'rotate-90' : 'rotate-0'
-						)}
-					/>
-				</Button>
-			</TooltipElement>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<Button variant='ghost' size='icon' onClick={toggleExpandRowAll}>
+						<ChevronRightIcon
+							className={cn(
+								'size-5 transform transition-all duration-300',
+								expandedRows.size > 0 ? 'rotate-90' : 'rotate-0'
+							)}
+						/>
+					</Button>
+				</TooltipTrigger>
+				<TooltipContent>
+					<p>{expandedRows.size > 0 ? t('datatable.collapse_all') : t('datatable.expand_all')}</p>{' '}
+				</TooltipContent>
+			</Tooltip>
+			// <TooltipElement content={<p>{expandedRows.size > 0 ? t('datatable.collapse_all') : t('datatable.expand_all')}</p>}>
+
+			// </TooltipElement>
 		),
 		cell: ({ row }: { row: Row<Item> }) => (
-			<TooltipElement
-				content={<p>{expandedRows.has(row.id) ? t('datatable.collapse_columns') : t('datatable.expand_column')}</p>}
-			>
-				<Button
-					variant='ghost'
-					size='icon'
-					onClick={(e) => {
-						e.stopPropagation();
-						toggleExpandRow(row.id);
-					}}
-				>
-					<ChevronRightIcon
-						className={cn(
-							'size-5 transform transition-transform duration-300',
-							expandedRows.has(row.id) ? 'rotate-90' : 'rotate-0'
-						)}
-					/>
-				</Button>
-			</TooltipElement>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<Button
+						variant='ghost'
+						size='icon'
+						onClick={(e) => {
+							e.stopPropagation();
+							toggleExpandRow(row.id);
+						}}
+					>
+						<ChevronRightIcon
+							className={cn(
+								'size-5 transform transition-transform duration-300',
+								expandedRows.has(row.id) ? 'rotate-90' : 'rotate-0'
+							)}
+						/>
+					</Button>
+				</TooltipTrigger>
+				<TooltipContent>
+					<p>{expandedRows.has(row.id) ? t('datatable.collapse_columns') : t('datatable.expand_column')}</p>
+				</TooltipContent>
+			</Tooltip>
+			// <TooltipElement
+			// 	content={<p>{expandedRows.has(row.id) ? t('datatable.collapse_columns') : t('datatable.expand_column')}</p>}
+			// >
+			// 	<Button
+			// 		variant='ghost'
+			// 		size='icon'
+			// 		onClick={(e) => {
+			// 			e.stopPropagation();
+			// 			toggleExpandRow(row.id);
+			// 		}}
+			// 	>
+			// 		<ChevronRightIcon
+			// 			className={cn(
+			// 				'size-5 transform transition-transform duration-300',
+			// 				expandedRows.has(row.id) ? 'rotate-90' : 'rotate-0'
+			// 			)}
+			// 		/>
+			// 	</Button>
+			// </TooltipElement>
 		),
 		maxSize: 40,
 		enableSorting: false,

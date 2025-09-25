@@ -1,8 +1,9 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+/* @import 'tailwindcss-rtl'; */
 
 /* data-table style  */
-@import '../components/Dashboard/dataTable/data-table.css';
+@import '../styles/data-table.css';
 /* inputs styles  */
 @import '../styles/inputs.css';
 

@@ -15,15 +15,14 @@ import {
 	SidebarMenuSubItem,
 	useSidebar,
 } from '@/components/ui/sidebar-rtl';
-import { LocalesData } from '@/configs/general';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export interface TSidebarItems {
-	group_name?: Record<LocalesData, string>;
-	title: Record<LocalesData, string>;
+	group_name?: Record<TLocalesData, string>;
+	title: Record<TLocalesData, string>;
 	url: string;
 	icon?: LucideIcon;
 	isActive?: boolean;
@@ -32,7 +31,7 @@ export interface TSidebarItems {
 
 export function NavMain({ items }: { items: TSidebarItems[] }) {
 	const { i18n } = useTranslation('dashboard');
-	const locale = i18n.language as LocalesData;
+	const locale = i18n.language as TLocalesData;
 	const { state } = useSidebar();
 	const [openPopoverIndex, setOpenPopoverIndex] = useState<number | null>(null);
 
