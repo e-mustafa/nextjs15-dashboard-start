@@ -1,10 +1,7 @@
 import { clsx, type ClassValue } from 'clsx';
 import { TFunction } from 'i18next';
 import { twMerge } from 'tailwind-merge';
-import { ZodType } from 'zod';
-import z, { ZodTypeAny } from 'zod/v3';
-// import z, { ZodSchema, ZodTypeAny } from 'zod';
-import setSlug from 'slugify';
+import z, { ZodObject, ZodTypeAny } from 'zod';
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -58,57 +55,27 @@ export type FormResult<T> = FormResultSuccess<T> | FormResultError;
 
 export type SchemaInput<T extends () => ZodTypeAny> = z.infer<ReturnType<T>>;
 
-export type ValidationResult<T> =
-	| { success: true; ok?: true; data: T }
-	| { success: false; ok?: false; status: number; formData: unknown; error: Record<string, string[]> };
-
-export async function ValidateFormAction<T>(schema: ZodType<T, any, any>, formData: unknown): Promise<ValidationResult<T>> {
-	const result = schema.safeParse(formData);
+export async function ValidateFormAction<T extends () => ZodObject>(
+	schemaFn: T,
+	formData: z.infer<ReturnType<T>>,
+	locale?: string
+): Promise<FormResult<z.infer<ReturnType<T>>>> {
+	const result = schemaFn.safeParse(formData);
+	console.log('result', result);
 
 	if (!result.success) {
 		return {
 			success: false,
+			ok: false,
 			status: 400,
-			formData,
-			error: result.error.flatten().fieldErrors as Record<string, string[]>,
+			error: result.error.flatten().fieldErrors,
 		};
 	}
 
 	return {
 		success: true,
 		ok: true,
-		data: result.data,
+		data: result.data as z.infer<ReturnType<T>>,
 	};
 }
 
-type slugifyOptions = {
-	locale?: string;
-	replacement?: string;
-	lower?: boolean;
-	strict?: boolean;
-	trim?: boolean;
-	remove?: RegExp;
-};
-
-export function slugify(text: string, locale: string = 'ar', options?: slugifyOptions) {
-	const { lang = locale, replacement = '-', lower = true, trim = true, ...rest } = (options = {});
-
-	if (lang === 'ar') {
-		// allow arabic, latin characters and numbers
-		return text
-			.normalize('NFKD')
-			.replace(/[^\u0600-\u06FFA-Za-z0-9\s]/g, '')
-			.trim()
-			.replace(/\s+/g, replacement)
-			.replace(new RegExp(`^${replacement}+|${replacement}+$`, 'g'), '')
-			.toLowerCase();
-	}
-
-	return setSlug(text, {
-		replacement,
-		lower,
-		locale: lang,
-		trim,
-		...rest,
-	});
-}

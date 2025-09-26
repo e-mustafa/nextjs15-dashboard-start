@@ -195,9 +195,11 @@
 			"name_max": "Name must not exceed {{max}} characters.",
 			"name_required": "Name is required.",
 
+			"slug_required": "Slug is required",
 			"slug_min": "Slug must be at least {{min}} characters",
 			"slug_max": "Slug must not exceed {{max}} characters",
-			"slug_regex": "Slug must contain only lowercase letters a-z, numbers 0-9, and dashes -"
+			"slug_ar_regex": "Slug must contain only arabic & latin letters, numbers 0-9, and dashes -",
+			"slug_en_regex": "Slug must contain only lowercase latin letters a-z, numbers 0-9, and dashes -"
 		},
 		"descriptions": {
 			"slug": "The slug must be unique and can only contain English letters, numbers, and dashes."
@@ -282,5 +284,32 @@
 		"rows_per_page": "Rows per page",
 		"of": "of",
 		"page": "Page"
+	},
+	"api": {
+		"brands": {
+			"success": {
+				"create": "Brand created successfully",
+				"update": "Brand updated successfully",
+				"delete": "Brand deleted successfully"
+			},
+			"error": {
+				"create": "Failed to create brand",
+				"update": "Failed to update brand",
+				"delete": "Failed to delete brand",
+				"not_found": "Brand not found",
+				"exists": "Brand already exists"
+			}
+		},
+		"products": "Products",
+
+		"no_data": "No data to display",
+
+		"loading_records": "Loading...",
+		"processing": "Processing...",
+		"zero_records": "No matching records found",
+		"info": "Showing _START_ to _END_ of _TOTAL_ entries",
+		"info_empty": "No entries available",
+		"info_filtered": "(filtered from _MAX_ total entries)",
+		"empty_table": "No data available in table"
 	}
 }

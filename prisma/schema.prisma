@@ -97,6 +97,7 @@ model Authenticator {
   @@id([userId, credentialID])
 }
 
+// Dashboard schema -------------------------------------------------
 // post -----------------------------------
 model Post {
   id        String   @id @default(cuid())
@@ -118,4 +119,45 @@ model Product {
   price       Float
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// brand model 
+// model Brand {
+//   id             String @id @default(cuid())
+//   name_ar        String
+//   name_en        String
+//   description_ar String
+//   description_en String
+//   image          String
+// }
+
+model Brand {
+  id           String             @id @default(cuid())
+  image        String?
+  translations BrandTranslation[]
+}
+
+// model BrandTranslation {
+//   id          String @id @default(cuid())
+//   brandId     String
+//   lang        String
+//   slug        String
+//   name        String
+//   description String
+//   Brand       Brand  @relation(fields: [brandId], references: [id])
+
+//   @@unique([lang, slug]) // slug فريد لكل لغة
+// }
+
+
+model BrandTranslation {
+  id          String @id @default(cuid())
+  brandId     String
+  lang        String
+  slug        String
+  name        String
+  description String
+  Brand       Brand  @relation(fields: [brandId], references: [id])
+
+  @@unique([lang, slug], name: "lang_slug")
 }

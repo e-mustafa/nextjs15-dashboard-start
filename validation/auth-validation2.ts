@@ -1,6 +1,7 @@
 import { msg } from '@/lib/utils';
 import { i18n } from 'i18next';
 import { z } from 'zod';
+import { emailField, passwordField } from './fields-validation';
 
 console.log(
 	'msg',
@@ -19,29 +20,16 @@ export type Tt = i18n['t'];
 // Helper to encode dynamic messages
 // const msg = (key: string, values?: Record<string, any>): string => (values ? `${key}|${JSON.stringify(values)}` : key);
 
-// fields validation --------------------------------------------------------
-export const emailField = () =>
-	z.string().trim().nonempty({ message: 'validation.email_required' }).email({ message: 'validation.invalid_email' });
 
-export const passwordField = () =>
-	z
-		.string()
-		.nonempty({ message: 'validation.password_required' })
-		.min(8, {
-			message: msg('validation.min', {
-				field_name: 'inputs.password_label',
-				min: 8,
-			}),
-		});
 
 // forms schemas ----------------------------------------------------------------
 export function signUpSchema() {
 	return z
 		.object({
-			email: emailField(),
-			password: passwordField(),
+			email: emailField,
+			password: passwordField,
 			// name: z.string().nonempty({ message: 'validation.name_required' }),
-			confirm_password: passwordField(),
+			confirm_password: passwordField,
 		})
 		.refine((data) => data.password === data.confirm_password, {
 			message: 'validation.confirm_password',
@@ -51,22 +39,22 @@ export function signUpSchema() {
 
 export function signInSchema() {
 	return z.object({
-		email: emailField(),
-		password: passwordField(),
+		email: emailField,
+		password: passwordField,
 	});
 }
 
 export function forgotPasswordSchema() {
 	return z.object({
-		password: passwordField(),
+		password: passwordField,
 	});
 }
 
 export function resetPasswordSchema() {
 	return z
 		.object({
-			password: passwordField(),
-			confirm_password: passwordField(),
+			password: passwordField,
+			confirm_password: passwordField,
 		})
 		.refine((data) => data.password === data.confirm_password, {
 			message: 'validation.confirm_password',
@@ -77,9 +65,9 @@ export function resetPasswordSchema() {
 export function changePasswordSchema() {
 	return z
 		.object({
-			currentPassword: passwordField(),
-			new_password: passwordField(),
-			confirm_password: passwordField(),
+			currentPassword: passwordField,
+			new_password: passwordField,
+			confirm_password: passwordField,
 		})
 		.refine((data) => data.new_password === data.confirm_password, {
 			message: 'validation.confirm_password',
@@ -95,7 +83,7 @@ export function verifyEmailSchema() {
 
 export function changeEmailSchema() {
 	return z.object({
-		email: emailField(),
-		password: passwordField(),
+		email: emailField,
+		password: passwordField,
 	});
 }

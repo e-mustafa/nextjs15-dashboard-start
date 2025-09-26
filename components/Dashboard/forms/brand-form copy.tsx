@@ -9,13 +9,11 @@ import { Button } from '@/components/ui-custom/custom-button';
 import { Form } from '@/components/ui-custom/custom-form';
 import { renderField } from '@/lib/create-forms/input-registry';
 
-import useLocale from '@/hooks/useLocale';
 import { SectionConfig } from '@/lib/create-forms/types-create-forms';
-import { saveBrandAction } from '@/server/actions/brand-actions';
 import { defaultValues_brand, formSchema_brand } from '@/validation/brand-validation';
-import { useTransition } from 'react';
+import { useTranslation } from 'react-i18next';
 
-export type TBrandFormValues = z.infer<typeof formSchema_brand>;
+type TBrandFormValues = z.infer<typeof formSchema_brand>;
 
 export const formSectionSEO: SectionConfig = {
 	title: 'forms.sections.seo_details',
@@ -101,19 +99,19 @@ export const formSections_brand: SectionConfig<TBrandFormValues>[] = [
 				label: 'forms.labels.description_en',
 				placeholder: 'forms.placeholders.description_en',
 			},
-			{
-				type: 'slug',
-				name: 'slug_ar',
-				locale: 'ar',
-				referenceInput: 'name_ar',
-			},
+			// {
+			// 	type: 'slug',
+			// 	name: 'slug_ar',
+			// 	locale: 'ar',
+			// 	referenceInput: 'name_ar',
+			// },
 
-			{
-				type: 'slug',
-				name: 'slug_en',
-				locale: 'en',
-				referenceInput: 'name_en',
-			},
+			// {
+			// 	type: 'slug',
+			// 	name: 'slug_en',
+			// 	locale: 'en',
+			// 	referenceInput: 'name_en',
+			// },
 			{
 				type: 'uploadFile',
 				name: 'image',
@@ -124,36 +122,67 @@ export const formSections_brand: SectionConfig<TBrandFormValues>[] = [
 					// multiple: false,
 				},
 			},
+
+			// {
+			// 	type: 'password',
+			// 	name: 'password',
+			// 	label: 'forms.labels.password',
+			// 	placeholder: 'forms.placeholders.password',
+			// 	required: true,
+			// },
+			// {
+			// 	type: 'combobox',
+			// 	name: 'brand',
+			// 	label: 'form.brand',
+			// 	placeholder: 'form.ph_select_brand',
+			// 	fetcher: fetchBrands,
+			// },
 		],
 	},
 	// SEO sections inputs with mockup card
 	// formSectionSEO,
 ];
 
-export default function BrandForm(type: 'create' | 'update' = 'create') {
-	const { locale, dir, t, i18n } = useLocale();
+export default function BrandForm() {
+	const { t } = useTranslation();
+
+	// const { locale, dir, t, i18n } = useLocale();
 
 	const form = useForm<TBrandFormValues>({
 		resolver: zodResolver(formSchema_brand),
 		defaultValues: defaultValues_brand,
-		delayError: 1000,
+		// mode: 'onChange',
+		// reValidateMode: 'onChange',
+		// criteriaMode: 'firstError',
+		// shouldFocusError: true,
+		// shouldUnregister: false,
+		// shouldUseNativeValidation: false,
+		// delayError: 1000,
 	});
 
-	const [isPending, startTransition] = useTransition();
-
-	async function onSubmit(data: TBrandFormValues) {
-		startTransition(async () => {
-			const res = await saveBrandAction(data);
-			console.log('res', res);
-
-			if (res.success) {
-				toast.success(t(res.message as string) ?? 'Success');
-				form.reset();
-			} else {
-				toast.error(t(res.error as string) ?? 'Something went wrong');
-			}
+	function onSubmit(data: TBrandFormValues) {
+		toast.success('You submitted the following values', {
+			description: (
+				<pre className='mt-2 w-[320px] rounded-md bg-neutral-950 p-4'>
+					<code className='text-white'>{JSON.stringify(data, null, 2)}</code>
+				</pre>
+			),
 		});
 	}
+
+	// useEffect(() => {
+	// 	const name = form.watch('name_en').trim();
+
+	// 	if (!name) return;
+
+	// 	form.setValue(
+	// 		'slug',
+	// 		name
+	// 			.toLowerCase()
+	// 			.replace(/[^a-z0-9]+/g, '-')
+	// 			.replace(/^-+|-+$/g, '')
+	// 	);
+	// }, [form.watch('name_en')]);
 
 	return (
 		<Form {...form}>

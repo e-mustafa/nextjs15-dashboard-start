@@ -6,7 +6,8 @@
 		"dev": "next dev --hostname 0.0.0.0 --port 4000 --turbopack",
 		"build": "next build",
 		"start": "next start",
-		"lint": "next lint"
+		"lint": "next lint",
+		"db": "npx prisma studio"
 	},
 	"dependencies": {
 		"@auth/prisma-adapter": "^2.10.0",
@@ -69,14 +70,14 @@
 	},
 	"devDependencies": {
 		"@eslint/eslintrc": "^3",
-		"@prisma/client": "^6.13.0",
+		"@prisma/client": "^6.16.2",
 		"@tailwindcss/postcss": "^4",
 		"@types/node": "^20",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
 		"eslint": "^9",
 		"eslint-config-next": "15.3.1",
-		"prisma": "^6.13.0",
+		"prisma": "^6.16.2",
 		"tailwindcss": "^4",
 		"tsx": "^4.20.3",
 		"typescript": "^5"

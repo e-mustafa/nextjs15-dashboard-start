@@ -63,9 +63,9 @@ export async function signinAction(formData: SchemaInput<() => typeof signInSche
 	}
 }
 
-export async function signupAction(formData: SchemaInput<() => typeof signUpSchema>, locale: string): Promise<AuthResponse> {
+export async function signupAction(formData: SchemaInput<typeof signUpSchema>, locale: string): Promise<AuthResponse> {
 	// const { t } = await initTranslations(locale, ['auth']);
-	const result = await ValidateFormAction(() => signUpSchema, formData, locale);
+	const result = await ValidateFormAction(signUpSchema, formData, locale);
 
 	if (!result.success)
 		return {

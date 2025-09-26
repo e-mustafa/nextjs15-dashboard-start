@@ -6,10 +6,9 @@ import { FormMessageTranslated } from '@/components/ui-custom/custom-form';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { FieldTypeMap, RenderFieldProps } from '@/lib/create-forms/types-create-forms';
-import { cn } from '@/lib/utils';
+import { cn, slugify } from '@/lib/utils';
 import { TicketSlashIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import slugify from 'slugify';
 
 /**
  * Slug input field
@@ -29,7 +28,6 @@ export default function SlugInputField<T extends FieldValues, K extends keyof Fi
 	form,
 }: RenderFieldProps<T, K>): JSX.Element {
 	const { t } = useTranslation();
-
 
 	// const formatSlug = (event: ChangeEvent<HTMLInputElement>, referenceInput: string, form: UseFormReturn<T>) => {
 	// 	const slug = event.target.value;
@@ -51,19 +49,7 @@ export default function SlugInputField<T extends FieldValues, K extends keyof Fi
 	// };
 
 	const formatSlug = (slug: string, form: UseFormReturn<T>) => {
-		// 	.trim()
-		// 	.toLowerCase()
-		// 	.replace(/[^a-z0-9]+/g, '-')
-		// 	.replace(/^-+|-+$/g, ''); // trim leading/trailing hyphens
-
-		const formattedSlug = slugify(slug, {
-			replacement: '-', // replace spaces with replacement character, defaults to `-`
-			remove: undefined, // remove characters that match regex, defaults to `undefined`
-			lower: true, // convert to lower case, defaults to `false`
-			strict: true, // strip special characters except replacement, defaults to `false`
-			locale: locale, // language code of the locale to use
-			trim: true, // trim leading and trailing replacement chars, defaults to `true`
-		});
+		const formattedSlug = slugify(slug, locale);
 
 		form.setValue(name as Path<T>, formattedSlug as PathValue<T, Path<T>>);
 	};
