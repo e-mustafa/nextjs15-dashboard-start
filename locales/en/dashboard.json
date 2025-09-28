@@ -10,7 +10,10 @@
 			"download": "Download",
 			"upload": "Upload",
 			"export": "Export",
-			"import": "Import"
+			"import": "Import",
+			"rename": "Rename",
+			"Load_more":"Load more",
+			"refresh":"Refresh"
 		},
 		"status": {
 			"active": "Active",
@@ -20,7 +23,11 @@
 			"no_data": "No data available",
 			"loading": "Loading...",
 			"error": "An error occurred, please try again later",
-			"success": "Operation completed successfully"
+			"success": "Operation completed successfully",
+			"loading_data": "Loading data...",
+			"loading_more": "Loading more...",
+			"no_data_found": "No data found.",
+			"no_images": "No images found."
 		},
 		"pagination": {
 			"previous": "Previous",
@@ -171,7 +178,16 @@
 			"role": "Select role",
 			"permissions": "Select permissions",
 
-			"slug": "Enter slug..."
+			"slug": "Enter slug...",
+
+			"image_drag_and_drop": "Drag & drop images here, or click to select.",
+			"file_drag_and_drop": "Drag & drop files here, or click to select.",
+			"image_on_drag": "Drop image here to upload...",
+			"file_on_drag": "Drop files here to upload...",
+
+			"upload_image": "Upload Image",
+			"upload_file": "Upload File",
+			"upload_general": "Upload images or files"
 		},
 
 		"validation": {

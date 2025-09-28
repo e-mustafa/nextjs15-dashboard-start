@@ -1,6 +1,17 @@
 {
 	"welcome_message": "مرحبًا بك في سِلّم! تابع الخطوات أدناه للبدء في استخدام منصتنا:",
-
+	"common": {
+		"messages": {
+			"no_data": "لا توجد بيانات لعرضها",
+			"loading": "جارٍ التحميل..."
+		}, 
+		"sections": {
+			"go_to_dashboard": "الذهاب إلى لوحة التحكم",
+			"details": "التفاصيل",
+			"settings": "الإعدادات",
+			"permissions": "الأذونات"
+		}
+	},
 	"error_pages": {
 		"NotFound": {
 			"title": "الصفحة غير موجودة",

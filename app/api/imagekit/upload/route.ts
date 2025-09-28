@@ -1,4 +1,4 @@
-import { imageKit } from '../route';
+import imagekit from '@/lib/imagekit.server';
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
 		const arrayBuffer = await file.arrayBuffer();
 		const base64 = Buffer.from(arrayBuffer).toString('base64');
 
-		const uploaded = await imageKit.upload({
+		const uploaded = await imagekit.upload({
 			file: base64,
 			fileName,
 			folder,

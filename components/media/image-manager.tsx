@@ -1,13 +1,28 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import clsx from 'clsx';
-import { Loader2, Pencil, Trash, Upload } from 'lucide-react';
+import { InfoIcon, Loader2, Pencil, Trash, Upload } from 'lucide-react';
+import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { useTranslation } from 'react-i18next';
+
+import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core';
+import {
+	SortableContext,
+	arrayMove,
+	defaultAnimateLayoutChanges,
+	rectSortingStrategy,
+	useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { Skeleton } from '../ui/skeleton';
+
+const apiImagekitUrl = '/api/imagekit';
 
 // ---------------------------------------------
 // Types
@@ -26,18 +41,15 @@ export type ImageKitFile = {
 };
 
 export type ImageManagerProps = {
-	/** allow selecting single or multiple images */
 	multiple?: boolean;
-	/** optionally confine operations to a folder */
 	folder?: string;
-	/** callback when selection changes */
 	onChange?: (files: ImageKitFile[]) => void;
-	/** initial selected files */
 	value?: ImageKitFile[];
+	onDoubleClick?: () => void;
 };
 
-export default function ImageManager({ multiple = true, folder, onChange, value = [] }: ImageManagerProps) {
-	const [files, setFiles] = useState<ImageKitFile[]>([]); // all fetched files (from ImageKit)
+export default function ImageManager({ multiple = true, folder, onChange, value = [], onDoubleClick }: ImageManagerProps) {
+	const [files, setFiles] = useState<ImageKitFile[]>([]);
 	const [selected, setSelected] = useState<ImageKitFile[]>(value);
 	const [search, setSearch] = useState('');
 	const [loading, setLoading] = useState(false);
@@ -45,6 +57,14 @@ export default function ImageManager({ multiple = true, folder, onChange, value 
 	const [skip, setSkip] = useState(0);
 	const [hasMore, setHasMore] = useState(true);
 	const inputRef = useRef<HTMLInputElement | null>(null);
+
+	const { t } = useTranslation();
+
+	// ------------------------
+	// DnD sensors MUST be declared at top-level (hooks)
+	// ------------------------
+	const pointerSensor = useSensor(PointerSensor);
+	const sensors = useSensors(pointerSensor);
 
 	// ------------------------
 	// Fetch list
@@ -59,7 +79,7 @@ export default function ImageManager({ multiple = true, folder, onChange, value 
 				limit: '40',
 				...(folder ? { folder } : {}),
 			});
-			const res = await fetch(`/api/imagekit/list?${params.toString()}`);
+			const res = await fetch(`${apiImagekitUrl}/list?${params.toString()}`);
 			if (!res.ok) throw new Error('Failed to load files');
 			const data: ImageKitFile[] = await res.json();
 
@@ -71,43 +91,44 @@ export default function ImageManager({ multiple = true, folder, onChange, value 
 				setSkip((s) => s + 40);
 			}
 			setHasMore(data.length === 40);
+		} catch (err) {
+			console.error('fetchFiles error', err);
 		} finally {
 			setLoading(false);
 		}
 	};
 
 	useEffect(() => {
-		// fetch first load
 		fetchFiles({ reset: true });
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	// Debounce search
 	useEffect(() => {
-		const t = setTimeout(() => {
+		const tmr = setTimeout(() => {
 			fetchFiles({ reset: true });
 		}, 400);
-		return () => clearTimeout(t);
+		return () => clearTimeout(tmr);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [search, folder]);
 
-	// Notify parent when selected changes
+	// Notify parent when selected changes (include onChange in deps)
 	useEffect(() => {
 		onChange?.(selected);
-	}, [selected, onChange]);
+	}, [selected]);
 
 	// ------------------------
 	// Upload (supports drag & drop + button)
 	// ------------------------
-	const handleUploadFiles = async (files: File[]) => {
+	const handleUploadFiles = async (filesArr: File[]) => {
 		setUploading(true);
 		try {
-			const promises = files.map(async (file) => {
+			const promises = filesArr.map(async (file) => {
 				const form = new FormData();
 				form.append('file', file);
 				form.append('fileName', file.name);
 				if (folder) form.append('folder', folder);
-				const res = await fetch('/api/imagekit/upload', {
+				const res = await fetch(`${apiImagekitUrl}/upload`, {
 					method: 'POST',
 					body: form,
 				});
@@ -116,15 +137,15 @@ export default function ImageManager({ multiple = true, folder, onChange, value 
 			});
 			const uploaded = await Promise.all(promises);
 
-			// Put them at the top (first image highlighted)
 			setFiles((prev) => [...uploaded, ...prev]);
 
-			// Auto-select if user wants selection
 			if (multiple) {
 				setSelected((prev) => [...uploaded, ...prev]);
 			} else if (uploaded[0]) {
 				setSelected([uploaded[0]]);
 			}
+		} catch (err) {
+			console.error('upload error', err);
 		} finally {
 			setUploading(false);
 		}
@@ -147,12 +168,11 @@ export default function ImageManager({ multiple = true, folder, onChange, value 
 		if (exists) {
 			setSelected(selected.filter((f) => f.fileId !== file.fileId));
 		} else {
-			// Maintain order: put newly selected item at the end
 			setSelected([...selected, file]);
 		}
 	};
 
-	// Drag to reorder *selected* images locally (Shopify-like UX)
+	// Drag reorder for selected
 	const moveSelected = (fromIndex: number, toIndex: number) => {
 		setSelected((curr) => {
 			const copy = [...curr];
@@ -163,42 +183,57 @@ export default function ImageManager({ multiple = true, folder, onChange, value 
 	};
 
 	const deleteFile = async (fileId: string) => {
-		const res = await fetch('/api/imagekit/delete', {
-			method: 'DELETE',
-			body: JSON.stringify({ fileId }),
-		});
-		if (!res.ok) return;
-		setFiles((prev) => prev.filter((f) => f.fileId !== fileId));
-		setSelected((prev) => prev.filter((f) => f.fileId !== fileId));
+		try {
+			const res = await fetch(`${apiImagekitUrl}/delete`, {
+				method: 'DELETE',
+				headers: { 'Content-Type': 'application/json' }, // ensure server can parse body
+				body: JSON.stringify({ fileId }),
+			});
+			if (!res.ok) {
+				console.error('delete failed', await res.text());
+				return;
+			}
+			setFiles((prev) => prev.filter((f) => f.fileId !== fileId));
+			setSelected((prev) => prev.filter((f) => f.fileId !== fileId));
+		} catch (err) {
+			console.error('delete error', err);
+		}
 	};
 
 	const renameFile = async (fileId: string, newFileName: string) => {
-		const res = await fetch('/api/imagekit/rename', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ fileId, newFileName }),
-		});
-		if (!res.ok) return;
-		const data = (await res.json()) as ImageKitFile;
-		setFiles((prev) => prev.map((f) => (f.fileId === fileId ? { ...f, name: newFileName, ...data } : f)));
-		setSelected((prev) => prev.map((f) => (f.fileId === fileId ? { ...f, name: newFileName, ...data } : f)));
+		try {
+			const res = await fetch(`${apiImagekitUrl}/rename`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ fileId, newFileName }),
+			});
+			if (!res.ok) {
+				console.error('rename failed', await res.text());
+				return;
+			}
+			const data = (await res.json()) as ImageKitFile;
+			setFiles((prev) => prev.map((f) => (f.fileId === fileId ? { ...f, ...data, name: newFileName } : f)));
+			setSelected((prev) => prev.map((f) => (f.fileId === fileId ? { ...f, ...data, name: newFileName } : f)));
+		} catch (err) {
+			console.error('rename error', err);
+		}
 	};
 
-	const filteredFiles = useMemo(() => files, [files]); // server already filters by name
+	const filteredFiles = useMemo(() => files, [files]);
 
 	return (
-		<div className='space-y-4'>
+		<div className='space-y-4 min-h-full'>
 			{/* Toolbar */}
 			<div className='flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between'>
 				<div className='flex items-center gap-2'>
 					<Input
-						placeholder='Search images...'
+						placeholder={t('forms.search.search_images_placeholder')}
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
 						className='w-64'
 					/>
-					<Button variant='outline' onClick={() => fetchFiles({ reset: true })} disabled={loading}>
-						{loading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />} Refresh
+					<Button type='button' variant='outline' onClick={() => fetchFiles({ reset: true })} disabled={loading}>
+						{loading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />} {t('common.actions.refresh')}
 					</Button>
 				</div>
 				<div className='flex items-center gap-2'>
@@ -210,9 +245,10 @@ export default function ImageManager({ multiple = true, folder, onChange, value 
 						onChange={(e) => handleUploadFiles(Array.from(e.target.files ?? []))}
 						className='hidden'
 					/>
-					<Button onClick={openFilePicker} disabled={uploading}>
+					<Button type='button' onClick={openFilePicker} disabled={uploading}>
 						{uploading ? <Loader2 className='mr-2 h-4 w-4 animate-spin' /> : <Upload className='mr-2 h-4 w-4' />}
-						Upload {multiple ? 'images' : 'image'}
+						{t('common.actions.upload') + ' '}
+						{multiple ? t('forms.labels.image_multiple') : t('forms.labels.image_single')}
 					</Button>
 				</div>
 			</div>
@@ -221,93 +257,85 @@ export default function ImageManager({ multiple = true, folder, onChange, value 
 			<div
 				{...getRootProps()}
 				className={clsx(
-					'border border-dashed rounded-xl p-6 text-center cursor-pointer',
-					isDragActive ? 'bg-accent/30' : 'bg-muted'
+					'border-2 border-dashed rounded-xl p-3 text-center cursor-pointer grid place-items-center gap-2',
+					isDragActive ? 'bg-accent/30' : 'bg-muted/50'
 				)}
 			>
 				<input {...getInputProps()} />
-				{isDragActive ? <p>Drop the files here ...</p> : <p>Drag & drop images here, or click to select.</p>}
+				<p className='text-xs text-muted-foreground py-4'>
+					{t(isDragActive ? 'forms.placeholders.image_on_drag' : 'forms.placeholders.image_drag_and_drop')}
+				</p>
+				<p className='text-xs text-muted-foreground'>{t('forms.infos.upload_image_multiple')}</p>
 			</div>
 
-			{/* Selected (sortable) */}
-			{selected.length > 0 && (
-				<section>
-					<h3 className='mb-2 text-sm font-medium text-muted-foreground'>Selected images (drag to reorder)</h3>
-					<div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3'>
-						{selected.map((img, index) => (
-							<Card
-								key={img.fileId}
-								className={clsx('relative group overflow-hidden', index === 0 ? 'col-span-2 row-span-2' : '')}
-								draggable
-								onDragStart={(e) => e.dataTransfer.setData('text/plain', index.toString())}
-								onDragOver={(e) => e.preventDefault()}
-								onDrop={(e) => {
-									const fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
-									moveSelected(fromIndex, index);
-								}}
-							>
-								<CardContent className='p-2'>
-									{/* eslint-disable-next-line @next/next/no-img-element */}
-									<img src={img.url} alt={img.name} className='w-full h-full object-cover rounded' />
-									<div className='absolute bottom-2 left-2 right-2 bg-background/80 rounded p-1 text-xs flex items-center justify-between gap-1'>
-										<span className='truncate'>{img.name}</span>
-										<div className='flex gap-1'>
-											<RenameDialog file={img} onRename={renameFile} />
-											<Button
-												size='icon'
-												variant='ghost'
-												className='h-5 w-5'
-												onClick={() => deleteFile(img.fileId)}
-											>
-												<Trash className='h-3 w-3 text-destructive' />
-											</Button>
-										</div>
-									</div>
-								</CardContent>
-							</Card>
-						))}
-					</div>
-				</section>
-			)}
+			{/* Selected Images Section (sortable) */}
+			<section onDoubleClick={onDoubleClick}>
+				<h3 className='text-sm font-medium text-muted-foreground'>
+					{t('common.sections.selected_images') + ` (${selected.length}) `}
+				</h3>
+
+				<span className='text-xs text-muted-foreground p-1 self-end flex items-center gap-2'>
+					<InfoIcon className='size-4' />
+					{t('common.messages.drag_to_reorder')}
+				</span>
+
+				<div className='grid gap-2 border p-2 rounded-lg'>
+					{selected.length > 0 ? (
+						<DndContext
+							sensors={sensors}
+							collisionDetection={closestCenter}
+							onDragEnd={({ active, over }) => {
+								if (over && active.id !== over.id) {
+									const oldIndex = selected.findIndex((f) => f.fileId === active.id);
+									const newIndex = selected.findIndex((f) => f.fileId === over.id);
+									setSelected((items) => arrayMove(items, oldIndex, newIndex));
+								}
+							}}
+						>
+							<SortableContext items={selected.map((f) => f.fileId)} strategy={rectSortingStrategy}>
+								<div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3'>
+									{selected.map((img) => (
+										<SortableImage
+											key={img.fileId || img.url}
+											img={img}
+											onRename={renameFile}
+											onDelete={deleteFile}
+										/>
+									))}
+								</div>
+							</SortableContext>
+						</DndContext>
+					) : (
+						<p className='text-muted-foreground text-sm text-center'>{t('common.messages.no_images_selected')}</p>
+					)}
+				</div>
+			</section>
 
 			{/* Library */}
-			<section>
-				<h3 className='mb-2 text-sm font-medium text-muted-foreground'>Library</h3>
-				{filteredFiles.length === 0 && !loading && <p className='text-muted-foreground text-sm'>No images found.</p>}
-				<div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3'>
+			<section onDoubleClick={onDoubleClick}>
+				<h3 className='mb-2 text-sm font-medium text-muted-foreground'>{t('common.sections.all_images')}</h3>
+				{filteredFiles.length === 0 && !loading && (
+					<p className='text-muted-foreground text-sm'>{t('common.messages.no_images')}</p>
+				)}
+				<div className='grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-3'>
+					{/* loading placeholder */}
+					{filteredFiles.length === 0 &&
+						loading &&
+						Array.from({ length: 6 }).map((_, index) => (
+							<Skeleton key={index} className='h-auto w-full aspect-square' />
+						))}
+
 					{filteredFiles.map((img, index) => {
 						const active = !!selected.find((f) => f.fileId === img.fileId);
 						return (
-							<Card
-								key={img.fileId}
-								className={clsx(
-									'relative group overflow-hidden',
-									index === 0 ? 'col-span-2 row-span-2' : '',
-									active && 'ring-2 ring-primary'
-								)}
+							<ImageCard
+								key={img.fileId || img.url}
+								img={img}
+								active={active}
 								onClick={() => toggleSelect(img, index)}
-							>
-								<CardContent className='p-2'>
-									<img src={img.url} alt={img.name} className='w-full h-full object-cover rounded' />
-									<div className='absolute bottom-2 left-2 right-2 bg-background/80 rounded p-1 text-xs flex items-center justify-between gap-1'>
-										<span className='truncate'>{img.name}</span>
-										<div className='flex gap-1'>
-											<RenameDialog file={img} onRename={renameFile} />
-											<Button
-												size='icon'
-												variant='ghost'
-												className='h-5 w-5'
-												onClick={(e) => {
-													e.stopPropagation();
-													deleteFile(img.fileId);
-												}}
-											>
-												<Trash className='h-3 w-3 text-destructive' />
-											</Button>
-										</div>
-									</div>
-								</CardContent>
-							</Card>
+								onDelete={deleteFile}
+								onRename={renameFile}
+							/>
 						);
 					})}
 				</div>
@@ -315,9 +343,9 @@ export default function ImageManager({ multiple = true, folder, onChange, value 
 				{/* Load more */}
 				{hasMore && (
 					<div className='flex justify-center mt-4'>
-						<Button onClick={() => fetchFiles()} disabled={loading} variant='ghost'>
+						<Button type='button' onClick={() => fetchFiles()} disabled={loading} variant='ghost'>
 							{loading ? <Loader2 className='mr-2 h-4 w-4 animate-spin' /> : null}
-							Load more
+							{t('common.actions.Load_more')}
 						</Button>
 					</div>
 				)}
@@ -335,17 +363,18 @@ function RenameDialog({
 }) {
 	const [open, setOpen] = useState(false);
 	const [name, setName] = useState(file.name);
+	const { t } = useTranslation();
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button size='icon' variant='ghost' className='h-5 w-5'>
+				<Button type='button' size='icon' variant='ghost' className='h-5 w-5'>
 					<Pencil className='h-3 w-3' />
 				</Button>
 			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Rename</DialogTitle>
+					<DialogTitle>{t('common.actions.rename')}</DialogTitle>
 				</DialogHeader>
 				<div className='space-y-3'>
 					<Input value={name} onChange={(e) => setName(e.target.value)} />
@@ -355,10 +384,105 @@ function RenameDialog({
 							setOpen(false);
 						}}
 					>
-						Save
+						{t('common.actions.save')}
 					</Button>
 				</div>
 			</DialogContent>
 		</Dialog>
+	);
+}
+
+function animateLayoutChanges(args: any) {
+	return defaultAnimateLayoutChanges({ ...args, wasDragging: true });
+}
+
+export function SortableImage({ img, onRename, onDelete }: any) {
+	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+		id: img.fileId,
+		animateLayoutChanges,
+	});
+
+	const style = {
+		transform: CSS.Transform.toString(transform),
+		transition: transition || 'transform 200ms cubic-bezier(0.25, 1, 0.5, 1)',
+		zIndex: isDragging ? 50 : 'auto',
+	};
+
+	return (
+		<div
+			ref={setNodeRef}
+			style={style}
+			{...attributes}
+			{...listeners}
+			className='relative group overflow-hidden p-1 aspect-square border-2 border-accent rounded-lg cursor-grab active:cursor-grabbing'
+		>
+			<Image
+				src={img.url}
+				alt={img.name}
+				width={200}
+				height={200}
+				className='size-full object-cover rounded aspect-square'
+			/>
+			{/* <div className='absolute bottom-2 left-2 right-2 bg-background/80 rounded p-1 text-xs flex items-center justify-between gap-1'>
+				<span className='truncate'>{img.name}</span>
+				<div className='flex gap-1'>
+					<RenameDialog file={img} onRename={onRename} />
+					<Button size='icon' variant='ghost' className='h-5 w-5' onClick={() => onDelete(img.fileId)}>
+						<Trash className='h-3 w-3 text-destructive' />
+					</Button>
+				</div>
+			</div> */}
+		</div>
+	);
+}
+
+function ImageCard({
+	img,
+	active,
+	onClick,
+	onDelete,
+	onRename,
+}: {
+	img: ImageKitFile;
+	active: boolean;
+	onClick: () => void;
+	onDelete: (fileId: string) => void;
+	onRename: (fileId: string, newName: string) => Promise<void>;
+}) {
+	const { t } = useTranslation(); // hook هنا ثابت
+	return (
+		<div
+			className={cn(
+				'relative overflow-hidden p-1 aspect-square ring-2 ring-muted rounded-lg',
+				active && 'ring-2 ring-primary'
+			)}
+			onClick={onClick}
+		>
+			<Image
+				src={img.url}
+				alt={img.name || t('forms.placeholders.upload_image')}
+				width={200}
+				height={200}
+				className='size-full object-cover rounded aspect-square'
+			/>
+			<div className='absolute bottom-2 start-2 end-2 bg-background/80 rounded p-1 text-xs flex items-center justify-between gap-1'>
+				<span className='truncate'>{img.name}</span>
+				<div className='flex gap-1'>
+					<RenameDialog file={img} onRename={onRename} />
+					<Button
+						type='button'
+						size='icon'
+						variant='ghost'
+						className='h-5 w-5'
+						onClick={(e) => {
+							e.stopPropagation();
+							onDelete(img.fileId);
+						}}
+					>
+						<Trash className='h-3 w-3 text-destructive' />
+					</Button>
+				</div>
+			</div>
+		</div>
 	);
 }

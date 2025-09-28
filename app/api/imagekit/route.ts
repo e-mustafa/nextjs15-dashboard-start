@@ -6,6 +6,7 @@ const {
 	imageKit: { privateKey, publicKey, urlEndpoint },
 } = config_env;
 
+
 export const imageKit = new ImageKit({ privateKey, publicKey, urlEndpoint });
 
 
