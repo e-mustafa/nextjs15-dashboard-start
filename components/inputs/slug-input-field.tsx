@@ -51,7 +51,7 @@ export default function SlugInputField<T extends FieldValues, K extends keyof Fi
 	const formatSlug = (slug: string, form: UseFormReturn<T>) => {
 		const formattedSlug = slugify(slug, locale);
 
-		form.setValue(name as Path<T>, formattedSlug as PathValue<T, Path<T>>);
+		form.setValue(name as Path<T>, formattedSlug as PathValue<T, Path<T>>, { shouldValidate: true });
 	};
 
 	useEffect(() => {

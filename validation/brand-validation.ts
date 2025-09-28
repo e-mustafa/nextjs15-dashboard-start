@@ -7,7 +7,7 @@ export const defaultValues_brand = {
 	name_en: '',
 	description_ar: '',
 	description_en: '',
-	image: 'https://picsum.photos/200/300?random=2',
+	image: '',
 
 	slug_ar: '',
 	slug_en: '',

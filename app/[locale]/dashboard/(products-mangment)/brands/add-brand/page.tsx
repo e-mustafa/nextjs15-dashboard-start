@@ -1,19 +1,24 @@
 // import DataTableComponent from '@/components/Dashboard/dataTable/data-table';
-import BrandForm from '@/components/Dashboard/forms/brand-form';
+// import BrandForm from '@/components/Dashboard/forms/brand-form';
+import { TLayoutProps } from '@/app/[locale]/layout';
+import initTranslations from '@/app/i18n';
+import LoaderBlock from '@/components/shard/loaders/loader-block';
 import { Button } from '@/components/ui-custom/custom-button';
 import { ArrowRightIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
-const DataTableComponent = dynamic(() => import('@/components/Dashboard/dataTable/data-table'), {
+const BrandForm = dynamic(() => import('@/components/Dashboard/forms/brand-form'), {
 	// ssr: false,
+	// loading: () => <LoaderBlock />,
 });
 
-export default async function BrandsPage() {
-	// const headersList = await headers();
-	// const locale = headersList.get('x-url') || headersList.get('NEXT_LOCALE') || defaultLocale.short;
-	// console.log('localessss: ', locale);
+const i18nNamespaces = ['dashboard'];
+
+export default async function BrandsPage({ params }: TLayoutProps) {
+	const { locale } = await params;
+	const { t } = await initTranslations(i18nNamespaces, locale);
 
 	return (
 		<div className='page-component flex-col'>
@@ -23,10 +28,10 @@ export default async function BrandsPage() {
 						<ArrowRightIcon className='size-6 text-muted-foreground' />
 					</Link>
 				</Button>
-				Add Brand 
+				{t('common.sections.add_brand')}
 			</div>
 
-			<Suspense fallback={<div>Loading...</div>}>
+			<Suspense fallback={<LoaderBlock />}>
 				<BrandForm />
 			</Suspense>
 		</div>

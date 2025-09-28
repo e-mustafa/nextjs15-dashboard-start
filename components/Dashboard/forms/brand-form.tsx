@@ -5,15 +5,15 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-import { Button } from '@/components/ui-custom/custom-button';
 import { Form } from '@/components/ui-custom/custom-form';
 import { renderField } from '@/lib/create-forms/input-registry';
 
-import useLocale from '@/hooks/useLocale';
 import { SectionConfig } from '@/lib/create-forms/types-create-forms';
 import { saveBrandAction } from '@/server/actions/brand-actions';
 import { defaultValues_brand, formSchema_brand } from '@/validation/brand-validation';
 import { useTransition } from 'react';
+import { useTranslation } from 'react-i18next';
+import SubmitButton from './submit-button';
 
 export type TBrandFormValues = z.infer<typeof formSchema_brand>;
 
@@ -114,15 +114,28 @@ export const formSections_brand: SectionConfig<TBrandFormValues>[] = [
 				locale: 'en',
 				referenceInput: 'name_en',
 			},
+			// {
+			// 	type: 'imageManager',
+			// 	name: 'image',
+			// 	label: 'forms.labels.image',
+			// 	placeholder: 'forms.placeholders.image',
+			// 	file: {
+			// 		// accept: 'image/*',
+			// 		// multiple: false,
+			// 	},
+			// },
 			{
-				type: 'uploadFile',
+				type: 'imageUpload',
 				name: 'image',
-				label: 'forms.labels.description_en',
-				placeholder: 'forms.placeholders.description_en',
-				file: {
-					// accept: 'image/*',
-					// multiple: false,
-				},
+				label: 'forms.labels.image',
+				placeholder: 'forms.placeholders.image',
+				parentClass: 'col-span-full',
+				folder: 'brands',
+				// file: {
+				// 	// accept: 'image/*',
+				// 	// multiple: false,
+				// },
+				// multiple: true,
 			},
 		],
 	},
@@ -130,34 +143,38 @@ export const formSections_brand: SectionConfig<TBrandFormValues>[] = [
 	// formSectionSEO,
 ];
 
-export default function BrandForm(type: 'create' | 'update' = 'create') {
-	const { locale, dir, t, i18n } = useLocale();
+export default function BrandForm({
+	type = 'create',
+	defaultValues = defaultValues_brand,
+}: {
+	type?: 'create' | 'update';
+	defaultValues?: TBrandFormValues;
+}) {
+	const { t } = useTranslation();
 
 	const form = useForm<TBrandFormValues>({
 		resolver: zodResolver(formSchema_brand),
-		defaultValues: defaultValues_brand,
+		defaultValues,
 		delayError: 1000,
 	});
 
 	const [isPending, startTransition] = useTransition();
+	console.log('isPending', isPending);
 
 	async function onSubmit(data: TBrandFormValues) {
-		startTransition(async () => {
-			const res = await saveBrandAction(data);
-			console.log('res', res);
+		const res = await saveBrandAction(data);
+		console.log('res', res);
 
-			if (res.success) {
-				toast.success(t(res.message as string) ?? 'Success');
-				form.reset();
-			} else {
-				toast.error(t(res.error as string) ?? 'Something went wrong');
-			}
-		});
+		if (res.success) {
+			toast.success(t(res.message as string) ?? 'Success');
+			form.reset();
+		} else {
+			toast.error(t(res.error as string) ?? 'Something went wrong');
+		}
 	}
 
 	return (
 		<Form {...form}>
-			{t('general.welcome')}
 			<form onSubmit={form.handleSubmit(onSubmit)} method='post' className='w-full grid gap-6'>
 				{formSections_brand.map((section, sectionIndex) => (
 					<div key={'section-' + sectionIndex} className='form-section'>
@@ -172,9 +189,7 @@ export default function BrandForm(type: 'create' | 'update' = 'create') {
 					</div>
 				))}
 
-				<div className='pt-4'>
-					<Button type='submit'>Submit</Button>
-				</div>
+				<SubmitButton />
 			</form>
 		</Form>
 	);

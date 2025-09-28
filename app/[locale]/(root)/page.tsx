@@ -3,8 +3,8 @@ import { LanguageToggle } from '@/components/languageToggle';
 import { ModeToggle } from '@/components/modeToggle';
 import { TLocalesData } from '@/configs/general';
 import Link from 'next/link';
-import initTranslations from '../i18n';
-import { TLayoutProps } from './layout';
+import initTranslations from '../../i18n';
+import { TLayoutProps } from '../layout';
 
 const i18nNamespaces = ['general'];
 

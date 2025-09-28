@@ -8,7 +8,7 @@ const i18nNamespaces = ['dashboard'];
 
 export default async function DashboardPage({ children, params }: TLayoutProps) {
 	const products = await prisma_DB.product.findMany();
-	console.log('Products:', products);
+	// console.log('Products:', products);
 
 	const { locale } = await params;
 	const { t } = await initTranslations(i18nNamespaces, locale);
