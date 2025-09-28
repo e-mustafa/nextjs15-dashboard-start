@@ -112,3 +112,9 @@ export function slugify(text: string, locale: string = 'ar', options?: slugifyOp
 		...rest,
 	});
 }
+
+export function getBackLink(pathname: string): string {
+	const parts = pathname.split('/').filter(Boolean); // remove empty parts
+	parts.pop(); // remove the last part
+	return '/' + parts.join('/');
+}

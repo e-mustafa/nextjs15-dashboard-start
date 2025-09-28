@@ -19,6 +19,8 @@ export type FieldTypeMap = {
 	uploadFile: File | File[] | null;
 	slug: string;
 
+	imageManager: File | File[] | null;
+	imageUpload : string | string[] | null;
 	seoMockupCard: never;
 };
 
@@ -47,6 +49,8 @@ export interface FieldConfig<T extends FieldValues = FieldValues, K extends Fiel
 		maxSize?: number;
 		multiple?: boolean;
 	};
+	multiple?: boolean;
+	folder?: string; // for ImageManager upload folder name
 
 	// only for special field types that need additional data
 	options?: { label: string; value: string }[];

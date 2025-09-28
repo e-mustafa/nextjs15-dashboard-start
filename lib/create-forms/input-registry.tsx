@@ -7,6 +7,8 @@ import { JSX } from 'react';
 import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
 import BaseInputField from './base-input-field';
 import { FieldTypeMap, RenderFieldProps } from './types-create-forms';
+import ImageManagerField from '@/components/inputs/image-manager-field';
+import ImageUploadField from '@/components/inputs/image-upload-field';
 
 /**
  * A registry mapping input field types to their corresponding render functions.
@@ -43,6 +45,8 @@ export const inputRegistry: InputRegistry = {
 	slug: ({ fieldConfig, form }) => <SlugInputField fieldConfig={fieldConfig} form={form} />,
 
 	uploadFile: ({ fieldConfig, form }) => <FileInputField fieldConfig={fieldConfig} form={form} />,
+	imageManager: ({ fieldConfig, form }) => <ImageManagerField fieldConfig={fieldConfig} form={form} />,
+	imageUpload: ({ fieldConfig, form }) => <ImageUploadField fieldConfig={fieldConfig} form={form} />,
 
 	richtext: ({ fieldConfig, form }) => <RichTextField fieldConfig={fieldConfig} form={form} />,
 
