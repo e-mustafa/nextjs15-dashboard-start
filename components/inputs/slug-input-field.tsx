@@ -2,11 +2,18 @@ import { JSX, useEffect } from 'react';
 import { FieldValues, Path, PathValue, UseFormReturn } from 'react-hook-form';
 
 import InfoIconTooltip from '@/components/inputs/info-icon-tooltip';
-import { FormMessageTranslated } from '@/components/ui-custom/custom-form';
-import { FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import {
+	FormControl,
+	FormDescription,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessageTranslated,
+} from '@/components/ui-custom/custom-form';
 import { Input } from '@/components/ui/input';
 import { FieldTypeMap, RenderFieldProps } from '@/lib/create-forms/types-create-forms';
-import { cn, slugify } from '@/lib/utils';
+import { slugify } from '@/lib/slugify';
+import { cn } from '@/lib/utils';
 import { TicketSlashIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -29,33 +36,16 @@ export default function SlugInputField<T extends FieldValues, K extends keyof Fi
 }: RenderFieldProps<T, K>): JSX.Element {
 	const { t } = useTranslation();
 
-	// const formatSlug = (event: ChangeEvent<HTMLInputElement>, referenceInput: string, form: UseFormReturn<T>) => {
-	// 	const slug = event.target.value;
-	// 	// 	.trim()
-	// 	// 	.toLowerCase()
-	// 	// 	.replace(/[^a-z0-9]+/g, '-')
-	// 	// 	.replace(/^-+|-+$/g, ''); // trim leading/trailing hyphens
-
-	// 	const formattedSlug = slugify(slug, {
-	// 		replacement: '-', // replace spaces with replacement character, defaults to `-`
-	// 		remove: undefined, // remove characters that match regex, defaults to `undefined`
-	// 		lower: false, // convert to lower case, defaults to `false`
-	// 		strict: false, // strip special characters except replacement, defaults to `false`
-	// 		locale: locale, // language code of the locale to use
-	// 		trim: true, // trim leading and trailing replacement chars, defaults to `true`
-	// 	});
-
-	// 	form.setValue(referenceInput as Path<T>, formattedSlug as PathValue<T, Path<T>>);
-	// };
-
 	const formatSlug = (slug: string, form: UseFormReturn<T>) => {
+		// if (slug) return;
+
 		const formattedSlug = slugify(slug, locale);
 
 		form.setValue(name as Path<T>, formattedSlug as PathValue<T, Path<T>>, { shouldValidate: true });
 	};
 
 	useEffect(() => {
-		const referenceData = form.watch(referenceInput as Path<T>).trim();
+		const referenceData = form.watch(referenceInput as Path<T>)?.trim();
 
 		if (!referenceData) return;
 

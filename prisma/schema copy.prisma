@@ -1,3 +1,9 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
 generator client {
   provider = "prisma-client-js"
   output   = "../lib/generated/prisma"
@@ -14,18 +20,18 @@ model User {
   name          String?
   email         String    @unique
   emailVerified DateTime? @map("email_verified")
+  image         String?
   password      String?   @db.Text
   accounts      Account[]
   sessions      Session[]
   role          UserRole  @default(user)
 
-  imageId String? // مفتاح أجنبي اختياري
-  image   Image?  @relation(fields: [imageId], references: [id])
-
+  // Optional for WebAuthn support
   Authenticator Authenticator[]
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  Post          Post[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Post      Post[]
 
   @@map("users")
 }
@@ -104,34 +110,30 @@ model Post {
   updatedAt DateTime @updatedAt
 }
 
-// products -----------------------------------
 model Product {
   id          String   @id @default(cuid())
   name        String
   description String?
+  image       String?
   basePrice   Float
   price       Float
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  images ProductImage[]
 }
 
-model ProductImage {
-  id        String @id @default(cuid())
-  productId String
-  imageId   String
+// brand model 
+// model Brand {
+//   id             String @id @default(cuid())
+//   name_ar        String
+//   name_en        String
+//   description_ar String
+//   description_en String
+//   image          String
+// }
 
-  product Product @relation(fields: [productId], references: [id])
-  image   Image   @relation(fields: [imageId], references: [id])
-
-  @@unique([productId, imageId]) // كل صورة مرة واحدة فقط لكل منتج
-}
-
-// brand -----------------------------------
 model Brand {
   id           String             @id @default(cuid())
-  imageId      String? // مفتاح أجنبي اختياري
+  imageId      String?
   image        Image?             @relation(fields: [imageId], references: [id])
   translations BrandTranslation[]
 }
@@ -148,16 +150,15 @@ model BrandTranslation {
   @@unique([lang, slug], name: "lang_slug")
 }
 
-// image -----------------------------------
 model Image {
   id        String   @id @default(cuid())
-  fileId    String   @unique // من ImageKit
+  fileId    String   @unique // from ImageKit
   url       String
   createdAt DateTime @default(now())
 
   // العلاقات
-  users   User[]
-  brands Brand[] // نفس الصورة يقدر يستخدمها عدة براندات
-
-  products ProductImage[]
+  brands     Brand[]
+  users      User[]
+  categories Category[]
+  products   ProductImage[]
 }

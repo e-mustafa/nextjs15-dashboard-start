@@ -16,7 +16,7 @@ const BrandForm = dynamic(() => import('@/components/Dashboard/forms/brand-form'
 
 const i18nNamespaces = ['dashboard'];
 
-export default async function BrandsPage({ params }: TLayoutProps) {
+export default async function AddBrandPage({ params }: TLayoutProps) {
 	const { locale } = await params;
 	const { t } = await initTranslations(i18nNamespaces, locale);
 
@@ -32,7 +32,7 @@ export default async function BrandsPage({ params }: TLayoutProps) {
 			</div>
 
 			<Suspense fallback={<LoaderBlock />}>
-				<BrandForm />
+				<BrandForm type='create' />
 			</Suspense>
 		</div>
 	);

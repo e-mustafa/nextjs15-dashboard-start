@@ -18,7 +18,6 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { ContentEditable } from './editor-ui/content-editable';
 import { editorTheme } from './themes/editor-theme';
 
-import { useTranslation } from 'react-i18next';
 import { BlockFormatDropDown } from './plugins/toolbar/block-format-toolbar-plugin';
 import { FormatBulletedList } from './plugins/toolbar/block-format/format-bulleted-list';
 import { FormatCheckList } from './plugins/toolbar/block-format/format-check-list';
@@ -50,9 +49,12 @@ const editorConfig: InitialConfigType = {
 	nodes: [HeadingNode, QuoteNode, ParagraphNode, TextNode, ListNode, ListItemNode],
 };
 
-export function RichTextInput({ value, onChange, placeholder = 'Start typing...' }: RichTextInputProps) {
+export function RichTextInput({ value, onChange, placeholder = 'Start typing...', ...rest }: RichTextInputProps) {
 	return (
-		<div className='input w-full overflow-hidden rounded-lg border bg-background disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive'>
+		<div
+			className='input w-full overflow-hidden rounded-lg border bg-background disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive'
+			{...rest}
+		>
 			<LexicalComposer initialConfig={editorConfig}>
 				<TooltipProvider>
 					<EditorContent value={value} onChange={onChange} placeholder={placeholder} />

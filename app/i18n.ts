@@ -1,6 +1,6 @@
 import { TLocalesData } from '@/configs/general';
 import i18nConfig from '@/i18n.Config';
-import getCurrentLocale from '@/lib/getCurrentLocale.server';
+import getCurrentLocale from '@/lib/server/getCurrentLocale.server';
 import { createInstance, i18n, InitOptions, Resources } from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import resourcesToBackend from 'i18next-resources-to-backend';

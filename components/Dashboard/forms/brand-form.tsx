@@ -1,21 +1,22 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import { z } from 'zod';
-
 import { Form } from '@/components/ui-custom/custom-form';
 import { renderField } from '@/lib/create-forms/input-registry';
-
 import { SectionConfig } from '@/lib/create-forms/types-create-forms';
-import { saveBrandAction } from '@/server/actions/brand-actions';
+import { handleFormResponse } from '@/lib/form-response-handler';
+import { ActionResult } from '@/lib/server/error-handler/errorsApp';
+import { createBrandAction, updateBrandAction } from '@/server/actions/brand-actions';
 import { defaultValues_brand, formSchema_brand } from '@/validation/brand-validation';
-import { useTransition } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { redirect } from 'next/navigation';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import { z } from 'zod';
 import SubmitButton from './submit-button';
 
-export type TBrandFormValues = z.infer<typeof formSchema_brand>;
+export type TBrandFormValues = z.infer<typeof formSchema_brand> & { id?: string };
 
 export const formSectionSEO: SectionConfig = {
 	title: 'forms.sections.seo_details',
@@ -58,18 +59,6 @@ export const formSectionSEO: SectionConfig = {
 		},
 	],
 };
-
-// const formatSlug = (event: ChangeEvent<HTMLInputElement>, form: UseFormReturn<TBrandFormValues>) => {
-// 	console.log('onChange event:', event);
-// 	console.log('onChange form:', form);
-// 	const slug = event.target.value
-// 		.trim()
-// 		.toLowerCase()
-// 		.replace(/[^a-z0-9]+/g, '-')
-// 		.replace(/^-+|-+$/g, ''); // trim leading/trailing hyphens
-
-// 	form.setValue('slug', slug);
-// };
 
 export const formSections_brand: SectionConfig<TBrandFormValues>[] = [
 	{
@@ -145,37 +134,47 @@ export const formSections_brand: SectionConfig<TBrandFormValues>[] = [
 
 export default function BrandForm({
 	type = 'create',
-	defaultValues = defaultValues_brand,
+	response,
+	defaultValues = response?.data || defaultValues_brand,
 }: {
 	type?: 'create' | 'update';
-	defaultValues?: TBrandFormValues;
+	response?: ActionResult<TBrandFormValues>;
+	defaultValues?: TBrandFormValues & { id?: string };
 }) {
 	const { t } = useTranslation();
+
+	useEffect(() => {
+		if (!response?.success && response?.error) {
+			toast.error(t(response.error));
+			redirect('/dashboard/brands');
+		}
+	}, []);
 
 	const form = useForm<TBrandFormValues>({
 		resolver: zodResolver(formSchema_brand),
 		defaultValues,
-		delayError: 1000,
+		// delayError: 1000,
 	});
 
-	const [isPending, startTransition] = useTransition();
-	console.log('isPending', isPending);
-
+	console.log('errors', form.formState.errors);
 	async function onSubmit(data: TBrandFormValues) {
-		const res = await saveBrandAction(data);
-		console.log('res', res);
+		const res = type == 'create' ? await createBrandAction(data) : await updateBrandAction(defaultValues.id || '', data);
+		console.log('res brand form', res);
+
+		handleFormResponse<TBrandFormValues>(res, form, t);
 
 		if (res.success) {
-			toast.success(t(res.message as string) ?? 'Success');
-			form.reset();
-		} else {
-			toast.error(t(res.error as string) ?? 'Something went wrong');
+			if (type == 'create') {
+				form.reset();
+			} else {
+				redirect('/dashboard/brands');
+			}
 		}
 	}
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} method='post' className='w-full grid gap-6'>
+			<form id='brand-form' onSubmit={form.handleSubmit(onSubmit)} method='post' className='w-full grid gap-6'>
 				{formSections_brand.map((section, sectionIndex) => (
 					<div key={'section-' + sectionIndex} className='form-section'>
 						<div className='section-title font-medium text-muted-foreground'>{t(section.title)}</div>
@@ -189,7 +188,8 @@ export default function BrandForm({
 					</div>
 				))}
 
-				<SubmitButton />
+				{/* submit & cancel buttons */}
+				<SubmitButton isPending={form.formState.isSubmitting} formId='brand-form' />
 			</form>
 		</Form>
 	);

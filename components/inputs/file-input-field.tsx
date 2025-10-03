@@ -1,7 +1,7 @@
 'use client';
 
+import { FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui-custom/custom-form';
 import { Button } from '@/components/ui/button';
-import { FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { FileUploadOptions, FileWithPreview, useFileUpload } from '@/hooks/use-file-upload';
 import { FieldTypeMap, RenderFieldProps } from '@/lib/create-forms/types-create-forms';
 import { cn } from '@/lib/utils';

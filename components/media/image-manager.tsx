@@ -408,6 +408,8 @@ export function SortableImage({ img, onRename, onDelete }: any) {
 		zIndex: isDragging ? 50 : 'auto',
 	};
 
+	const { t } = useTranslation();
+
 	return (
 		<div
 			ref={setNodeRef}
@@ -418,10 +420,11 @@ export function SortableImage({ img, onRename, onDelete }: any) {
 		>
 			<Image
 				src={img.url}
-				alt={img.name}
+				alt={img.name || t('forms.placeholders.select_image')}
 				width={200}
 				height={200}
 				className='size-full object-cover rounded aspect-square'
+				loading='lazy'
 			/>
 			{/* <div className='absolute bottom-2 left-2 right-2 bg-background/80 rounded p-1 text-xs flex items-center justify-between gap-1'>
 				<span className='truncate'>{img.name}</span>
@@ -460,10 +463,11 @@ function ImageCard({
 		>
 			<Image
 				src={img.url}
-				alt={img.name || t('forms.placeholders.upload_image')}
+				alt={img.name || t('forms.placeholders.select_image')}
 				width={200}
 				height={200}
 				className='size-full object-cover rounded aspect-square'
+				loading='lazy'
 			/>
 			<div className='absolute bottom-2 start-2 end-2 bg-background/80 rounded p-1 text-xs flex items-center justify-between gap-1'>
 				<span className='truncate'>{img.name}</span>

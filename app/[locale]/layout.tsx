@@ -45,7 +45,7 @@ export function generateStaticParams() {
 
 const i18nNamespaces = ['general'];
 
-export type TLayoutProps = { children: ReactNode; params: { locale: TLocalesData } };
+export interface TLayoutProps { children: ReactNode; params: { locale: TLocalesData } };
 
 export default async function RootLayout({ children, params }: TLayoutProps) {
 	const { locale } = await params;

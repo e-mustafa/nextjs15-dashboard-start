@@ -3,8 +3,14 @@ import { FieldValues, Path } from 'react-hook-form';
 import { FieldTypeMap, RenderFieldProps } from './types-create-forms';
 
 import InfoIconTooltip from '@/components/inputs/info-icon-tooltip';
-import { FormMessageTranslated } from '@/components/ui-custom/custom-form';
-import { FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import {
+	FormControl,
+	FormDescription,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessageTranslated,
+} from '@/components/ui-custom/custom-form';
 import { Input } from '@/components/ui/input';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../utils';

@@ -1,11 +1,10 @@
 'use client';
 
 import { ImageKitFile } from '@/components/media/image-manager';
-import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { ImagePlusIcon, ImageUpIcon, InfoIcon } from 'lucide-react';
+import { ImagePlusIcon, ImageUpIcon, InfoIcon, ReplaceIcon } from 'lucide-react';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FieldValues, Path, PathValue, UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import ImageManagerDialog from '../media/image-manager-dialog';
@@ -15,6 +14,7 @@ import { Checkbox } from '../ui/checkbox';
 import { DndContext, DragEndEvent, PointerSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, arrayMove, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { FormDescription, FormField, FormItem, FormLabel, FormMessageTranslated } from '../ui-custom/custom-form';
 
 type ImageFieldProps<T extends FieldValues> = {
 	fieldConfig: {
@@ -24,32 +24,48 @@ type ImageFieldProps<T extends FieldValues> = {
 		required?: boolean;
 		multiple?: boolean;
 		folder?: string;
+		description?: string | undefined;
 	};
 	form: UseFormReturn<T>;
 };
 
+/*
+	WHY: this component displays the selected images, opens ImageManagerDialog to select them,
+	and supports reordering via drag-and-drop when multiple === true
+*/
+
 export default function ImageUploadField<T extends FieldValues>({
-	fieldConfig: { name, label = 'forms.labels.image', multiple = false, folder },
+	fieldConfig: { name, label = 'forms.labels.image', description, required = false, multiple = false, folder },
 	form,
 }: ImageFieldProps<T>) {
 	const { t } = useTranslation();
 
+	// init images from form value
 	const defaultValue = form.getValues(name);
 	const [images, setImages] = useState<ImageKitFile[]>(
 		Array.isArray(defaultValue) ? defaultValue : defaultValue ? [defaultValue] : []
 	);
-	console.log('ImageUploadField images:', images);
 
 	const [open, setOpen] = useState(false);
 
-	function handelChange(files: ImageKitFile[]) {
-		const data = files.map((f) => ({ fileId: f.fileId, url: f.url })) as PathValue<T, typeof name>;
-		form.setValue(name, data as PathValue<T, typeof name>);
-		setImages(data as PathValue<T, typeof name>);
-		console.log('ImageKitFile value:', data);
+	// update form when images change (central sync)
+	useEffect(() => {
+		form.setValue(name, images as PathValue<T, typeof name>);
+	}, [images, form, name]);
+
+	// called by ImageManagerDialog when user picks images
+	function handleManagerChange(files: ImageKitFile[]) {
+		// add images with only fileId and url
+		const data = files.map((file) => ({ fileId: file.fileId, url: file.url })) as PathValue<T, typeof name>;
+		setImages(data);
+		// form sync happens in useEffect above
 	}
 
-	// sensors
+	function handleRemove(fileId: string) {
+		setImages((prev) => prev.filter((i) => i.fileId !== fileId));
+	}
+
+	// ---------- DnD setup (declare hooks at top-level of component) ----------
 	const sensors = useSensors(useSensor(PointerSensor));
 
 	function handleDragEnd(event: DragEndEvent) {
@@ -58,68 +74,135 @@ export default function ImageUploadField<T extends FieldValues>({
 
 		const oldIndex = images.findIndex((img) => img.fileId === active.id);
 		const newIndex = images.findIndex((img) => img.fileId === over.id);
-		const reordered = arrayMove(images, oldIndex, newIndex);
+		if (oldIndex < 0 || newIndex < 0) return;
 
+		const reordered = arrayMove(images, oldIndex, newIndex);
 		setImages(reordered);
-		form.setValue(name, reordered as PathValue<T, typeof name>);
+		// form updated by useEffect
 	}
 
+	// ---------- render ----------
 	return (
 		<div className='grid gap-3'>
-			<Label aria-required={true}>{t(label)}</Label>
-
-			<div className='min-h-60 w-full grid gap-3 p-2 sm:p-4 border-2 border-dashed rounded-xl'>
-				{images.length > 0 ? (
-					<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-						<SortableContext items={images.map((img) => img.fileId)} strategy={rectSortingStrategy}>
-							<div className='grid md:grid-cols-3 lg:grid-cols-7 gap-3 max-h-96 overflow-y-auto'>
-								{images.map((image, index) => (
-									<SortableImageItem
-										key={image.fileId}
-										image={image}
-										index={index}
-										onRemove={() => setImages((prev) => prev.filter((f) => f.fileId !== image.fileId))}
-									/>
-								))}
-
-								<Button
-									type='button'
-									onClick={() => setOpen(true)}
-									variant='ghost'
-									className='w-full h-auto rounded-lg grid place-items-center p-4 bg-accent/10 text-muted-foreground sm:aspect-square'
-								>
-									<ImagePlusIcon className='size-full text-muted-foreground' />
-								</Button>
+			<FormField
+				control={form.control}
+				name={name}
+				render={({ field }) => (
+					console.log('field in upload image field', field),
+					(
+						<FormItem>
+							<FormLabel aria-required={!!required}>{t(label as string)}</FormLabel>
+							{/* <FormControl>
+							<div className='relative'>
+								<Input
+									placeholder={t(placeholder as string)}
+									type={showPassword ? 'text' : 'password'}
+									className='pe-10'
+									{...field}
+								/>
+								<div className='absolute top-1/2 -translate-y-1/2 end-0 ms-2 size-5 text-muted-foreground'>
+									<ShowHidePasswordButton showPassword={showPassword} setShowPassword={setShowPassword} t={t} />
+								</div>
 							</div>
-						</SortableContext>
-					</DndContext>
-				) : (
-					<div className='size-full grid place-items-center gap-4 col-span-full'>
-						<Button
-							type='button'
-							onClick={() => setOpen(true)}
-							variant='ghost'
-							className='bg-accent/10 text-muted-foreground h-16'
-						>
-							<div className='flex items-center gap-2'>
-								<ImageUpIcon className='size-12' />
-								{t('forms.placeholders.upload_general')}
+						</FormControl> */}
+
+							<div className='min-h-60 w-full grid gap-3 p-2 sm:p-4 border-2 border-dashed rounded-xl'>
+								{images.length > 0 ? (
+									// only enable DnD when multiple === true and more than 1 image
+									multiple && images.length > 1 ? (
+										<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+											<SortableContext items={images.map((img) => img.fileId)} strategy={rectSortingStrategy}>
+												<div className='grid md:grid-cols-3 lg:grid-cols-7 gap-3 max-h-96 overflow-y-auto'>
+													{images.map((image, index) => (
+														<SortableImageItem
+															key={image.fileId}
+															image={image}
+															selected={images.some((i) => i.fileId === image.fileId)}
+															onRemove={() => handleRemove(image.fileId)}
+														/>
+													))}
+
+													<Button
+														type='button'
+														onClick={() => setOpen(true)}
+														variant='ghost'
+														className='w-full h-auto rounded-lg grid place-items-center p-4 bg-accent/10 text-muted-foreground sm:aspect-square'
+													>
+														<ImagePlusIcon className='size-full text-muted-foreground' />
+													</Button>
+												</div>
+											</SortableContext>
+										</DndContext>
+									) : (
+										// non-dnd fallback (single image or multiple disabled) — show static grid
+										<div className='grid md:grid-cols-3 lg:grid-cols-7 gap-3 max-h-96 overflow-y-auto'>
+											{images.map((image) => (
+												<StaticImageItem
+													key={image.fileId}
+													image={image}
+													selected={images.some((i) => i.fileId === image.fileId)}
+													onRemove={() => handleRemove(image.fileId)}
+												/>
+											))}
+
+											<Button
+												type='button'
+												onClick={() => setOpen(true)}
+												variant='ghost'
+												className='w-full h-auto rounded-lg grid place-items-center p-4 bg-accent/10 text-muted-foreground sm:aspect-square'
+												aria-label={
+													!multiple && images.length
+														? t('forms.placeholders.change_image')
+														: t('forms.placeholders.upload_image')
+												}
+												title={
+													!multiple && images.length
+														? t('forms.placeholders.change_image')
+														: t('forms.placeholders.upload_image')
+												}
+											>
+												{!multiple && images.length ? (
+													<ReplaceIcon className='size-full text-muted-foreground' />
+												) : (
+													<ImagePlusIcon className='size-full text-muted-foreground' />
+												)}
+											</Button>
+										</div>
+									)
+								) : (
+									<div className='size-full grid place-items-center gap-4 col-span-full'>
+										<Button
+											type='button'
+											onClick={() => setOpen(true)}
+											variant='ghost'
+											className='bg-accent/10 text-muted-foreground h-16'
+										>
+											<div className='flex items-center gap-2'>
+												<ImageUpIcon className='size-12' />
+												{t('forms.placeholders.upload_general')}
+											</div>
+										</Button>
+
+										<p className='text-xs text-muted-foreground text-center self-end'>
+											{multiple ? t('forms.infos.upload_image_multiple') : t('forms.infos.upload_image_single')}
+										</p>
+									</div>
+								)}
+
+								{images.length > 1 && (
+									<span className='text-xs text-muted-foreground self-end flex items-center gap-2'>
+										<InfoIcon className='size-4' />
+										{t('common.messages.drag_to_reorder')}
+									</span>
+								)}
 							</div>
-						</Button>
 
-						<p className='text-xs text-muted-foreground text-center self-end'>
-							{multiple ? t('forms.infos.upload_image_multiple') : t('forms.infos.upload_image_single')}
-						</p>
-					</div>
+							{description && <FormDescription>{t(description as string)}</FormDescription>}
+							<FormMessageTranslated />
+						</FormItem>
+					)
 				)}
-
-				{!!images.length && (
-					<span className='text-xs text-muted-foreground self-end flex items-center gap-2'>
-						<InfoIcon className='size-4' />
-						{t('common.messages.drag_to_reorder')}
-					</span>
-				)}
-			</div>
+			/>
 
 			<ImageManagerDialog
 				open={open}
@@ -127,16 +210,26 @@ export default function ImageUploadField<T extends FieldValues>({
 				value={images}
 				multiple={multiple}
 				folder={folder}
-				onChange={handelChange}
+				onChange={handleManagerChange}
 			/>
 		</div>
 	);
 }
 
-function SortableImageItem({ image, index, onRemove }: { image: ImageKitFile; index: number; onRemove: () => void }) {
-	const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
-		id: image.fileId,
-	});
+/* --------------------------
+   Sortable item (drag handle separate so checkbox receives events)
+   -------------------------- */
+function SortableImageItem({
+	image,
+	selected,
+	onRemove,
+}: {
+	image: ImageKitFile;
+	selected: boolean;
+	onRemove: (checked: boolean) => void;
+}) {
+	const { t } = useTranslation();
+	const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: image.fileId });
 
 	const style = {
 		transform: CSS.Transform.toString(transform),
@@ -152,23 +245,64 @@ function SortableImageItem({ image, index, onRemove }: { image: ImageKitFile; in
 			className={cn(
 				'p-1 relative aspect-square border rounded-lg cursor-grab active:cursor-grabbing first-of-type:col-span-2 first-of-type:row-span-2'
 			)}
+			aria-label={t('common.messages.drag_to_reorder')}
 		>
 			<Image
 				src={image.url}
 				width={200}
 				height={200}
-				alt='image'
+				alt={t('forms.placeholders.select_image')}
 				className='rounded-lg aspect-square size-full object-cover'
 			/>
 
 			<div className='absolute top-1 end-1 p-2 flex gap-1'>
-				<Checkbox
-					checked
-					onCheckedChange={onRemove}
-					id={image.fileId}
-					aria-label='Remove image'
-					className='scale-125 shadow shadow-accent'
-				/>
+				{/* prevent pointer events bubbling to DnD: wrapper stops propagation */}
+				<div onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
+					<Checkbox
+						checked={!!selected}
+						onCheckedChange={(val) => onRemove(!!val)}
+						id={image.fileId}
+						aria-label='Select image'
+						className='scale-125 shadow shadow-accent'
+					/>
+				</div>
+			</div>
+		</div>
+	);
+}
+
+/* Static (non-sortable) item used when DnD disabled */
+function StaticImageItem({
+	image,
+	selected,
+	onRemove,
+}: {
+	image: ImageKitFile;
+	selected: boolean;
+	onRemove: (checked: boolean) => void;
+}) {
+	const { t } = useTranslation();
+
+	return (
+		<div className={cn('p-1 relative aspect-square border rounded-lg first-of-type:col-span-2 first-of-type:row-span-2')}>
+			<Image
+				src={image.url}
+				width={200}
+				height={200}
+				alt={t('forms.placeholders.upload_image')}
+				className='rounded-lg aspect-square size-full object-cover'
+			/>
+
+			<div className='absolute top-1 end-1 p-2 flex gap-1'>
+				<div onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
+					<Checkbox
+						checked={!!selected}
+						onCheckedChange={(val) => onRemove(!!val)}
+						id={image.fileId}
+						aria-label={t('forms.placeholders.select_image')}
+						className='scale-125 shadow shadow-accent'
+					/>
+				</div>
 			</div>
 		</div>
 	);

@@ -2,12 +2,12 @@
 
 import { AuthResponse } from '@/components/auth/auth-form';
 import { isDEV } from '@/configs/general';
-import { SchemaInput, ValidateFormAction } from '@/lib/utils';
-import { signInSchema, signUpSchema } from '@/validation/auth-validation';
+import { SchemaSignIn, SchemaSignUp, signInSchema, signUpSchema } from '@/validation/auth-validation';
 import bcrypt from 'bcrypt';
 import { prisma_DB } from '../db/prisma';
+import { ValidateFormAction } from '@/lib/server/validate-data-server';
 
-export async function unknownError(error: string = 'messages.errors.error') {
+export async function unknownError(error: string = 'api.errors.error') {
 	isDEV && console.error('signup error:', error);
 
 	return {
@@ -17,18 +17,19 @@ export async function unknownError(error: string = 'messages.errors.error') {
 	};
 }
 
-export async function signinAction(formData: SchemaInput<() => typeof signInSchema>, locale: string): Promise<AuthResponse> {
+export async function signinAction<T>(formData: unknown): Promise<AuthResponse & { form_errors?: string }> {
 	// const { t } = await initTranslations(locale, ['auth']);
-	const result = await ValidateFormAction(() => signInSchema, formData, locale);
+	const result = await ValidateFormAction(signInSchema, formData);
 
 	if (!result.success) {
 		return {
 			...result,
-			error: typeof result.error === 'string' ? result.error : JSON.stringify(result.error),
+			form_errors: JSON.stringify(result.form_errors),
+			error: 'api.errors.inputs_validation',
 		};
 	}
 
-	const { email, password } = result.data;
+	const { email, password } = result.data as SchemaSignIn;
 
 	try {
 		const user = await prisma_DB.user.findUnique({ where: { email } });
@@ -38,7 +39,7 @@ export async function signinAction(formData: SchemaInput<() => typeof signInSche
 				success: false,
 				ok: false,
 				status: 401,
-				error: 'messages.errors.account_not_found',
+				error: 'api.errors.account_not_found',
 			};
 		}
 
@@ -48,7 +49,7 @@ export async function signinAction(formData: SchemaInput<() => typeof signInSche
 				success: false,
 				ok: false,
 				status: 401,
-				error: 'messages.errors.sign_in_failed',
+				error: 'api.errors.sign_in_failed',
 			};
 		}
 
@@ -56,24 +57,25 @@ export async function signinAction(formData: SchemaInput<() => typeof signInSche
 			success: true,
 			ok: true,
 			status: 200,
-			message: 'messages.successes.sign_in_success',
+			message: 'api.successes.sign_in_success',
 		};
 	} catch (error: any) {
 		return unknownError(error);
 	}
 }
 
-export async function signupAction(formData: SchemaInput<typeof signUpSchema>, locale: string): Promise<AuthResponse> {
+export async function signupAction(formData: unknown): Promise<AuthResponse & { form_errors?: string }> {
 	// const { t } = await initTranslations(locale, ['auth']);
-	const result = await ValidateFormAction(signUpSchema, formData, locale);
+	const result = await ValidateFormAction(signUpSchema, formData);
 
 	if (!result.success)
 		return {
 			...result,
-			error: typeof result.error === 'string' ? result.error : JSON.stringify(result.error),
+			form_errors: JSON.stringify(result.form_errors),
+			error: 'api.errors.inputs_validation',
 		};
 
-	const { email, password, confirm_password } = result.data;
+	const { email, password, confirm_password } = result.data as SchemaSignUp;
 
 	if (password !== confirm_password) {
 		return {
@@ -90,7 +92,7 @@ export async function signupAction(formData: SchemaInput<typeof signUpSchema>, l
 			return {
 				success: false,
 				status: 409,
-				error: 'messages.errors.email_already_exists',
+				error: 'api.errors.email_already_exists',
 			};
 		}
 
@@ -111,7 +113,7 @@ export async function signupAction(formData: SchemaInput<typeof signUpSchema>, l
 			success: true,
 			status: 201,
 			data: userWithoutPassword,
-			message: 'messages.successes.sign_up_success',
+			message: 'api.successes.sign_up_success',
 		};
 	} catch (error: any) {
 		return unknownError(error);

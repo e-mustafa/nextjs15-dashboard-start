@@ -1,15 +1,22 @@
 import { clsx, type ClassValue } from 'clsx';
 import { TFunction } from 'i18next';
 import { twMerge } from 'tailwind-merge';
-import { ZodType } from 'zod';
 import z, { ZodTypeAny } from 'zod/v3';
 // import z, { ZodSchema, ZodTypeAny } from 'zod';
-import setSlug from 'slugify';
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
+/**
+ * Render error message with dynamic values.
+ * If the message contains "|", it is split into key and raw json.
+ * The raw json is parsed and the field_name is translated using the t function.
+ * The translated message is then returned, or the original message if there is an error.
+ * @param {string} message - The error message to render.
+ * @param {TFunction} t - The translation function.
+ * @returns {string} - The rendered error message.
+ */
 export function renderErrorMessage(message: string, t: TFunction): string {
 	try {
 		if (message.includes('|')) {
@@ -40,78 +47,83 @@ export type TError =
 
 export type FormResultSuccess<T> = {
 	success: true;
-	ok: boolean;
+	ok?: boolean;
+	status: number;
 	data: T;
 	message?: string;
-	error?: TError;
+	form_errors?: string;
+	// error?: TError;
 };
 
-export type FormResultError = {
+export type FormResultError<T> = {
 	success: false;
-	ok: false;
+	ok?: false;
 	status: number;
 	error: TError;
+	form_errors?: string; // FieldErrors<T extends FieldValues ? FieldValues : object>;
 	formData?: FormData;
 };
 
-export type FormResult<T> = FormResultSuccess<T> | FormResultError;
+export type FormResult<T> = FormResultSuccess<T> | FormResultError<T>;
 
 export type SchemaInput<T extends () => ZodTypeAny> = z.infer<ReturnType<T>>;
 
-export type ValidationResult<T> =
-	| { success: true; ok?: true; data: T }
-	| { success: false; ok?: false; status: number; formData: unknown; error: Record<string, string[]> };
+// export type ValidationResult<T> =
+// 	| { success: true; ok?: true; data: T }
+// 	| { success: false; ok?: false; status: number; formData: unknown; form_errors: Record<string, string[]> };
 
-export async function ValidateFormAction<T>(schema: ZodType<T, any, any>, formData: unknown): Promise<ValidationResult<T>> {
-	const result = schema.safeParse(formData);
+// export async function ValidateFormAction<T>(schema: ZodType<T, any, any>, formData: unknown): Promise<ValidationResult<T>> {
+// 	console.log('formData');
+// 	const result = schema.safeParse(formData);
 
-	if (!result.success) {
-		return {
-			success: false,
-			status: 400,
-			formData,
-			error: result.error.flatten().fieldErrors as Record<string, string[]>,
-		};
-	}
+// 	if (!result.success) {
+// 		return {
+// 			success: false,
+// 			status: 400,
+// 			formData,
+// 			// error: result.error.flatten().fieldErrors as Record<string, string[]>,
+// 			form_errors: result.error.flatten().fieldErrors as Record<string, string[]>,
+// 		};
+// 	}
 
-	return {
-		success: true,
-		ok: true,
-		data: result.data,
-	};
-}
+// 	return {
+// 		success: true,
+// 		ok: true,
+// 		data: result.data,
+// 	};
+// }
 
-type slugifyOptions = {
-	locale?: string;
-	replacement?: string;
-	lower?: boolean;
-	strict?: boolean;
-	trim?: boolean;
-	remove?: RegExp;
-};
+// type slugifyOptions = {
+// 	locale?: string;
+// 	replacement?: string;
+// 	lower?: boolean;
+// 	strict?: boolean;
+// 	trim?: boolean;
+// 	remove?: RegExp;
+// };
 
-export function slugify(text: string, locale: string = 'ar', options?: slugifyOptions) {
-	const { lang = locale, replacement = '-', lower = true, trim = true, ...rest } = (options = {});
+// export function slugify(text: string, locale: string = 'ar', options?: slugifyOptions) {
+// 	const { lang = locale, replacement = '-', lower = true, trim = true, ...rest } = (options = {});
 
-	if (lang === 'ar') {
-		// allow arabic, latin characters and numbers
-		return text
-			.normalize('NFKD')
-			.replace(/[^\u0600-\u06FFA-Za-z0-9\s]/g, '')
-			.trim()
-			.replace(/\s+/g, replacement)
-			.replace(new RegExp(`^${replacement}+|${replacement}+$`, 'g'), '')
-			.toLowerCase();
-	}
+// 	if (lang === 'ar') {
+// 		// allow arabic, latin characters and numbers
+// 		return text
+// 			.normalize('NFKD')
+// 			.replace(/[^\u0600-\u06FFA-Za-z0-9\s]/g, '')
+// 			.trim()
+// 			.replace(/\s+/g, replacement)
+// 			.replace(new RegExp(`^${replacement}+|${replacement}+$`, 'g'), '')
+// 			.toLowerCase();
+// 	}
 
-	return setSlug(text, {
-		replacement,
-		lower,
-		locale: lang,
-		trim,
-		...rest,
-	});
-}
+// 	return setSlug(text, {
+// 		replacement,
+// 		lower,
+// 		locale: lang,
+// 		trim,
+// 		...rest,
+// 	});
+// }
 
 export function getBackLink(pathname: string): string {
 	const parts = pathname.split('/').filter(Boolean); // remove empty parts

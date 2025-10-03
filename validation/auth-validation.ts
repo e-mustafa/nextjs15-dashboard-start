@@ -4,8 +4,8 @@ import { z } from 'zod';
 import { emailField, otpField, passwordField } from './fields-validation';
 
 export type Tt = i18n['t'];
-export type SchemaSignUp = SchemaInput<() => typeof signUpSchema>;
-export type SchemaSignIn = SchemaInput<() => typeof signInSchema>;
+export type SchemaSignUp = z.infer<typeof signUpSchema>;
+export type SchemaSignIn = z.infer<typeof signInSchema>;
 
 
 

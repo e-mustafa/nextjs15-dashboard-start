@@ -31,7 +31,7 @@ const data = {
 	user: {
 		name: 'shadcn',
 		email: 'm@example.com',
-		avatar: '/avatars/shadcn.jpg',
+		avatar: 'https://picsum.photos/100/100?random=1',
 	},
 	teams: [
 		{

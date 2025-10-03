@@ -1,5 +1,5 @@
-import { RenderFieldProps } from '@/zz old files/types copy';
-import { useState } from 'react';
+import { FieldTypeMap, RenderFieldProps } from '@/lib/create-forms/types-create-forms';
+import { JSX, useState } from 'react';
 import { FieldValues } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import {
@@ -13,10 +13,10 @@ import {
 import { Input } from '../ui/input';
 import ShowHidePasswordButton from './show-hide-password-button';
 
-export default function PasswordInput({
+export default function PasswordInput<T extends FieldValues, K extends keyof FieldTypeMap>({
 	fieldConfig: { name, label, placeholder, required, description },
 	form,
-}: RenderFieldProps<FieldValues>) {
+}: RenderFieldProps<T, K>): JSX.Element { // }: RenderFieldProps<FieldValues, 'password'>) {
 	const { t } = useTranslation();
 	const [showPassword, setShowPassword] = useState<boolean>(false);
 

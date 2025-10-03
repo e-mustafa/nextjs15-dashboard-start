@@ -1,14 +1,13 @@
 import SEOMockupCard from '@/components/Dashboard/seo-mockup';
 import { FileInputField } from '@/components/inputs/file-input-field';
+import ImageUploadField from '@/components/inputs/image-upload-field';
 import PasswordInput from '@/components/inputs/password-input';
 import RichTextField from '@/components/inputs/rich-text-field';
 import SlugInputField from '@/components/inputs/slug-input-field';
 import { JSX } from 'react';
-import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
+import { FieldValues, Path } from 'react-hook-form';
 import BaseInputField from './base-input-field';
 import { FieldTypeMap, RenderFieldProps } from './types-create-forms';
-import ImageManagerField from '@/components/inputs/image-manager-field';
-import ImageUploadField from '@/components/inputs/image-upload-field';
 
 /**
  * A registry mapping input field types to their corresponding render functions.
@@ -32,10 +31,7 @@ export const inputRegistry: InputRegistry = {
 	// 	<PasswordInput fieldConfig={fieldConfig} form={form as UseFormReturn<FieldValues>} />
 	// ),
 
-	password: ({ fieldConfig, form }) => (
-		<PasswordInput fieldConfig={fieldConfig} form={form as UseFormReturn<FieldValues>} />
-	),
-
+	password: ({ fieldConfig, form }) => <PasswordInput fieldConfig={fieldConfig} form={form} />,
 	// password: ({ fieldConfig, form }) => <PasswordInput fieldConfig={fieldConfig} form={form} />,
 
 	// uploadFile: <T extends FieldValues>({ fieldConfig, form }: RenderFieldProps<T, 'uploadFile'>) => (
@@ -45,7 +41,7 @@ export const inputRegistry: InputRegistry = {
 	slug: ({ fieldConfig, form }) => <SlugInputField fieldConfig={fieldConfig} form={form} />,
 
 	uploadFile: ({ fieldConfig, form }) => <FileInputField fieldConfig={fieldConfig} form={form} />,
-	imageManager: ({ fieldConfig, form }) => <ImageManagerField fieldConfig={fieldConfig} form={form} />,
+	// imageManager: ({ fieldConfig, form }) => <ImageManagerField fieldConfig={fieldConfig} form={form} />,
 	imageUpload: ({ fieldConfig, form }) => <ImageUploadField fieldConfig={fieldConfig} form={form} />,
 
 	richtext: ({ fieldConfig, form }) => <RichTextField fieldConfig={fieldConfig} form={form} />,

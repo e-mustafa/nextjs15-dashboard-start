@@ -17,6 +17,8 @@ export const localesData = {
 export type TLocalesData = keyof typeof localesData;
 export const defaultLocale = localesData['ar'];
 
+export const nextRevalidateData = 60;
+
 export const config_env = {
 	environment: process.env.NODE_ENV!,
 	domain: process.env.NEXT_PUBLIC_DOMAIN!,
