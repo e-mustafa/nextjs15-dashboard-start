@@ -229,8 +229,9 @@
 	* {
 		@apply border-border outline-ring/50;
 	}
-	html{
-		@apply scroll-smooth
+	html {
+		@apply scroll-smooth;
+		scrollbar-gutter: stable; /* don't fill while hide or disable scroll bar  */
 	}
 	body {
 		@apply bg-background text-foreground font-sans scroll-smooth;

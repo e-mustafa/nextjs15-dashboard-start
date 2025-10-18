@@ -1,6 +1,6 @@
-import { HandlerContext, errorHandler } from '@/lib/server/error-handler/error-handler-route';
-import { AppError } from '@/lib/server/error-handler/errorsApp';
-import { deleteBrand, getBrand, updateBrand } from '@/lib/services/brandService';
+import { HandlerContext, errorHandler } from '@/lib/error-handler/error-handler-route';
+import { AppError } from '@/lib/error-handler/error-handler.server';
+import { deleteBrand, getBrand, updateBrand } from '@/server/services/brand-service';
 
 // GET /api/brands/:id
 

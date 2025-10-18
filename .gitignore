@@ -44,3 +44,5 @@ next-env.d.ts
 i18nBoost.config.ts
 
 zzz-old-files/
+
+logs/

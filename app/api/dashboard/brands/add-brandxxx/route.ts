@@ -1,6 +1,6 @@
 // import { prisma_DB } from '@/lib/prisma';
-import { mapTranslations } from '@/lib/server/mapTranslations.server';
-import { prisma_DB } from '@/server/db/prisma';
+import { mapTranslations } from '@/lib/utils.server/mapTranslations.server';
+import { prisma_DB } from '@/prisma/prisma.db';
 import { NextResponse } from 'next/server';
 // import { mapTranslations } from '@/lib/mapTranslations';
 
@@ -23,10 +23,8 @@ export async function GET(req: Request) {
 			fields: ['name', 'slug', 'description'],
 		})),
 	};
-	
-	
 
-   const result = { success: true, status: 200, data };
+	const result = { success: true, status: 200, data };
 
 	return NextResponse.json(result);
 }

@@ -59,7 +59,6 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -177,73 +176,73 @@ const ActionColumns = {
 };
 
 // columns -------------------------------------------
-const columns: ColumnDef<Item>[] = [
-	{
-		header: 'Name',
-		accessorKey: 'name',
-		cell: ({ row }) => <div className='font-medium'>{row.getValue('name')}</div>,
-		// size: 180,
-		filterFn: multiColumnFilterFn,
-		// enableHiding: false,
-		enablePinning: true,
-	},
-	{
-		header: 'Email',
-		accessorKey: 'email',
-		enablePinning: true,
-		// size: 220,
-	},
-	{
-		header: 'Location',
-		accessorKey: 'location',
-		cell: ({ row }) => (
-			<div>
-				<span className='text-lg leading-none'>{row.original.flag}</span> {row.getValue('location')}
-			</div>
-		),
-		// size: 180,
-		enablePinning: true,
-	},
-	{
-		header: 'Status',
-		accessorKey: 'status',
-		cell: ({ row }) => (
-			<Badge className={cn(row.getValue('status') === 'Inactive' && 'bg-muted-foreground/60 text-primary-foreground')}>
-				{row.getValue('status')}
-			</Badge>
-		),
-		// size: 100,
-		filterFn: statusFilterFn,
-		enablePinning: true,
-	},
+// const columns: ColumnDef<Item>[] = [
+// 	{
+// 		header: 'Name',
+// 		accessorKey: 'name',
+// 		cell: ({ row }) => <div className='font-medium'>{row.getValue('name')}</div>,
+// 		// size: 180,
+// 		filterFn: multiColumnFilterFn,
+// 		// enableHiding: false,
+// 		enablePinning: true,
+// 	},
+// 	{
+// 		header: 'Email',
+// 		accessorKey: 'email',
+// 		enablePinning: true,
+// 		// size: 220,
+// 	},
+// 	{
+// 		header: 'Location',
+// 		accessorKey: 'location',
+// 		cell: ({ row }) => (
+// 			<div>
+// 				<span className='text-lg leading-none'>{row.original.flag}</span> {row.getValue('location')}
+// 			</div>
+// 		),
+// 		// size: 180,
+// 		enablePinning: true,
+// 	},
+// 	{
+// 		header: 'Status',
+// 		accessorKey: 'status',
+// 		cell: ({ row }) => (
+// 			<Badge className={cn(row.getValue('status') === 'Inactive' && 'bg-muted-foreground/60 text-primary-foreground')}>
+// 				{row.getValue('status')}
+// 			</Badge>
+// 		),
+// 		// size: 100,
+// 		filterFn: statusFilterFn,
+// 		enablePinning: true,
+// 	},
 
-	{
-		header: 'Balance',
-		accessorKey: 'balance',
-		cell: ({ row }) => {
-			const amount = parseFloat(row.getValue('balance'));
-			const formatted = new Intl.NumberFormat('ar-sa', {
-				style: 'currency',
-				currency: 'SAR',
-			}).format(amount);
-			return formatted;
-		},
-		enablePinning: true,
-		// size: 120,
-	},
-	{
-		header: 'Performance',
-		accessorKey: 'performance',
-		enablePinning: true,
-	},
-];
+// 	{
+// 		header: 'Balance',
+// 		accessorKey: 'balance',
+// 		cell: ({ row }) => {
+// 			const amount = parseFloat(row.getValue('balance'));
+// 			const formatted = new Intl.NumberFormat('ar-sa', {
+// 				style: 'currency',
+// 				currency: 'SAR',
+// 			}).format(amount);
+// 			return formatted;
+// 		},
+// 		enablePinning: true,
+// 		// size: 120,
+// 	},
+// 	{
+// 		header: 'Performance',
+// 		accessorKey: 'performance',
+// 		enablePinning: true,
+// 	},
+// ];
 
-export default function DataTableComponent() {
+export default function DataTableComponent<T>({ columns, data = [] }: { columns: ColumnDef<T>[]; data: T[] }) {
 	const isClient = useIsClient();
 	const { t, i18n } = useTranslation();
 	const id = useId();
 
-	const [data, setData] = useState<any[]>([]);
+	// const [data, setData] = useState<any[]>([]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	// const [columnOrder, setColumnOrder] = useStorageState<ColumnOrderState>('Columns-Order', []);
 	const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([]);
@@ -293,9 +292,6 @@ export default function DataTableComponent() {
 					<p>{expandedRows.size > 0 ? t('datatable.collapse_all') : t('datatable.expand_all')}</p>{' '}
 				</TooltipContent>
 			</Tooltip>
-			// <TooltipElement content={<p>{expandedRows.size > 0 ? t('datatable.collapse_all') : t('datatable.expand_all')}</p>}>
-
-			// </TooltipElement>
 		),
 		cell: ({ row }: { row: Row<Item> }) => (
 			<Tooltip>
@@ -320,25 +316,6 @@ export default function DataTableComponent() {
 					<p>{expandedRows.has(row.id) ? t('datatable.collapse_columns') : t('datatable.expand_column')}</p>
 				</TooltipContent>
 			</Tooltip>
-			// <TooltipElement
-			// 	content={<p>{expandedRows.has(row.id) ? t('datatable.collapse_columns') : t('datatable.expand_column')}</p>}
-			// >
-			// 	<Button
-			// 		variant='ghost'
-			// 		size='icon'
-			// 		onClick={(e) => {
-			// 			e.stopPropagation();
-			// 			toggleExpandRow(row.id);
-			// 		}}
-			// 	>
-			// 		<ChevronRightIcon
-			// 			className={cn(
-			// 				'size-5 transform transition-transform duration-300',
-			// 				expandedRows.has(row.id) ? 'rotate-90' : 'rotate-0'
-			// 			)}
-			// 		/>
-			// 	</Button>
-			// </TooltipElement>
 		),
 		maxSize: 40,
 		enableSorting: false,
@@ -487,9 +464,9 @@ export default function DataTableComponent() {
 
 	// fetch dummy data
 	useEffect(() => {
-		fetch('https://raw.githubusercontent.com/origin-space/origin-images/refs/heads/main/users-01_fertyx.json')
-			.then((res) => res.json())
-			.then((data) => setData(data));
+		// fetch('https://raw.githubusercontent.com/origin-space/origin-images/refs/heads/main/users-01_fertyx.json')
+		// 	.then((res) => res.json())
+		// 	.then((data) => setData(data));
 	}, []);
 
 	// drag & drop columns order feature -------------------------------------------------------

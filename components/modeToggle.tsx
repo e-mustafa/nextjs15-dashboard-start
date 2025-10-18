@@ -1,6 +1,5 @@
 'use client';
 
-import * as React from 'react';
 import { useTheme } from 'next-themes';
 
 import { Button } from '@/components/ui/button';
@@ -11,8 +10,6 @@ import { useTranslation } from 'react-i18next';
 export function ModeToggle() {
 	const { themes, theme, setTheme } = useTheme();
 	const { t } = useTranslation();
-
-	console.log('themes', themes);
 
 	return (
 		<DropdownMenu>

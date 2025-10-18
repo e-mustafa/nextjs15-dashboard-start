@@ -1,11 +1,9 @@
+import { SidebarMenuButton, useSidebar } from '@/components/ui/sidebar-rtl';
 import Image from 'next/image';
 import Link from 'next/link';
-import { SidebarMenuButton, useSidebar } from '@/components/ui/sidebar-rtl';
 
 export default function SidebarLogo() {
 	const { open } = useSidebar();
-
-	console.log('Sidebar ', open);
 
 	return (
 		<SidebarMenuButton size='lg' className='min-h-fit shrink-0 px-2'>
@@ -14,9 +12,10 @@ export default function SidebarLogo() {
 					<Image
 						src='/assets/images/sllm-identity/sllm-logo.svg'
 						alt='sllm logo'
-						className='h-10 starting:scale-0 scale-100 transition-all duration-300'
+						className='h-10 starting:scale-0 scale-100 transition-all duration-300 w-auto'
 						width={104}
 						height={36}
+						priority
 					/>
 				) : (
 					<Image
@@ -25,6 +24,7 @@ export default function SidebarLogo() {
 						className='h-10 starting:scale-0 scale-100 transition-all duration-300'
 						width={36}
 						height={36}
+						priority
 					/>
 				)}
 			</Link>

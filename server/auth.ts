@@ -1,11 +1,13 @@
-import { isDEV } from '@/configs/general';
+import { isDEV, isPROD } from '@/configs/general';
 import { GeneralLinks } from '@/constant/enums';
-import { prisma_DB } from '@/server/db/prisma';
+import { prisma_DB } from '@/prisma/prisma.db';
 import { signInSchema } from '@/validation/auth-validation';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import bcrypt from 'bcrypt';
 import { type NextAuthOptions } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
+import { cookies } from 'next/headers';
+const cookiesStore = await cookies();
 
 export const authConfig: NextAuthOptions = {
 	session: {
@@ -54,6 +56,25 @@ export const authConfig: NextAuthOptions = {
 						})
 					);
 				}
+
+				// Store basic user info (readable by client)
+				cookiesStore.set(
+					'user',
+					JSON.stringify({
+						id: user.id,
+						email: user.email,
+						name: user.name,
+						image: user.imageId,
+						role: user.role,
+						// count_items_cart,
+					}),
+					{
+						httpOnly: false, // can read by client
+						secure: isPROD,
+						path: '/',
+						maxAge: 60 * 60 * 24 * 7,
+					}
+				);
 
 				return {
 					id: user.id,

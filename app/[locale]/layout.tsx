@@ -1,17 +1,22 @@
 import type { Metadata } from 'next';
 import { Cairo, Roboto } from 'next/font/google';
 import '../globals.css';
+import '@/lib/setup/init-server-logger';
 
-import { ThemeProvider } from '@/components/theme-provider';
-import TranslationsProvider from '@/components/TranslationsProvider';
+// import { PerformanceDashboard } from '@/components/dev/performance-dashboard';
 import { Toaster } from '@/components/ui/sonner';
-import { TLocalesData } from '@/configs/general';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { isDEV, TLocalesData } from '@/configs/general';
 import { toasterConfig } from '@/configs/toast-config';
+import { ThemeProvider } from '@/contexts/theme-provider';
+import TranslationsProvider from '@/contexts/translations-provider';
 import i18nConfig from '@/i18n.Config';
+// import { GA_TRACKING_ID } from '@/lib/analytics/gtag';
+import { useAlertSystem } from '@/lib/monitoring/alert-system';
+import { useSentryMonitoring } from '@/lib/monitoring/sentry';
 import { ReactNode } from 'react';
 import { ToasterProps } from 'sonner';
 import initTranslations from '../i18n';
-import { TooltipProvider } from '@/components/ui/tooltip';
 
 // const IBM_Plex_Sans = IBM_Plex_Sans_Arabic({
 // 	variable: '--font-plex-sans',
@@ -43,22 +48,54 @@ export function generateStaticParams() {
 	return i18nConfig.locales.map((locale) => ({ locale }));
 }
 
-const i18nNamespaces = ['general'];
+const i18nNamespaces = ['general', 'auth', 'dashboard'];
 
-export interface TLayoutProps { children: ReactNode; params: { locale: TLocalesData } };
+export interface TLayoutProps {
+	children: ReactNode;
+	params: { locale: TLocalesData };
+}
 
 export default async function RootLayout({ children, params }: TLayoutProps) {
 	const { locale } = await params;
 	const { resources, dir } = await initTranslations(i18nNamespaces, locale);
 
+	// if (isDEV) {
+	// 	useSentryMonitoring();
+	// 	useAlertSystem();
+	// }
+
+	// ensureClientTranslations(locale, ['common', 'dashboard', 'auth']);
 	return (
 		<html lang={locale} dir={dir} suppressHydrationWarning>
+			<head>
+				{/* {GA_TRACKING_ID && (
+					<>
+						<Script
+							src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`}
+							strategy='afterInteractive'
+						/>
+						<Script id='google-analytics' strategy='afterInteractive'>
+							{`
+								window.dataLayer = window.dataLayer || [];
+								function gtag(){dataLayer.push(arguments);}
+								gtag('js', new Date());
+								gtag('config', '${GA_TRACKING_ID}');
+							`}
+						</Script>
+					</>
+				)} */}
+			</head>
 			<body className={`${locale === 'ar' ? Cairo_Font.variable : Roboto_Font.variable} antialiased`}>
 				<TranslationsProvider namespaces={i18nNamespaces} locale={locale} resources={resources}>
+					{/* <FeedbackProvider> */}
 					<ThemeProvider attribute='class' defaultTheme='system' enableSystem>
-						<TooltipProvider>{children}</TooltipProvider>
-						<Toaster {...(toasterConfig as ToasterProps)} />
+						<TooltipProvider>
+							{children}
+							<Toaster {...(toasterConfig as ToasterProps)} />
+						</TooltipProvider>
 					</ThemeProvider>
+					{/* </FeedbackProvider> */}
+					{/* {isDEV && <PerformanceDashboard />} */}
 				</TranslationsProvider>
 			</body>
 		</html>

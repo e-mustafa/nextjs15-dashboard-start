@@ -2,10 +2,10 @@
 
 import { AuthResponse } from '@/components/auth/auth-form';
 import { isDEV } from '@/configs/general';
+import { ValidateFormAction } from '@/lib/utils.server/validate-data-server';
 import { SchemaSignIn, SchemaSignUp, signInSchema, signUpSchema } from '@/validation/auth-validation';
 import bcrypt from 'bcrypt';
-import { prisma_DB } from '../db/prisma';
-import { ValidateFormAction } from '@/lib/server/validate-data-server';
+import { prisma_DB } from '../../prisma/prisma.db';
 
 export async function unknownError(error: string = 'api.errors.error') {
 	isDEV && console.error('signup error:', error);

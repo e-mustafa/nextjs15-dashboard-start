@@ -1,11 +1,25 @@
 'use server';
 
 import { TBrandFormValues } from '@/components/Dashboard/forms/brand-form';
-import { runAction } from '@/lib/server/error-handler/errorsApp';
-import * as brandService from '@/lib/services/brandService';
+import { TLocalesData } from '@/configs/general';
+import { runAction } from '@/lib/error-handler/error-handler.server';
+import * as brandService from '@/server/services/brand-service';
 
-export async function getAllBrandsAction() {
-	return runAction(() => brandService.getAllBrands());
+// export async function getAllBrandsAction() {
+// 	return runAction(() => brandService.getAllBrands());
+// }
+
+export async function getAllBrandsAction(
+	params?: {
+		page?: number;
+		limit?: number;
+		search?: string;
+		sortBy?: string;
+		sortOrder?: 'asc' | 'desc';
+	},
+	locale?: TLocalesData
+) {
+	return runAction(() => brandService.getAllBrands(params, locale));
 }
 
 export async function getBrandAction(id: string) {

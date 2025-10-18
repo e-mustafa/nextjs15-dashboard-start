@@ -1,7 +1,7 @@
-import { errorHandler } from '@/lib/server/error-handler/error-handler-route';
-import { AppError } from '@/lib/server/error-handler/errorsApp';
-import imagekit from '@/lib/server/imagekit.server';
-import { prisma_DB } from '@/server/db/prisma';
+import { errorHandler } from '@/lib/error-handler/error-handler-route';
+import { AppError } from '@/lib/error-handler/error-handler.server';
+import imagekit from '@/lib/utils.server/imagekit.server';
+import { prisma_DB } from '@/prisma/prisma.db';
 
 /**
  * DELETE /api/imagekit/delete

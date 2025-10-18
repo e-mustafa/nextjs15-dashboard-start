@@ -1,7 +1,7 @@
 import initTranslations from '@/app/i18n';
-import TranslationsProvider from '@/components/TranslationsProvider';
 import { TLocalesData } from '@/configs/general';
-import { prisma_DB } from '@/server/db/prisma';
+import TranslationsProvider from '@/contexts/translations-provider';
+import { prisma_DB } from '@/prisma/prisma.db';
 import { TLayoutProps } from '../layout';
 
 const i18nNamespaces = ['dashboard'];

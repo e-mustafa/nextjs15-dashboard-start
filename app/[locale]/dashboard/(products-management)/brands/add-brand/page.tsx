@@ -1,5 +1,3 @@
-// import DataTableComponent from '@/components/Dashboard/dataTable/data-table';
-// import BrandForm from '@/components/Dashboard/forms/brand-form';
 import { TLayoutProps } from '@/app/[locale]/layout';
 import initTranslations from '@/app/i18n';
 import LoaderBlock from '@/components/shard/loaders/loader-block';
@@ -11,7 +9,6 @@ import { Suspense } from 'react';
 
 const BrandForm = dynamic(() => import('@/components/Dashboard/forms/brand-form'), {
 	// ssr: false,
-	// loading: () => <LoaderBlock />,
 });
 
 const i18nNamespaces = ['dashboard'];

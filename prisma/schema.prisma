@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../lib/generated/prisma"
 }
 
 datasource db {
@@ -143,20 +142,23 @@ model BrandTranslation {
   slug        String
   name        String
   description String
-  Brand       Brand  @relation(fields: [brandId], references: [id])
+  Brand       Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
 
+  @@unique([brandId, lang], name: "brandId_lang") // ✅ أضف الاسم هنا
   @@unique([lang, slug], name: "lang_slug")
+  @@index([name])
+  @@index([slug])
 }
 
 // image -----------------------------------
 model Image {
   id        String   @id @default(cuid())
-  fileId    String   @unique // من ImageKit
+  fileId    String // @unique // من ImageKit
   url       String
   createdAt DateTime @default(now())
 
   // العلاقات
-  users   User[]
+  users  User[]
   brands Brand[] // نفس الصورة يقدر يستخدمها عدة براندات
 
   products ProductImage[]

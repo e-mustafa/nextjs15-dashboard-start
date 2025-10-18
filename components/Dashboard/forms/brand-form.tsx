@@ -1,18 +1,18 @@
 'use client';
 
+import { url_segment } from '@/app/[locale]/dashboard/(products-management)/brands/page';
 import { Form } from '@/components/ui-custom/custom-form';
+import { useFormResponse } from '@/hooks/use-form-response';
+import { useServerResponse } from '@/hooks/use-server-response';
 import { renderField } from '@/lib/create-forms/input-registry';
 import { SectionConfig } from '@/lib/create-forms/types-create-forms';
-import { handleFormResponse } from '@/lib/form-response-handler';
-import { ActionResult } from '@/lib/server/error-handler/errorsApp';
 import { createBrandAction, updateBrandAction } from '@/server/actions/brand-actions';
+import { ActionResult } from '@/types/api';
 import { defaultValues_brand, formSchema_brand } from '@/validation/brand-validation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { redirect } from 'next/navigation';
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 import { z } from 'zod';
 import SubmitButton from './submit-button';
 
@@ -135,7 +135,7 @@ export const formSections_brand: SectionConfig<TBrandFormValues>[] = [
 export default function BrandForm({
 	type = 'create',
 	response,
-	defaultValues = response?.data || defaultValues_brand,
+	defaultValues = (response?.data as TBrandFormValues) || defaultValues_brand,
 }: {
 	type?: 'create' | 'update';
 	response?: ActionResult<TBrandFormValues>;
@@ -143,12 +143,8 @@ export default function BrandForm({
 }) {
 	const { t } = useTranslation();
 
-	useEffect(() => {
-		if (!response?.success && response?.error) {
-			toast.error(t(response.error));
-			redirect('/dashboard/brands');
-		}
-	}, []);
+	// for handling server response errors & messages
+	useServerResponse(response);
 
 	const form = useForm<TBrandFormValues>({
 		resolver: zodResolver(formSchema_brand),
@@ -156,20 +152,22 @@ export default function BrandForm({
 		// delayError: 1000,
 	});
 
+	const [result, setResult] = useState<ActionResult<TBrandFormValues> | null>(null);
+
+	useFormResponse<TBrandFormValues>(result!, form, {
+		redirectUrl: `/${url_segment}`,
+		reset_on_success: (result?.data as TBrandFormValues) || true,
+	});
+
 	console.log('errors', form.formState.errors);
+
 	async function onSubmit(data: TBrandFormValues) {
-		const res = type == 'create' ? await createBrandAction(data) : await updateBrandAction(defaultValues.id || '', data);
-		console.log('res brand form', res);
+		const result =
+			type == 'create' ? await createBrandAction(data) : await updateBrandAction(defaultValues.id || '', data);
 
-		handleFormResponse<TBrandFormValues>(res, form, t);
+		setResult(result as ActionResult<TBrandFormValues>);
 
-		if (res.success) {
-			if (type == 'create') {
-				form.reset();
-			} else {
-				redirect('/dashboard/brands');
-			}
-		}
+		console.log('res brand form', result);
 	}
 
 	return (

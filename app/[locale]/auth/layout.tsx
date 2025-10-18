@@ -1,12 +1,9 @@
 import initTranslations from '@/app/i18n';
 import GlobalLogo from '@/components/globalLogo';
-import TranslationsProvider from '@/components/TranslationsProvider';
-import { TLocalesData } from '@/configs/general';
-import { ReactNode } from 'react';
+import TranslationsProvider from '@/contexts/translations-provider';
 import { TLayoutProps } from '../layout';
 
 const i18nNamespaces = ['auth'];
-
 
 export default async function AuthLayout({ children, params }: TLayoutProps) {
 	const { locale } = await params;

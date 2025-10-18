@@ -1,8 +1,8 @@
 import initTranslations from '@/app/i18n';
 import { AppSidebar } from '@/components/Dashboard/Sidebar/app-sidebar';
-import TranslationsProvider from '@/components/TranslationsProvider';
 import { Separator } from '@/components/ui/separator';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar-rtl';
+import TranslationsProvider from '@/contexts/translations-provider';
 import { TLayoutProps } from '../layout';
 
 const i18nNamespaces = ['dashboard'];

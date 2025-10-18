@@ -226,7 +226,7 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-	console.log('props', props);
+	
 	return (
 		<Sidebar collapsible='icon' side={dir() === 'rtl' ? 'right' : 'left'} {...props} className='font-medium border-0'>
 			<SidebarHeader className='min-h-[72px]'>
