@@ -12,8 +12,8 @@ import { ThemeProvider } from '@/contexts/theme-provider';
 import TranslationsProvider from '@/contexts/translations-provider';
 import i18nConfig from '@/i18n.Config';
 // import { GA_TRACKING_ID } from '@/lib/analytics/gtag';
-import { useAlertSystem } from '@/lib/monitoring/alert-system';
-import { useSentryMonitoring } from '@/lib/monitoring/sentry';
+// import { useAlertSystem } from '@/lib/monitoring/alert-system';
+// import { useSentryMonitoring } from '@/lib/monitoring/sentry';
 import { ReactNode } from 'react';
 import { ToasterProps } from 'sonner';
 import initTranslations from '../i18n';
@@ -64,7 +64,6 @@ export default async function RootLayout({ children, params }: TLayoutProps) {
 	// 	useAlertSystem();
 	// }
 
-	// ensureClientTranslations(locale, ['common', 'dashboard', 'auth']);
 	return (
 		<html lang={locale} dir={dir} suppressHydrationWarning>
 			<head>

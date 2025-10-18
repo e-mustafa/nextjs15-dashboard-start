@@ -4,6 +4,11 @@
 			"add": "Add",
 			"edit": "Edit",
 			"delete": "Delete",
+			"delete_confirm": "Confirm Deletion",
+			"delete_selected": "Delete Selected",
+			"delete_image": "Delete Image",
+			"remove": "Remove",
+			"remove_image": "Remove Image",
 			"save": "Save",
 			"cancel": "Cancel",
 			"view": "View",
@@ -12,26 +17,65 @@
 			"export": "Export",
 			"import": "Import",
 			"rename": "Rename",
-			"Load_more":"Load more",
-			"refresh":"Refresh"
+			"Load_more": "Load More",
+			"refresh": "Refresh",
+			"close": "Close"
 		},
 		"status": {
 			"active": "Active",
 			"inactive": "Inactive"
 		},
+		"sections": {
+			"the_list": "The List",
+			"list": "List",
+			"general_details": "General Details",
+			"seo_details": "SEO Details",
+			"details": "Details",
+			"settings": "Settings",
+			"permissions": "Permissions",
+			"selected_images": "Selected Images",
+			"all_images": "All Images",
+			"library": "Library",
+			"images_library": "Image Library",
+			"images_library_description": "In this library, you can upload, download, delete, and rename images.",
+			"brands": "Brands",
+			"add_brand": "Add Brand",
+			"edit_brand": "Edit Brand"
+		},
 		"messages": {
-			"no_data": "No data available",
+			"processing": "Processing...",
+			"saving": "Saving...",
+			"deleting": "Deleting...",
+			"delete_confirm": "Are you sure you want to delete this? This action cannot be undone.",
+			"delete_selected_confirm": "Are you sure you want to delete the selected items ({{count}})? This action cannot be undone.",
+			"no_data": "No data to display",
 			"loading": "Loading...",
-			"error": "An error occurred, please try again later",
+			"error": "An error occurred. Please try again later.",
 			"success": "Operation completed successfully",
 			"loading_data": "Loading data...",
 			"loading_more": "Loading more...",
-			"no_data_found": "No data found.",
-			"no_images": "No images found."
-		},
-		"pagination": {
-			"previous": "Previous",
-			"next": "Next"
+			"no_data_found": "No data found",
+			"no_images": "No images found.",
+			"no_images_selected": "No images selected.",
+			"no_products": "No products found.",
+			"no_orders": "No orders found.",
+			"no_customers": "No customers found.",
+			"no_reviews": "No reviews found.",
+			"no_messages": "No messages found.",
+			"no_wishlists": "No wishlists found.",
+			"no_warehouses": "No warehouses found.",
+			"no_suppliers": "No suppliers found.",
+			"no_collections": "No collections found.",
+			"no_categories": "No categories found.",
+			"no_brands": "No brands found.",
+			"no_coupons": "No coupons found.",
+			"no_discounts": "No discounts found.",
+			"no_transactions": "No transactions found.",
+			"no_pages": "No pages found.",
+			"no_blogs": "No blogs found.",
+			"no_attributes": "No attributes found.",
+			"no_tags": "No tags found.",
+			"drag_to_reorder": "Drag images to reorder them."
 		},
 		"options": {
 			"yes": "Yes",
@@ -40,7 +84,6 @@
 			"auto_collapse": "Auto Collapse"
 		}
 	},
-
 	"sidebar": {
 		"nav": {
 			"dashboard": "Dashboard",
@@ -82,7 +125,6 @@
 			"updated_at": "Updated At"
 		}
 	},
-
 	"forms": {
 		"sections": {
 			"general_details": "General Details",
@@ -101,7 +143,6 @@
 			"title": "Title",
 			"title_ar": "Title (Arabic)",
 			"title_en": "Title (English)",
-
 			"seo_title": "SEO Title",
 			"seo_title_ar": "SEO Title (Arabic)",
 			"seo_title_en": "SEO Title (English)",
@@ -110,10 +151,10 @@
 			"seo_description_en": "SEO Description (English)",
 			"seo_keywords": "SEO Keywords",
 			"seo_link": "SEO Link",
-
 			"first_name": "First Name",
 			"last_name": "Last Name",
 			"full_name": "Full Name",
+			"image": "Image",
 			"username": "Username",
 			"email": "Email",
 			"phone": "Phone",
@@ -131,8 +172,11 @@
 			"role": "Role",
 			"permissions": "Permissions",
 			"search": "Search",
-
-			"slug": "Slug"
+			"slug": "Slug",
+			"image_single": "Image",
+			"image_multiple": "Images",
+			"file_single": "File",
+			"file_multiple": "Files"
 		},
 		"placeholders": {
 			"name": "Enter name",
@@ -145,7 +189,6 @@
 			"title_ar": "Enter title (Arabic)",
 			"title_en": "Enter title (English)",
 			"link": "Enter link",
-
 			"seo_link": "Enter SEO link",
 			"seo_title_ar": "Enter SEO title (Arabic)",
 			"seo_title_en": "Enter SEO title (English)",
@@ -154,16 +197,15 @@
 			"seo_description_ar": "Enter SEO description (Arabic)",
 			"seo_description_en": "Enter SEO description (English)",
 			"seo_keywords": "Enter SEO keywords separated by commas",
-
-			"richtext": "Write here...",
-			"textarea": "Write here...",
-
+			"richtext": "Type here...",
+			"textarea": "Type here...",
 			"first_name": "Enter first name",
 			"last_name": "Enter last name",
 			"full_name": "Enter full name",
 			"username": "Enter username",
 			"email": "Enter email",
 			"phone": "Enter phone number",
+			"image": "Choose an image",
 			"address": "Enter address",
 			"city": "Enter city",
 			"state": "Enter state",
@@ -177,19 +219,17 @@
 			"confirm_new_password": "Confirm new password",
 			"role": "Select role",
 			"permissions": "Select permissions",
-
 			"slug": "Enter slug...",
-
-			"image_drag_and_drop": "Drag & drop images here, or click to select.",
-			"file_drag_and_drop": "Drag & drop files here, or click to select.",
-			"image_on_drag": "Drop image here to upload...",
-			"file_on_drag": "Drop files here to upload...",
-
+			"image_drag_and_drop": "Drag images here or click to select",
+			"file_drag_and_drop": "Drag files here or click to select",
+			"image_on_drag": "Drag image here to upload...",
+			"file_on_drag": "Drag files here to upload...",
 			"upload_image": "Upload Image",
+			"select_image": "Select Image",
 			"upload_file": "Upload File",
-			"upload_general": "Upload images or files"
+			"upload_general": "Upload Images or Files",
+			"change_image": "Change Image"
 		},
-
 		"validation": {
 			"required": "This field is required",
 			"email": "Please enter a valid email",
@@ -197,10 +237,10 @@
 			"max": "Please enter a valid value",
 			"numeric": "Please enter a valid number",
 			"integer": "Please enter a valid integer",
-			"invalid_url": "Invalid URL, enter a valid one like: https://www.google.com",
-			"invalid_phone": "Invalid phone number, enter a valid one like: +1234567890",
-			"invalid_zip": "Invalid ZIP code, enter a valid one like: 12345",
-			"invalid_color": "Invalid color, enter a valid one like: #000000",
+			"invalid_url": "Invalid URL. Example: https://www.google.com",
+			"invalid_phone": "Invalid phone number. Example: +1234567890",
+			"invalid_zip": "Invalid ZIP code. Example: 12345",
+			"invalid_color": "Invalid color. Example: #000000",
 			"name_ar_min": "Arabic name must be at least {{min}} characters.",
 			"name_en_min": "English name must be at least {{min}} characters.",
 			"name_en_max": "English name must not exceed {{max}} characters.",
@@ -208,40 +248,47 @@
 			"name_ar_required": "Arabic name is required.",
 			"name_en_required": "English name is required.",
 			"name_min": "Name must be at least {{min}} characters.",
-			"name_max": "Name must not exceed {{max}} characters.",
+			"name_max": "Name must be at most {{max}} characters.",
 			"name_required": "Name is required.",
-
 			"slug_required": "Slug is required",
-			"slug_min": "Slug must be at least {{min}} characters",
+			"slug_min": "Slug must be at least {{min}} characters long",
 			"slug_max": "Slug must not exceed {{max}} characters",
-			"slug_ar_regex": "Slug must contain only arabic & latin letters, numbers 0-9, and dashes -",
-			"slug_en_regex": "Slug must contain only lowercase latin letters a-z, numbers 0-9, and dashes -"
+			"slug_ar_regex": "Slug must contain only Arabic or English lowercase letters, numbers 0-9, and dashes (-)",
+			"slug_en_regex": "Slug must contain only English lowercase letters a-z, numbers 0-9, and dashes (-)",
+			"slug_regex": "Slug must contain only lowercase letters a-z, numbers 0-9, and dashes (-)"
 		},
 		"descriptions": {
-			"slug": "The slug must be unique and can only contain English letters, numbers, and dashes."
+			"slug": "The slug must be unique and can only contain letters, numbers, and dashes."
 		},
 		"infos": {
-			"slug": "The slug must be unique because it is part of the website URL. It can only contain English letters, numbers, and dashes."
+			"slug": "The slug must be unique since it’s part of the page URL. It can only contain English letters, numbers, and dashes.",
+			"upload_image_single": "You can upload an image (jpg, jpeg, png, webp, svg) up to 5MB.",
+			"upload_image_multiple": "You can upload multiple images (jpg, jpeg, png, webp, svg) up to 5MB each."
 		},
 		"tooltips": {
 			"hide_password": "Hide password",
 			"show_password": "Show password",
-			"slug": "The slug must be unique and cannot contain spaces. Example: my-product",
-			"seo_link": "SEO link must be unique and cannot contain spaces. Example: my-product",
-			"seo_title": "SEO title is the title that appears in search engine results.",
-			"seo_description": "SEO description is the description that appears in search engine results.",
-			"seo_keywords": "SEO keywords help improve the page ranking in search engine results."
+			"slug": "The slug should be unique and contain no spaces. Example: my-product",
+			"seo_link": "The SEO link should be unique and contain no spaces. Example: my-product",
+			"seo_title": "SEO title is the title shown in search results.",
+			"seo_description": "SEO description is the summary shown in search results.",
+			"seo_keywords": "SEO keywords help improve your search ranking."
 		},
 		"search": {
 			"label": "Search",
-			"placeholder": "Search everything...",
+			"placeholder": "Search data...",
 			"no_results": "No matching results",
-			"results": "Search results",
+			"results": "Search Results",
 			"searching": "Searching...",
-			"error": "An error occurred while searching"
+			"error": "Error while searching",
+			"search_placeholder": "Search everything...",
+			"search_no_results": "No matching results",
+			"search_results": "Search Results",
+			"search_searching": "Searching...",
+			"search_error": "Search error occurred",
+			"search_images_placeholder": "Search images..."
 		}
 	},
-
 	"general": {
 		"welcome": "Welcome to the Dashboard",
 		"overview": "Business Overview",
@@ -255,10 +302,9 @@
 		"top_products": "Top Selling Products",
 		"customer_activity": "Customer Activity"
 	},
-
 	"datatable": {
 		"columns": "Columns",
-		"columns_control": "Columns Control",
+		"columns_control": "Column Control",
 		"manage_columns": "Manage Columns",
 		"show_columns": "Show Columns",
 		"hide_columns": "Hide Columns",
@@ -268,16 +314,16 @@
 		"expand_all": "Expand All",
 		"collapse_all": "Collapse All",
 		"collapse_columns": "Collapse Columns",
-		"expand_column": "Expand Column",
+		"expand_column": "Expand Columns",
 		"pin_column": "Pin Column",
 		"unpin_column": "Unpin Column",
-		"length_menu": "Rows per page",
+		"length_menu": "Rows per Page",
 		"filter": "Filter",
 		"search": "Search",
-		"rows_per_page": "Rows per page",
+		"rows_per_page": "Rows per Page",
 		"of": "of",
 		"page": "Page",
-		"no_data": "No data available",
+		"no_data": "No data to display",
 		"loading_records": "Loading...",
 		"processing": "Processing...",
 		"zero_records": "No matching records found",
@@ -286,29 +332,89 @@
 		"info_filtered": "(filtered from _MAX_ total entries)",
 		"empty_table": "No data available in the table"
 	},
-
+	"columns": {
+		"slug": "Slug",
+		"name": "Name",
+		"email": "Email",
+		"phone": "Phone",
+		"status": "Status",
+		"created_at": "Created At",
+		"updated_at": "Updated At",
+		"description": "Description",
+		"image": "Image"
+	},
 	"charts": {
 		"sales_over_time": "Sales Over Time",
 		"top_selling_products": "Top Selling Products",
 		"customer_demographics": "Customer Demographics",
 		"traffic_sources": "Traffic Sources"
 	},
-
 	"tooltips": {
 		"filter": "Filter",
 		"search": "Search",
-		"rows_per_page": "Rows per page",
+		"rows_per_page": "Rows per Page",
 		"of": "of",
 		"page": "Page"
 	},
+	"pagination": {
+		"previous": "Previous",
+		"next": "Next",
+		"first": "First",
+		"last": "Last",
+		"goto_page": "Go to Page",
+		"page": "Page",
+		"of": "of",
+		"rows_per_page": "Rows per Page"
+	},
+	"breadcrumbs": {
+		"home": "Home",
+		"dashboard": "Dashboard",
+		"orders": "Orders",
+		"products": "Products",
+		"customers": "Customers",
+		"settings": "Settings",
+		"users": "Users",
+		"brands": "Brands",
+		"add_brand": "Add Brand",
+		"edit_brand": "Edit Brand"
+	},
 	"api": {
+		"success": {
+			"create": "Created successfully",
+			"update": "Updated successfully",
+			"delete": "Deleted successfully",
+			"success": "Operation completed successfully",
+			"image_deleted": "Image deleted successfully"
+		},
+		"errors": {
+			"create": "Failed to create",
+			"update": "Failed to update",
+			"delete": "Failed to delete",
+			"unexpected": "Something went wrong, please try again",
+			"not_found": "Data not found",
+			"not_found_in_db": "Data not found in the database",
+			"error_in_db_with_code": "Database error occurred, code: {{code}}",
+			"forbidden": "You don’t have permission to access this data",
+			"unauthorized": "Unauthorized",
+			"exists": "Data already exists",
+			"validation": "Data validation failed",
+			"inputs_validation": "Invalid input data, please correct and try again.",
+			"invalid_id": "Invalid or missing ID",
+			"invalid_ids": "Invalid or missing IDs",
+			"invalid_data": "Invalid or missing data",
+			"slug_exists": "Slug already exists",
+			"image_in_use": "Image is in use and cannot be deleted",
+			"failed_delete_image": "Failed to delete image",
+			"duplicate_entry": "Duplicate database entry in field {{field}}"
+		},
 		"brands": {
 			"success": {
 				"create": "Brand created successfully",
 				"update": "Brand updated successfully",
-				"delete": "Brand deleted successfully"
+				"delete": "Brand deleted successfully",
+				"delete_many": "Brands deleted successfully"
 			},
-			"error": {
+			"errors": {
 				"create": "Failed to create brand",
 				"update": "Failed to update brand",
 				"delete": "Failed to delete brand",
@@ -317,15 +423,6 @@
 			}
 		},
 		"products": "Products",
-
-		"no_data": "No data to display",
-
-		"loading_records": "Loading...",
-		"processing": "Processing...",
-		"zero_records": "No matching records found",
-		"info": "Showing _START_ to _END_ of _TOTAL_ entries",
-		"info_empty": "No entries available",
-		"info_filtered": "(filtered from _MAX_ total entries)",
-		"empty_table": "No data available in table"
+		"customers": "Customers"
 	}
 }
