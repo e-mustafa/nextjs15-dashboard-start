@@ -1,16 +1,18 @@
 import { msg } from '@/lib/utils';
 import z from 'zod';
+import { slugSchema } from './fields-validation';
+
+export const seoFields = ['seo_title', 'seo_description', 'slug'];
 
 export const SEODefaultValues = {
-	seo_name_ar: '',
-	seo_name_en: '',
+	seo_title_ar: '',
+	seo_title_en: '',
 	seo_description_ar: '',
 	seo_description_en: '',
-	seo_keywords: '',
-	seo_image: '',
-
 	slug_ar: '',
 	slug_en: '',
+	seo_keywords: '',
+	seo_image: '',
 };
 
 export const validate_slug = z
@@ -20,19 +22,19 @@ export const validate_slug = z
 	.regex(/^[\p{L}0-9-]+$/u, { message: msg('forms.validation.slug_regex') });
 
 export const SEOFormSchema = z.object({
-	seo_name_ar: z.string().optional(),
-	seo_name_en: z.string().optional(),
+	seo_title_ar: z.string().optional(),
+	seo_title_en: z.string().optional(),
 	seo_description_ar: z.string().optional(),
 	seo_description_en: z.string().optional(),
 	// seo_link: z.url('forms.validation.invalid_url').optional(),
-	Seo_keywords: z.string().optional(),
+	slug_ar: slugSchema('ar'),
+	slug_en: slugSchema('en'),
+	seo_keywords_ar: z.string().optional(),
+	seo_keywords_en: z.string().optional(),
 
-	seo_image: z.string().url().optional(),
-
-	slug_ar: validate_slug,
-	slug_en: validate_slug,
+	seo_image: z.any().optional(),
 });
 
 export type SEOFormValues = z.infer<typeof SEOFormSchema>;
 
-export type SEOFormErrors = z.infer<typeof SEOFormSchema>;
+// export type SEOFormErrors = z.infer<typeof SEOFormSchema>;

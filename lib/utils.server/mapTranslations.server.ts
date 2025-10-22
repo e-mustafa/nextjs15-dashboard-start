@@ -5,7 +5,7 @@ import getCurrentLocale from './getCurrentLocale.server';
  * Maps translations given as an array of objects to a flat object
  * with keys in the format of "name_lang" and values as the translated text.
  *
- * If Accept-Language header is provided, it will map the translations
+ * If `Accept-Language` header is provided, it will map the translations
  * to the language specified in the header.
  * If no Accept-Language header is provided, it will map all translations to a flat object with keys in the
  * format of "name_lang".
@@ -18,7 +18,6 @@ import getCurrentLocale from './getCurrentLocale.server';
  * @param options.defaultLang - the default language
  * @returns a flat object with keys in the format of "name_lang" and values as the translated text
  */
-
 export async function mapTranslations<T extends { lang: string }>(
 	translations: T[],
 	options?: {
@@ -32,35 +31,27 @@ export async function mapTranslations<T extends { lang: string }>(
 	const transAll = accept_language === '*';
 	const acceptLang = accept_language?.split(',')[0]?.trim();
 
-	console.log('brand fields', fields);
-
-	// ------------------------------
-	// 1. if language was provided Accept-Language, return only one translation
-	// ------------------------------
+	// 🟢 1. if Accept-Language provided → return one translation
 	if (!transAll) {
 		const tr = translations.find((t) => t.lang === acceptLang) || translations.find((t) => t.lang === defaultLang);
-
-		console.log('tr11111', tr);
 		if (!tr) return {};
 
 		const obj: Record<string, any> = {};
 		for (const field of fields || Object.keys(tr)) {
 			if (field === 'lang' || field === 'id') continue;
-			obj[field as string] = tr[field as keyof T];
+			const val = tr[field as keyof T];
+			obj[field] = val === null ? '' : val;
 		}
 		return obj;
 	}
 
-	// ------------------------------
-	// 2. if no language was provided Accept-Language, return all translations
-	// ------------------------------
+	// 🟢 2. if no Accept-Language provided → return all translations
 	const obj: Record<string, any> = {};
-
 	for (const tr of translations) {
-		console.log('tr22222', tr);
 		for (const field of fields || Object.keys(tr)) {
 			if (field === 'lang' || field === 'id') continue;
-			obj[`${String(field)}_${tr.lang}`] = tr[field as keyof T];
+			const val = tr[field as keyof T];
+			obj[`${String(field)}_${tr.lang}`] = val === null ? '' : val;
 		}
 	}
 

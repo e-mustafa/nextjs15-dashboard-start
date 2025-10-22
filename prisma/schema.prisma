@@ -23,7 +23,7 @@ model User {
 
   Authenticator Authenticator[]
   createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  updatedAt     DateTime        @default(now()) @updatedAt
   Post          Post[]
 
   @@map("users")
@@ -100,7 +100,7 @@ model Post {
   author    User     @relation(fields: [authorId], references: [id])
   authorId  String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 // products -----------------------------------
@@ -111,9 +111,14 @@ model Product {
   basePrice   Float
   price       Float
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime @default(now()) @updatedAt
 
   images ProductImage[]
+
+  Category   Category? @relation(fields: [categoryId], references: [id])
+  categoryId String?
+  Brand      Brand?    @relation(fields: [brandId], references: [id])
+  brandId    String?
 }
 
 model ProductImage {
@@ -132,6 +137,9 @@ model Brand {
   id           String             @id @default(cuid())
   imageId      String? // مفتاح أجنبي اختياري
   image        Image?             @relation(fields: [imageId], references: [id])
+  updatedAt    DateTime           @default(now()) @updatedAt
+  createdAt    DateTime           @default(now())
+  products     Product[]
   translations BrandTranslation[]
 }
 
@@ -150,16 +158,50 @@ model BrandTranslation {
   @@index([slug])
 }
 
-// image -----------------------------------
+model Category {
+  id          String  @id @default(cuid())
+  imageId     String? // الصورة الرئيسية
+  seo_imageId String? // صورة الـ SEO
+
+  // علاقات الصور
+  image     Image? @relation("CategoryImage", fields: [imageId], references: [id])
+  seo_image Image? @relation("CategorySeoImage", fields: [seo_imageId], references: [id])
+
+  // باقي العلاقات
+  products     Product[] // المنتجات التابعة للتصنيف
+  translations CategoryTranslation[] // الترجمات
+  updatedAt    DateTime              @default(now()) @updatedAt
+  createdAt    DateTime              @default(now())
+}
+
+model CategoryTranslation {
+  id              String   @id @default(cuid())
+  categoryId      String
+  lang            String
+  slug            String
+  name            String
+  description     String
+  seo_title       String?
+  seo_description String?
+  seo_keywords    String?
+  Category        Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, lang], name: "categoryId_lang")
+  @@unique([lang, slug], name: "lang_slug")
+  @@index([name])
+  @@index([slug])
+}
+
 model Image {
   id        String   @id @default(cuid())
-  fileId    String // @unique // من ImageKit
+  fileId    String
   url       String
   createdAt DateTime @default(now())
 
   // العلاقات
-  users  User[]
-  brands Brand[] // نفس الصورة يقدر يستخدمها عدة براندات
-
-  products ProductImage[]
+  users          User[]
+  brands         Brand[]
+  categories     Category[]     @relation("CategoryImage") // 🔗 ترابط الصورة الرئيسية
+  categories_seo Category[]     @relation("CategorySeoImage") // 🔗 ترابط صورة الـ SEO
+  products       ProductImage[]
 }

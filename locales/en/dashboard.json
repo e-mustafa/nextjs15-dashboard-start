@@ -39,7 +39,7 @@
 			"images_library": "Image Library",
 			"images_library_description": "In this library, you can upload, download, delete, and rename images.",
 			"brands": "Brands",
-			"add_brand": "Add Brand",
+			"create_brand": "Add Brand",
 			"edit_brand": "Edit Brand"
 		},
 		"messages": {
@@ -375,7 +375,7 @@
 		"settings": "Settings",
 		"users": "Users",
 		"brands": "Brands",
-		"add_brand": "Add Brand",
+		"create_brand": "Add Brand",
 		"edit_brand": "Edit Brand"
 	},
 	"api": {
