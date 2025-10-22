@@ -11,7 +11,7 @@ import ImageManagerDialog from '../media/image-manager-dialog';
 import { Button } from '../ui-custom/custom-button';
 import { Checkbox } from '../ui/checkbox';
 
-import { DndContext, DragEndEvent, PointerSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, PointerSensor, TouchSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, arrayMove, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { FormDescription, FormField, FormItem, FormLabel, FormMessageTranslated } from '../ui-custom/custom-form';
@@ -66,7 +66,20 @@ export default function ImageUploadField<T extends FieldValues>({
 	}
 
 	// ---------- DnD setup (declare hooks at top-level of component) ----------
-	const sensors = useSensors(useSensor(PointerSensor));
+	// const sensors = useSensors(useSensor(PointerSensor));
+	const sensors = useSensors(
+		useSensor(PointerSensor, {
+			activationConstraint: {
+				distance: 8,
+			},
+		}),
+		useSensor(TouchSensor, {
+			activationConstraint: {
+				delay: 250,
+				tolerance: 5,
+			},
+		})
+	);
 
 	function handleDragEnd(event: DragEndEvent) {
 		const { active, over } = event;
@@ -88,11 +101,9 @@ export default function ImageUploadField<T extends FieldValues>({
 				control={form.control}
 				name={name}
 				render={({ field }) => (
-					console.log('field in upload image field', field),
-					(
-						<FormItem>
-							<FormLabel aria-required={!!required}>{t(label as string)}</FormLabel>
-							{/* <FormControl>
+					<FormItem>
+						<FormLabel aria-required={!!required}>{t(label as string)}</FormLabel>
+						{/* <FormControl>
 							<div className='relative'>
 								<Input
 									placeholder={t(placeholder as string)}
@@ -106,101 +117,103 @@ export default function ImageUploadField<T extends FieldValues>({
 							</div>
 						</FormControl> */}
 
-							<div className='min-h-60 w-full grid gap-3 p-2 sm:p-4 border-2 border-dashed rounded-xl'>
-								{images.length > 0 ? (
-									// only enable DnD when multiple === true and more than 1 image
-									multiple && images.length > 1 ? (
-										<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-											<SortableContext items={images.map((img) => img.fileId)} strategy={rectSortingStrategy}>
-												<div className='grid md:grid-cols-3 lg:grid-cols-7 gap-3 max-h-96 overflow-y-auto'>
-													{images.map((image, index) => (
-														<SortableImageItem
-															key={image.fileId}
-															image={image}
-															selected={images.some((i) => i.fileId === image.fileId)}
-															onRemove={() => handleRemove(image.fileId)}
-														/>
-													))}
+						<div
+							onClick={() => setOpen(true)}
+							className='min-h-60 w-full flex flex-col gap-3 p-2 sm:p-4 border-2 border-dashed rounded-xl'
+						>
+							{images.length > 0 ? (
+								// only enable DnD when multiple === true and more than 1 image
+								multiple && images.length > 1 ? (
+									<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+										<SortableContext items={images.map((img) => img.fileId)} strategy={rectSortingStrategy}>
+											<div className='grid grid-cols-3 lg:grid-cols-6 gap-3 max-h-[400px] overflow-y-auto overflow-x-hidden flex-1'>
+												{images.map((image, index) => (
+													<SortableImageItem
+														key={image.fileId}
+														image={image}
+														selected={images.some((i) => i.fileId === image.fileId)}
+														onRemove={() => handleRemove(image.fileId)}
+													/>
+												))}
 
-													<Button
-														type='button'
-														onClick={() => setOpen(true)}
-														variant='ghost'
-														className='w-full h-auto rounded-lg grid place-items-center p-4 bg-accent/10 text-muted-foreground sm:aspect-square'
-													>
-														<ImagePlusIcon className='size-full text-muted-foreground' />
-													</Button>
-												</div>
-											</SortableContext>
-										</DndContext>
-									) : (
-										// non-dnd fallback (single image or multiple disabled) — show static grid
-										<div className='grid md:grid-cols-3 lg:grid-cols-7 gap-3 max-h-96 overflow-y-auto'>
-											{images.map((image) => (
-												<StaticImageItem
-													key={image.fileId}
-													image={image}
-													selected={images.some((i) => i.fileId === image.fileId)}
-													onRemove={() => handleRemove(image.fileId)}
-												/>
-											))}
-
-											<Button
-												type='button'
-												onClick={() => setOpen(true)}
-												variant='ghost'
-												className='w-full h-auto rounded-lg grid place-items-center p-4 bg-accent/10 text-muted-foreground sm:aspect-square'
-												aria-label={
-													!multiple && images.length
-														? t('forms.placeholders.change_image')
-														: t('forms.placeholders.upload_image')
-												}
-												title={
-													!multiple && images.length
-														? t('forms.placeholders.change_image')
-														: t('forms.placeholders.upload_image')
-												}
-											>
-												{!multiple && images.length ? (
-													<ReplaceIcon className='size-full text-muted-foreground' />
-												) : (
+												<Button
+													type='button'
+													onClick={() => setOpen(true)}
+													variant='ghost'
+													className='w-full h-auto rounded-lg grid place-items-center p-4 bg-accent/10 text-muted-foreground aspect-square'
+												>
 													<ImagePlusIcon className='size-full text-muted-foreground' />
-												)}
-											</Button>
-										</div>
-									)
+												</Button>
+											</div>
+										</SortableContext>
+									</DndContext>
 								) : (
-									<div className='size-full grid place-items-center gap-4 col-span-full'>
+									// non-dnd fallback (single image or multiple disabled) — show static grid
+									<div className='grid grid-cols-3 lg:grid-cols-7 gap-3 max-h-[400px] overflow-y-auto'>
+										{images.map((image) => (
+											<StaticImageItem
+												key={image.fileId}
+												image={image}
+												selected={images.some((i) => i.fileId === image.fileId)}
+												onRemove={() => handleRemove(image.fileId)}
+											/>
+										))}
+
 										<Button
 											type='button'
 											onClick={() => setOpen(true)}
 											variant='ghost'
-											className='bg-accent/10 text-muted-foreground h-16'
+											className='w-full h-auto rounded-lg grid place-items-center p-4 bg-accent/10 text-muted-foreground aspect-square'
+											aria-label={
+												!multiple && images.length
+													? t('forms.placeholders.change_image')
+													: t('forms.placeholders.upload_image')
+											}
+											title={
+												!multiple && images.length
+													? t('forms.placeholders.change_image')
+													: t('forms.placeholders.upload_image')
+											}
 										>
-											<div className='flex items-center gap-2'>
-												<ImageUpIcon className='size-12' />
-												{t('forms.placeholders.upload_general')}
-											</div>
+											{!multiple && images.length ? (
+												<ReplaceIcon className='size-full text-muted-foreground' />
+											) : (
+												<ImagePlusIcon className='size-full text-muted-foreground' />
+											)}
 										</Button>
-
-										<p className='text-xs text-muted-foreground text-center self-end'>
-											{multiple ? t('forms.infos.upload_image_multiple') : t('forms.infos.upload_image_single')}
-										</p>
 									</div>
-								)}
+								)
+							) : (
+								<div className='size-full  flex flex-col justify-center items-center gap-4 col-span-full rounded-xl hover:bg-accent/10 transition-all'>
+									<Button
+										type='button'
+										onClick={() => setOpen(true)}
+										variant='ghost'
+										className='bg-accent/10 text-muted-foreground h-16'
+									>
+										<div className='flex items-center gap-2'>
+											<ImageUpIcon className='size-12' />
+											{t('forms.placeholders.upload_general')}
+										</div>
+									</Button>
 
-								{images.length > 1 && (
-									<span className='text-xs text-muted-foreground self-end flex items-center gap-2'>
-										<InfoIcon className='size-4' />
-										{t('common.messages.drag_to_reorder')}
-									</span>
-								)}
-							</div>
+									<p className='text-xs text-muted-foreground text-center'>
+										{multiple ? t('forms.infos.upload_image_multiple') : t('forms.infos.upload_image_single')}
+									</p>
+								</div>
+							)}
 
-							{description && <FormDescription>{t(description as string)}</FormDescription>}
-							<FormMessageTranslated />
-						</FormItem>
-					)
+							{images.length > 1 && (
+								<span className='text-xs text-muted-foreground flex items-center gap-2'>
+									<InfoIcon className='size-4' />
+									{t('common.messages.drag_to_reorder')}
+								</span>
+							)}
+						</div>
+
+						{description && <FormDescription>{t(description as string)}</FormDescription>}
+						<FormMessageTranslated />
+					</FormItem>
 				)}
 			/>
 
@@ -243,7 +256,7 @@ function SortableImageItem({
 			{...attributes}
 			{...listeners}
 			className={cn(
-				'p-1 relative aspect-square border rounded-lg cursor-grab active:cursor-grabbing first-of-type:col-span-2 first-of-type:row-span-2'
+				'touch-none p-1 relative aspect-square border rounded-lg cursor-grab active:cursor-grabbing first-of-type:col-span-2 first-of-type:row-span-2'
 			)}
 			aria-label={t('common.messages.drag_to_reorder')}
 		>
@@ -290,7 +303,7 @@ function StaticImageItem({
 				width={200}
 				height={200}
 				alt={t('forms.placeholders.upload_image')}
-				className='rounded-lg aspect-square size-full object-cover'
+				className='rounded-lg aspect-square w-full object-cover'
 			/>
 
 			<div className='absolute top-1 end-1 p-2 flex gap-1'>

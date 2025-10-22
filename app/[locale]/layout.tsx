@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Cairo, Roboto } from 'next/font/google';
-import '../globals.css';
+import '@/styles/globals.css';
 import '@/lib/setup/init-server-logger';
 
 // import { PerformanceDashboard } from '@/components/dev/performance-dashboard';

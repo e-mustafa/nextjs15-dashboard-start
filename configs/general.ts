@@ -86,3 +86,10 @@ export const appConfig = {
 		windowMs: 60000, // 1 minute
 	},
 };
+
+
+export const imagesPlaceholder = {
+	imgMedium: '/assets/images/placeholders/placeholder-612x612.webp',
+	// blur: 10,
+	// base64: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=',
+};

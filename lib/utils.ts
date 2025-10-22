@@ -17,13 +17,37 @@ export function cn(...inputs: ClassValue[]) {
  * @param {TFunction} t - The translation function.
  * @returns {string} - The rendered error message.
  */
+// export function renderErrorMessage(message: string, t: TFunction): string {
+// 	console.log('message', message);
+// 	try {
+// 		if (message.includes('|')) {
+// 			const [key, rawJson] = message.split('|');
+// 			const values = JSON.parse(rawJson);
+// 			if (values.field_name) values.field_name = t(values.field_name);
+// 			// return t(key, values);
+// 			return t(key, values).toString();
+// 		}
+
+// 		return t(message);
+// 	} catch (e) {
+// 		console.warn('Invalid error message:', message);
+// 		return message;
+// 	}
+// }
+
 export function renderErrorMessage(message: string, t: TFunction): string {
 	try {
 		if (message.includes('|')) {
 			const [key, rawJson] = message.split('|');
 			const values = JSON.parse(rawJson);
-			if (values.field_name) values.field_name = t(values.field_name);
-			// return t(key, values);
+
+			// Translate any value that looks like a translation key
+			for (const [k, v] of Object.entries(values)) {
+				// if (typeof v === 'string' && v.startsWith('common.')) {
+				values[k] = t(v as string);
+				// }
+			}
+
 			return t(key, values).toString();
 		}
 

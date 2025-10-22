@@ -3,9 +3,9 @@
 /* @import 'tailwindcss-rtl'; */
 
 /* data-table style  */
-@import '../styles/data-table.css';
+@import './data-table.css';
 /* inputs styles  */
-@import '../styles/inputs.css';
+@import './inputs.css';
 
 /* @custom-variant dark (&:is(.dark *)); */
 @custom-variant dark (&:where(.dark, .dark *));

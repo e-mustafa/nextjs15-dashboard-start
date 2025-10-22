@@ -18,51 +18,51 @@ import SubmitButton from './submit-button';
 
 export type TBrandFormValues = z.infer<typeof formSchema_brand> & { id?: string };
 
-export const formSectionSEO: SectionConfig = {
-	title: 'forms.sections.seo_details',
-	fields: [
-		{
-			type: 'text',
-			name: 'seo_title_ar',
-			label: 'forms.labels.seo_title_ar',
-			placeholder: 'forms.placeholders.seo_title_ar',
-		},
-		{
-			type: 'text',
-			name: 'seo_title_en',
-			label: 'forms.labels.seo_title_en',
-			placeholder: 'forms.placeholders.seo_title_en',
-		},
-		{
-			type: 'text',
-			name: 'seo_description_ar',
-			label: 'forms.labels.seo_description_ar',
-			placeholder: 'forms.placeholders.seo_description_ar',
-		},
-		{
-			type: 'text',
-			name: 'seo_description_en',
-			label: 'forms.labels.seo_description_en',
-			placeholder: 'forms.placeholders.seo_description_en',
-		},
-		{ type: 'text', name: 'seo_link', label: 'forms.labels.seo_link', placeholder: 'forms.placeholders.seo_link' },
-		{
-			type: 'text',
-			name: 'seo_keywords',
-			label: 'forms.labels.seo_keywords',
-			placeholder: 'forms.placeholders.seo_keywords',
-		},
-		{
-			type: 'seoMockupCard',
-			name: 'seo_info',
-			parentClass: 'sm:col-span-full',
-		},
-	],
-};
+// export const formSectionSEO: SectionConfig = {
+// 	title: 'forms.sections.seo_details',
+// 	fields: [
+// 		{
+// 			type: 'text',
+// 			name: 'seo_title_ar',
+// 			label: 'forms.labels.seo_title_ar',
+// 			placeholder: 'forms.placeholders.seo_title_ar',
+// 		},
+// 		{
+// 			type: 'text',
+// 			name: 'seo_title_en',
+// 			label: 'forms.labels.seo_title_en',
+// 			placeholder: 'forms.placeholders.seo_title_en',
+// 		},
+// 		{
+// 			type: 'text',
+// 			name: 'seo_description_ar',
+// 			label: 'forms.labels.seo_description_ar',
+// 			placeholder: 'forms.placeholders.seo_description_ar',
+// 		},
+// 		{
+// 			type: 'text',
+// 			name: 'seo_description_en',
+// 			label: 'forms.labels.seo_description_en',
+// 			placeholder: 'forms.placeholders.seo_description_en',
+// 		},
+// 		{ type: 'text', name: 'seo_link', label: 'forms.labels.seo_link', placeholder: 'forms.placeholders.seo_link' },
+// 		{
+// 			type: 'text',
+// 			name: 'seo_keywords',
+// 			label: 'forms.labels.seo_keywords',
+// 			placeholder: 'forms.placeholders.seo_keywords',
+// 		},
+// 		{
+// 			type: 'seoMockupCard',
+// 			name: 'seo_info',
+// 			parentClass: 'sm:col-span-full',
+// 		},
+// 	],
+// };
 
 export const formSections_brand: SectionConfig<TBrandFormValues>[] = [
 	{
-		title: 'forms.sections.general_details',
+		title: 'forms.sections.brand_info',
 		fields: [
 			{
 				type: 'text',

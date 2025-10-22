@@ -1,4 +1,3 @@
-
 import initTranslations from '@/app/i18n';
 import BreadcrumbDashboard from '@/components/Dashboard/breadcrumb-dashboard';
 import { TBrandFormValues } from '@/components/Dashboard/forms/brand-form';
@@ -30,7 +29,7 @@ export default async function EditBrandsPage({ params }: TDRouteProps) {
 
 	return (
 		<div className='page-component flex-col'>
-			<BreadcrumbDashboard lastBath={t('breadcrumbs.edit_brand')} />
+			<BreadcrumbDashboard lastPath={t('breadcrumbs.edit_brand')} />
 			<div className='flex gap-2 items-center'>
 				<Button asChild variant='ghost' size='icon'>
 					<Link href={`/${url_segment}`}>

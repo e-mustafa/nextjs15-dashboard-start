@@ -34,9 +34,9 @@ export default async function BrandsPage({ params }: TLayoutProps) {
 				</h1>
 
 				<Button asChild className='ms-auto'>
-					<Link href='/dashboard/brands/add-brand'>
+					<Link href='/dashboard/brands/create'>
 						<FilePlusIcon />
-						{t('common.sections.add_brand')}
+						{t('common.sections.create_brand')}
 					</Link>
 				</Button>
 			</div>

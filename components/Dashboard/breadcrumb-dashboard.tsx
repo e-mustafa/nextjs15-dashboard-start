@@ -16,7 +16,7 @@ import { usePathname } from 'next/navigation';
 import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 
-export default function BreadcrumbDashboard({ lastBath }: { lastBath?: string }) {
+export default function BreadcrumbDashboard({ lastPath }: { lastPath?: string }) {
 	const pathname = usePathname();
 	const { t, i18n } = useTranslation();
 	const segments = pathname
@@ -47,7 +47,7 @@ export default function BreadcrumbDashboard({ lastBath }: { lastBath?: string })
 							<BreadcrumbSeparator className='rtl:rotate-180' />
 						</Fragment>
 					) : (
-						<BreadcrumbPage key={path}>{lastBath || label}</BreadcrumbPage>
+						<BreadcrumbPage key={path}>{lastPath || label}</BreadcrumbPage>
 					);
 				})}
 			</BreadcrumbList>

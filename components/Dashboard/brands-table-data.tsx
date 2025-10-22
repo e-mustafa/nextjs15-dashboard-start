@@ -1,6 +1,6 @@
 'use client';
 import { url_segment } from '@/app/[locale]/dashboard/(products-management)/brands/page';
-import { TLocalesData } from '@/configs/general';
+import { imagesPlaceholder, TLocalesData } from '@/configs/general';
 import { useServerResponse } from '@/hooks/use-server-response';
 import { getDataInPage } from '@/lib/utils.server/api.server';
 import { deleteBrandAction, deleteManyBrandsAction } from '@/server/actions/brand-actions';
@@ -97,7 +97,7 @@ export default function BrandDataTable({ result, locale }: { result: ActionResul
 			header: 'columns.image',
 			cell: ({ row }) => (
 				<Image
-					src={(row.original.image as TImage)?.url ?? '/assets/images/placeholders/placeholder-612x612.webp'}
+					src={(row.original.image as TImage)?.url ?? imagesPlaceholder.imgMedium}
 					width={40}
 					height={40}
 					alt={row.original.name}

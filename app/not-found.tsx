@@ -2,7 +2,7 @@ import { TLocalesData } from '@/configs/general';
 import { ThemeProvider } from '@/contexts/theme-provider';
 import TranslationsProvider from '@/contexts/translations-provider';
 import Link from 'next/link';
-import './globals.css';
+import '@/styles/globals.css';
 import initTranslations from './i18n';
 
 const i18nNamespaces = ['general'];

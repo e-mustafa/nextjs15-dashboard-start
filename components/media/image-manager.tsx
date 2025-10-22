@@ -222,7 +222,7 @@ export default function ImageManager({ multiple = true, folder, onChange, value 
 	const filteredFiles = useMemo(() => files, [files]);
 
 	return (
-		<div className='space-y-4 min-h-full'>
+		<div className='space-y-4 min-h-full overflow-y-auto'>
 			{/* Toolbar */}
 			<div className='flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between'>
 				<div className='flex items-center gap-2'>
@@ -232,7 +232,7 @@ export default function ImageManager({ multiple = true, folder, onChange, value 
 						onChange={(e) => setSearch(e.target.value)}
 						className='w-64'
 					/>
-					<Button type='button' variant='outline' onClick={() => fetchFiles({ reset: true })} disabled={loading}>
+					<Button type='button' variant='outline' onClick={() => fetchFiles({ reset: true })} disabled={loading} className='flex-1'>
 						{loading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />} {t('common.actions.refresh')}
 					</Button>
 				</div>
@@ -317,7 +317,7 @@ export default function ImageManager({ multiple = true, folder, onChange, value 
 				{filteredFiles.length === 0 && !loading && (
 					<p className='text-muted-foreground text-sm'>{t('common.messages.no_images')}</p>
 				)}
-				<div className='grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-3'>
+				<div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3'>
 					{/* loading placeholder */}
 					{filteredFiles.length === 0 &&
 						loading &&
@@ -456,8 +456,8 @@ function ImageCard({
 	return (
 		<div
 			className={cn(
-				'relative overflow-hidden p-1 aspect-square ring-2 ring-muted rounded-lg',
-				active && 'ring-2 ring-primary'
+				'relative overflow-hidden p-1 border-2 border-transparent ring-2xxx ring-mutedxxx rounded-lg',
+				active && 'border-primary ring-2xxx ring-primaryxxx'
 			)}
 			onClick={onClick}
 		>
@@ -466,7 +466,7 @@ function ImageCard({
 				alt={img.name || t('forms.placeholders.select_image')}
 				width={200}
 				height={200}
-				className='size-full object-cover rounded aspect-square'
+				className='size-full object-cover rounded'
 				loading='lazy'
 			/>
 			<div className='absolute bottom-2 start-2 end-2 bg-background/80 rounded p-1 text-xs flex items-center justify-between gap-1'>

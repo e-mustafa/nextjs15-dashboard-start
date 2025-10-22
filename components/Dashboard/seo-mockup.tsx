@@ -1,4 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
+import { config_env } from '@/configs/general';
 import { seoData, SEODataKey } from '@/configs/SEOData';
 import { SearchIcon } from 'lucide-react';
 import Image from 'next/image';
@@ -9,26 +10,29 @@ export interface SEOMockupCardData {
 	ar: {
 		title?: string;
 		description?: string;
-		link?: string;
+		slug?: string;
 	};
 	en: {
 		title?: string;
 		description?: string;
-		link?: string;
+		slug?: string;
 	};
 }
 
 export default function SEOMockupCard({ data }: { data?: SEOMockupCardData }) {
-	const { i18n:{ language } } = useTranslation();
+	const { t, i18n: { language } } = useTranslation();
 
 	const infos = data && data[language as SEODataKey];
 
 	return (
-		<div className='w-full mx-auto space-y-4 bg-zinc-900 p-4 rounded-2xl'>
+		<div className='w-full mx-auto space-y-4 bg-accent/20 p-4 rounded-2xl'>
 			{/* Search bar */}
 			<div className='relative flex items-center gap-2 bg-background/50 rounded-2xl px-4 py-2 shadow-md'>
-				<SearchIcon className='w-5 h-5 text-zinc-400' />
-				<Skeleton className='h-4 w-full bg-zinc-700' />
+				<SearchIcon className='w-5 h-5 text-muted-foreground' />
+				{/* <Skeleton className='h-4 w-full bg-zinc-700' /> */}
+				<span dir='ltr' className='grow flex items-center gap-0 text-foreground text-sm'>
+					{`${config_env.domain || 'www.example.com'}/.../${infos?.slug || ''}`}
+				</span>
 				<span className='text-white font-bold text-lg'>
 					<svg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'>
 						<path
@@ -65,20 +69,22 @@ export default function SEOMockupCard({ data }: { data?: SEOMockupCardData }) {
 					<div className='flex items-center gap-2 mb-4'>
 						<Image src='/assets/images/brand/icon.png' alt='website logo' width={46} height={46} priority />
 						<div className='grid gap-1.5'>
-							<p className='text-sm text-zinc-300'>{seoData[language as SEODataKey]?.title}</p>
-							<a href='#' className='text-sm text-zinc-400 hover:underline'>
-								{infos?.link || 'www.example.com'}
+							<p className='text-sm text-foreground'>{seoData[language as SEODataKey]?.title}</p>
+							<a href='#' className='text-sm text-foreground hover:underline'>
+								{config_env.domain || 'www.example.com'}
 							</a>
 						</div>
 					</div>
-					<h2 className='text-blue-400 font-medium hover:underline cursor-pointer'>{infos?.title || 'عنوان SEO'}</h2>
+					<h2 className='text-blue-400 font-medium hover:underline cursor-pointer'>
+						{infos?.title || t('forms.labels.seo_title')}
+					</h2>
 					{infos?.description ? (
-						<p className='text-sm text-zinc-300'>{infos?.description}</p>
+						<p className='text-sm text-foreground'>{infos?.description}</p>
 					) : (
 						<div className='space-y-1'>
-							<Skeleton className='h-4 w-full bg-zinc-700' />
-							<Skeleton className='h-4 w-3/4 bg-zinc-700' />
-							<Skeleton className='h-4 w-1/2 bg-zinc-700' />
+							<Skeleton className='h-4 w-full bg-muted-foreground' />
+							<Skeleton className='h-4 w-3/4 bg-muted-foreground' />
+							<Skeleton className='h-4 w-1/2 bg-muted-foreground' />
 						</div>
 					)}
 				</CardContent>

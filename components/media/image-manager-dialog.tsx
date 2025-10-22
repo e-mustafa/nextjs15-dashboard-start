@@ -39,7 +39,11 @@ export default function ImageManagerDialog({ open, setOpen, ...rest }: props) {
 				<DrawerContent className='px-4'>
 					<ImageManager onDoubleClick={() => setOpen?.(false)} {...rest} />
 					<DrawerFooter>
-						<DrawerClose>{t('common.actions.close')}</DrawerClose>
+						<DrawerClose asChild>
+							<Button type='button' variant='outline' onClick={() => setOpen?.(false)}>
+								{t('common.actions.close')}
+							</Button>
+						</DrawerClose>
 					</DrawerFooter>
 				</DrawerContent>
 			</Drawer>
@@ -55,7 +59,7 @@ export default function ImageManagerDialog({ open, setOpen, ...rest }: props) {
 				</ModalHeader>
 				<ImageManager onDoubleClick={() => setOpen?.(false)} {...rest} />
 				<ModalFooter className='py-2'>
-					<Button type='button' onClick={() => setOpen?.(false)}>
+					<Button type='button' variant='outline' onClick={() => setOpen?.(false)}>
 						{t('common.actions.close')}
 					</Button>
 				</ModalFooter>
