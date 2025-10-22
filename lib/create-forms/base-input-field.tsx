@@ -1,4 +1,4 @@
-import { JSX } from 'react';
+import { JSX, useEffect } from 'react';
 import { FieldValues, Path } from 'react-hook-form';
 import { FieldTypeMap, RenderFieldProps } from './types-create-forms';
 
@@ -23,6 +23,15 @@ export default function BaseInputField<T extends FieldValues, K extends keyof Fi
 	form,
 }: RenderFieldProps<T, K>): JSX.Element {
 	const { t } = useTranslation();
+
+	useEffect(() => {
+		if (!fieldConfig.referenceInput) return;
+		const referenceData = form.watch(fieldConfig.referenceInput as Path<T>)?.trim();
+
+		if (!referenceData) return;
+		form.setValue(fieldConfig.name as Path<T>, referenceData, { shouldValidate: true });
+		
+	}, [form.watch(fieldConfig.referenceInput as Path<T>)]);
 
 	return (
 		<FormField
@@ -53,6 +62,7 @@ export default function BaseInputField<T extends FieldValues, K extends keyof Fi
 								placeholder={t(fieldConfig.placeholder as string)}
 								className={cn(fieldConfig.IconStart && 'ps-10', fieldConfig.IconEnd && 'pe-10')}
 								{...field}
+								value={field.value || ''}
 								onChange={fieldConfig.onChange ? (event) => fieldConfig.onChange?.(event, form) : field.onChange}
 							/>
 						</FormControl>

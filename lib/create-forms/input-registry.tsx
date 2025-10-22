@@ -1,13 +1,16 @@
 import SEOMockupCard from '@/components/Dashboard/seo-mockup';
+import { ComboboxInputField } from '@/components/inputs/combobox-input-field';
 import { FileInputField } from '@/components/inputs/file-input-field';
 import ImageUploadField from '@/components/inputs/image-upload-field';
 import PasswordInput from '@/components/inputs/password-input';
 import RichTextField from '@/components/inputs/rich-text-field';
 import SlugInputField from '@/components/inputs/slug-input-field';
+// import TextareaInputField from '@/components/inputs/textarea-input-field';
 import { JSX } from 'react';
 import { FieldValues, Path } from 'react-hook-form';
 import BaseInputField from './base-input-field';
 import { FieldTypeMap, RenderFieldProps } from './types-create-forms';
+import TextareaInputField from '@/components/inputs/textarea-input-field';
 
 /**
  * A registry mapping input field types to their corresponding render functions.
@@ -32,7 +35,7 @@ export const inputRegistry: InputRegistry = {
 	// ),
 
 	password: ({ fieldConfig, form }) => <PasswordInput fieldConfig={fieldConfig} form={form} />,
-	// password: ({ fieldConfig, form }) => <PasswordInput fieldConfig={fieldConfig} form={form} />,
+	textarea: ({ fieldConfig, form }) => <TextareaInputField fieldConfig={fieldConfig} form={form} />,
 
 	// uploadFile: <T extends FieldValues>({ fieldConfig, form }: RenderFieldProps<T, 'uploadFile'>) => (
 	// 	<FileInputField fieldConfig={fieldConfig} form={form} />
@@ -46,17 +49,19 @@ export const inputRegistry: InputRegistry = {
 
 	richtext: ({ fieldConfig, form }) => <RichTextField fieldConfig={fieldConfig} form={form} />,
 
+	combobox: ({ fieldConfig, form }) => <ComboboxInputField fieldConfig={fieldConfig} form={form} />,
+
 	seoMockupCard: <T extends FieldValues>({ form }: RenderFieldProps<T, 'seoMockupCard'>) => {
 		const data = {
 			ar: {
 				title: form.watch('seo_title_ar' as Path<T>),
 				description: form.watch('seo_description_ar' as Path<T>),
-				link: form.watch('seo_link' as Path<T>),
+				slug: form.watch('slug_ar' as Path<T>),
 			},
 			en: {
 				title: form.watch('seo_title_en' as Path<T>),
 				description: form.watch('seo_description_en' as Path<T>),
-				link: form.watch('seo_link' as Path<T>),
+				slug: form.watch('slug_en' as Path<T>),
 			},
 		};
 		return <SEOMockupCard data={data} />;

@@ -1,9 +1,11 @@
+import { ComboboxOption, PaginatedResponse } from '@/components/ui-custom/reuseable-combobox';
 import { ChangeEvent, ElementType, ReactNode } from 'react';
 import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
 
 export type FieldTypeMap = {
 	// Base Field Types
 	text: string;
+	textarea: string;
 	number: number;
 	email: string;
 	tel: string;
@@ -14,13 +16,13 @@ export type FieldTypeMap = {
 	// Special Field Types
 	password: string;
 	richtext: string;
-	combobox: string | number;
+	combobox: string | string[] | number;
 	otp: string;
 	uploadFile: File | File[] | null;
 	slug: string;
 
 	imageManager: File | File[] | null;
-	imageUpload : string | string[] | null;
+	imageUpload: string | string[] | null;
 	seoMockupCard: never;
 };
 
@@ -37,6 +39,8 @@ export interface FieldConfig<T extends FieldValues = FieldValues, K extends Fiel
 	IconEnd?: ElementType;
 	InfoIcon?: ElementType;
 	infoContent?: string | ReactNode;
+	// for textarea
+	rows?: number;
 
 	parentClass?: string;
 	onChange?: (event: ChangeEvent<HTMLInputElement>, form: UseFormReturn<T>) => void;
@@ -55,6 +59,14 @@ export interface FieldConfig<T extends FieldValues = FieldValues, K extends Fiel
 	// only for special field types that need additional data
 	options?: { label: string; value: string }[];
 	fetchItems?: () => Promise<{ label: string; value: string }[]>;
+
+	// combobox component
+	fetchOptions?: (query: string, page?: number) => Promise<PaginatedResponse<T extends ComboboxOption ? T : ComboboxOption>>;
+	optionUrl?: string;
+	// getOptionFn;
+
+	searchPlaceholder?: string;
+	emptyMessage?: string | ReactNode;
 }
 
 export interface RenderFieldProps<T extends FieldValues, K extends keyof FieldTypeMap> {
