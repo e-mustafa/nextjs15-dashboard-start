@@ -1,0 +1,83 @@
+export const formSectionSEO = {
+	title: 'forms.sections.seo_info',
+	fields: [
+		{
+			type: 'text',
+			name: 'seoTitle_ar',
+			label: 'forms.labels.seo_title_ar',
+			placeholder: 'forms.placeholders.seo_title_ar',
+		},
+		{
+			type: 'text',
+			name: 'seoTitle_en',
+			label: 'forms.labels.seo_title_en',
+			placeholder: 'forms.placeholders.seo_title_en',
+		},
+		{
+			type: 'textarea',
+			name: 'seoDescription_ar',
+			label: 'forms.labels.seo_description_ar',
+			placeholder: 'forms.placeholders.seo_description_ar',
+			rows: 6,
+		},
+		{
+			type: 'textarea',
+			name: 'seoDescription_en',
+			label: 'forms.labels.seo_description_en',
+			placeholder: 'forms.placeholders.seo_description_en',
+			rows: 6,
+		},
+		{
+			type: 'text',
+			name: 'slug_ar',
+			label: 'forms.labels.slug_ar',
+			placeholder: 'forms.placeholders.slug_ar',
+			referenceInput: 'name_ar',
+		},
+		{
+			type: 'text',
+			name: 'slug_en',
+			label: 'forms.labels.slug_en',
+			placeholder: 'forms.placeholders.slug_en',
+			referenceInput: 'name_en',
+		},
+		{
+			type: 'text',
+			name: 'seoKeywords_ar',
+			label: 'forms.labels.seo_keywords_ar',
+			placeholder: 'forms.placeholders.seo_keywords_ar',
+		},
+		{
+			type: 'text',
+			name: 'seoKeywords_en',
+			label: 'forms.labels.seo_keywords_en',
+			placeholder: 'forms.placeholders.seo_keywords_en',
+		},
+		{
+			type: 'imageUpload',
+			name: 'seoImage',
+			label: 'forms.labels.seo_image',
+			placeholder: 'forms.placeholders.seo_image',
+			description: 'forms.descriptions.seo_image',
+			parentClass: 'col-span-full',
+			folder: 'seo_images',
+			// file: {
+			// 	// accept: 'image/*',
+			// 	// multiple: false,
+			// },
+			// multiple: true,
+		},
+		{
+			type: 'seoMockupCard',
+			name: 'seo_info',
+			// parentClass: 'sm:col-span-full',
+			parentClass: 'col-span-full xl:col-span-1',
+		},
+		{
+			type: 'shardPostMockupCard',
+			name: 'seo_info',
+			// parentClass: 'sm:col-span-full',
+			parentClass: 'col-span-full xl:col-span-1',
+		},
+	],
+};

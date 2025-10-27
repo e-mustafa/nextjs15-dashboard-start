@@ -5,19 +5,22 @@ import { deleteBrand, getBrand, updateBrand } from '@/server/services/brand-serv
 // GET /api/brands/:id
 
 async function getBrandAction(_req: Request, ctx?: HandlerContext) {
-	if (!ctx?.params?.id) throw new AppError('api.errors.invalid_id', 400);
-	return getBrand(ctx.params.id);
+	const { id } = (await ctx?.params) ?? {};
+	if (!id) throw new AppError('api.errors.invalid_id', 400);
+	return getBrand(id);
 }
 
 async function updateBrandAction(req: Request, ctx?: HandlerContext) {
-	if (!ctx?.params?.id) throw new AppError('api.errors.invalid_id', 400);
+	const { id } = (await ctx?.params) ?? {};
+	if (!id) throw new AppError('api.errors.invalid_id', 400);
 	const body = await req.json();
-	return updateBrand(ctx.params.id, body);
+	return updateBrand(id, body);
 }
 
 async function deleteBrandAction(_req: Request, ctx?: HandlerContext) {
-	if (!ctx?.params?.id) throw new AppError('api.errors.invalid_id', 400);
-	return deleteBrand(ctx.params.id);
+	const { id } = (await ctx?.params) ?? {};
+	if (!id) throw new AppError('api.errors.invalid_id', 400);
+	return deleteBrand(id);
 }
 
 export const { GET, PUT, DELETE } = errorHandler({

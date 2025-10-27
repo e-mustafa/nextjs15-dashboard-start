@@ -13,6 +13,12 @@ export type FieldTypeMap = {
 	date: string;
 	time: string;
 
+	empty: string;
+
+	switch: boolean;
+	checkbox: boolean;
+	radio: boolean;
+
 	// Special Field Types
 	password: string;
 	richtext: string;
@@ -24,6 +30,7 @@ export type FieldTypeMap = {
 	imageManager: File | File[] | null;
 	imageUpload: string | string[] | null;
 	seoMockupCard: never;
+	shardPostMockupCard: never;
 };
 
 export type FieldType = keyof FieldTypeMap;
@@ -45,6 +52,12 @@ export interface FieldConfig<T extends FieldValues = FieldValues, K extends Fiel
 	parentClass?: string;
 	onChange?: (event: ChangeEvent<HTMLInputElement>, form: UseFormReturn<T>) => void;
 
+	// for switch
+	variants?: 'input' | 'switch';
+
+	// for checkbox
+	items?: { name: string; label: string; checked: boolean }[];
+
 	locale?: string;
 	referenceInput?: string;
 
@@ -61,7 +74,10 @@ export interface FieldConfig<T extends FieldValues = FieldValues, K extends Fiel
 	fetchItems?: () => Promise<{ label: string; value: string }[]>;
 
 	// combobox component
-	fetchOptions?: (query: string, page?: number) => Promise<PaginatedResponse<T extends ComboboxOption ? T : ComboboxOption>>;
+	fetchOptions?: (
+		query: string,
+		page?: number
+	) => Promise<PaginatedResponse<T extends ComboboxOption ? T : ComboboxOption>>;
 	optionUrl?: string;
 	// getOptionFn;
 

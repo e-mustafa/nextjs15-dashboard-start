@@ -186,7 +186,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 	}, [allOptions, searchQuery, fetchOptions]);
 
 	const hasImage = useMemo(() => {
-		return allOptions.some((opt) => opt.image);
+		return allOptions.some((opt) => opt.images?.length > 0);
 	}, [allOptions]);
 
 	useEffect(() => {
@@ -348,7 +348,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 															src={
 																typeof option.image === 'string'
 																	? option.image
-																	: option.image?.url || imagesPlaceholder.imgMedium
+																	: option.images[0]?.url || imagesPlaceholder.imgMedium
 															}
 															alt={option.name}
 															width={40}

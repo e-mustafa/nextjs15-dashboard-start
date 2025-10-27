@@ -1,5 +1,8 @@
 // types/api.ts
 
+// image object in api
+export type TImage = { id?: string; url: string; fileId: string; createdAt?: Date } | null;
+
 /**
  * Standard API Response Structure
  */

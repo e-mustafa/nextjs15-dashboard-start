@@ -1,5 +1,6 @@
 import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
+	// reactCompiler: true,
 	// Experimental features
 	//    reactStrictMode: true,
 	//    swcMinify: true,
@@ -27,8 +28,7 @@ const nextConfig: NextConfig = {
 			//    port: '',
 			//    pathname: '/**',
 			// },
-      ],
-      
+		],
 	},
 };
 

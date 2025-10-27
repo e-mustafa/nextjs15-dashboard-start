@@ -195,7 +195,8 @@
 			"image_single": "صورة",
 			"image_multiple": "صور",
 			"file_single": "ملف",
-			"file_multiple": "ملفات"
+			"file_multiple": "ملفات",
+			"is_active": "حالة التفعيل"
 		},
 		"placeholders": {
 			"name": "اكتب الاسم",
@@ -255,7 +256,8 @@
 			"upload_general": "رفع صور او ملفات",
 			"change_image": "تغير الصورة",
 			"choose_categorys_products": "حدد المنتجات تحت هذا التصنيف",
-			"choose_items": "حدد العناصر..."
+			"choose_items": "حدد العناصر...",
+			"is_active": "تفعيل ليظهر في الموقع"
 		},
 		"validation": {
 			"required": "هذا الحقل مطلوب",
@@ -371,7 +373,8 @@
 		"created_at": "تاريخ الإنشاء",
 		"updated_at": "تاريخ التحديث",
 		"description": "الوصف",
-		"image": "الصورة"
+		"image": "الصورة",
+		"actions": "العمليات"
 	},
 	"charts": {
 		"sales_over_time": "المبيعات مع مرور الوقت",
@@ -425,7 +428,8 @@
 			"update": "تم التحديث بنجاح",
 			"delete": "تم الحذف بنجاح",
 			"success": "تمت العملية بنجاح",
-			"image_deleted": "تم حذف الصورة بنجاح"
+			"image_deleted": "تم حذف الصورة بنجاح",
+			"update_status": "تم تحديث الحالة بنجاح"
 		},
 		"errors": {
 			"create": "فشل الاضافة",
@@ -446,7 +450,8 @@
 			"slug_exists": "المعرف النصي (slug) موجود بالفعل",
 			"image_in_use": "الصورة مستخدمة بالفعل، لا يمكن حذفها",
 			"failed_delete_image": "فشل حذف الصورة",
-			"duplicate_entry": "قيمة مكررة في قاعدة البيانات في الحقل {{field}}"
+			"duplicate_entry": "قيمة مكررة في قاعدة البيانات في الحقل {{field}}",
+			"update_status": "فشل تحديث الحالة"
 		},
 		"brands": {
 			"success": {

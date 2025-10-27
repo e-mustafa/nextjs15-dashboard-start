@@ -7,27 +7,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// user -----------------------------------
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime? @map("email_verified")
-  password      String?   @db.Text
-  accounts      Account[]
-  sessions      Session[]
-  role          UserRole  @default(user)
-
-  imageId String? // مفتاح أجنبي اختياري
-  image   Image?  @relation(fields: [imageId], references: [id])
-
-  Authenticator Authenticator[]
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @default(now()) @updatedAt
-  Post          Post[]
-
-  @@map("users")
-}
+/////////////////////////
+// ENUMS
+/////////////////////////
 
 enum UserRole {
   user
@@ -35,12 +17,51 @@ enum UserRole {
   moderator
 }
 
+enum AttributeType {
+  COLOR
+  SIZE
+  MATERIAL
+  STYLE
+  CUSTOM
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+  BUY_X_GET_Y
+  BUNDLE
+}
+
+/////////////////////////
+// USERS & AUTH
+/////////////////////////
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime? @map("email_verified")
+  password      String?   @db.Text
+  imageId       String?
+  image         Image?    @relation("UserImage", fields: [imageId], references: [id], onDelete: SetNull)
+  role          UserRole  @default(user)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts       Account[]
+  sessions       Session[]
+  posts          Post[]
+  authenticators Authenticator[]
+
+  @@index([email])
+}
+
 model Account {
   id                String  @id @default(cuid())
-  userId            String  @map("user_id")
+  userId            String
   type              String
   provider          String
-  providerAccountId String  @map("provider_account_id")
+  providerAccountId String
   refresh_token     String? @db.Text
   access_token      String? @db.Text
   expires_at        Int?
@@ -48,33 +69,19 @@ model Account {
   scope             String?
   id_token          String? @db.Text
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
-  @@map("accounts")
 }
 
 model Session {
   id           String   @id @default(cuid())
-  sessionToken String   @unique @map("session_token")
-  userId       String   @map("user_id")
+  sessionToken String   @unique
+  userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("sessions")
 }
 
-model VerificationToken {
-  identifier String
-  token      String
-  expires    DateTime
-
-  @@unique([identifier, token])
-  @@map("verification_tokens")
-}
-
-// Optional for WebAuthn support
 model Authenticator {
   credentialID         String  @unique
   userId               String
@@ -84,124 +91,479 @@ model Authenticator {
   credentialDeviceType String
   credentialBackedUp   Boolean
   transports           String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, credentialID])
 }
 
-// Dashboard schema -------------------------------------------------
-// post -----------------------------------
+/////////////////////////
+// POSTS (simple CMS)
+/////////////////////////
+
 model Post {
   id        String   @id @default(cuid())
   title     String
   content   String?
   published Boolean  @default(false)
-  author    User     @relation(fields: [authorId], references: [id])
   authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  updatedAt DateTime @updatedAt
 }
 
-// products -----------------------------------
-model Product {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  basePrice   Float
-  price       Float
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
-
-  images ProductImage[]
-
-  Category   Category? @relation(fields: [categoryId], references: [id])
-  categoryId String?
-  Brand      Brand?    @relation(fields: [brandId], references: [id])
-  brandId    String?
-}
-
-model ProductImage {
-  id        String @id @default(cuid())
-  productId String
-  imageId   String
-
-  product Product @relation(fields: [productId], references: [id])
-  image   Image   @relation(fields: [imageId], references: [id])
-
-  @@unique([productId, imageId]) // كل صورة مرة واحدة فقط لكل منتج
-}
-
-// brand -----------------------------------
-model Brand {
-  id           String             @id @default(cuid())
-  imageId      String? // مفتاح أجنبي اختياري
-  image        Image?             @relation(fields: [imageId], references: [id])
-  updatedAt    DateTime           @default(now()) @updatedAt
-  createdAt    DateTime           @default(now())
-  products     Product[]
-  translations BrandTranslation[]
-}
-
-model BrandTranslation {
-  id          String @id @default(cuid())
-  brandId     String
-  lang        String
-  slug        String
-  name        String
-  description String
-  Brand       Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
-
-  @@unique([brandId, lang], name: "brandId_lang") // ✅ أضف الاسم هنا
-  @@unique([lang, slug], name: "lang_slug")
-  @@index([name])
-  @@index([slug])
-}
-
-model Category {
-  id          String  @id @default(cuid())
-  imageId     String? // الصورة الرئيسية
-  seo_imageId String? // صورة الـ SEO
-
-  // علاقات الصور
-  image     Image? @relation("CategoryImage", fields: [imageId], references: [id])
-  seo_image Image? @relation("CategorySeoImage", fields: [seo_imageId], references: [id])
-
-  // باقي العلاقات
-  products     Product[] // المنتجات التابعة للتصنيف
-  translations CategoryTranslation[] // الترجمات
-  updatedAt    DateTime              @default(now()) @updatedAt
-  createdAt    DateTime              @default(now())
-}
-
-model CategoryTranslation {
-  id              String   @id @default(cuid())
-  categoryId      String
-  lang            String
-  slug            String
-  name            String
-  description     String
-  seo_title       String?
-  seo_description String?
-  seo_keywords    String?
-  Category        Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-
-  @@unique([categoryId, lang], name: "categoryId_lang")
-  @@unique([lang, slug], name: "lang_slug")
-  @@index([name])
-  @@index([slug])
-}
+/////////////////////////
+// IMAGES (reusable)
+/////////////////////////
 
 model Image {
   id        String   @id @default(cuid())
   fileId    String
   url       String
+  // mimeType  String?
+  // size      Int? // bytes
   createdAt DateTime @default(now())
 
-  // العلاقات
-  users          User[]
-  brands         Brand[]
-  categories     Category[]     @relation("CategoryImage") // 🔗 ترابط الصورة الرئيسية
-  categories_seo Category[]     @relation("CategorySeoImage") // 🔗 ترابط صورة الـ SEO
-  products       ProductImage[]
+  // reverse relations (all join tables and direct uses)
+  users            User[]            @relation("UserImage")
+  brandImages      BrandImage[]
+  categoryImages   CategoryImage[]
+  collectionImages CollectionImage[]
+  productImages    ProductImage[]
+  variantImages    ProductVariant[] // product variant may reference Image via imageId
+  brandsMain       Brand[]           @relation("BrandMainImage")
+  brandsSeo        Brand[]           @relation("BrandSeoImage")
+  categoriesMain   Category[]        @relation("CategoryMainImage")
+  categoriesSeo    Category[]        @relation("CategorySeoImage")
+  collectionsMain  Collection[]      @relation("CollectionMainImage")
+  collectionsSeo   Collection[]      @relation("CollectionSeoImage")
+  productsDirect   Product[]         @relation("ProductDirectImage") // not used typically but kept for clarity
+  productsSeo      Product[]         @relation("ProductSeoImage")
 }
+
+/////////////////////////
+// BRANDS
+/////////////////////////
+
+model Brand {
+  id         String   @id @default(cuid())
+  imageId    String?
+  seoImageId String?
+  image      Image?   @relation("BrandMainImage", fields: [imageId], references: [id], onDelete: SetNull)
+  seoImage   Image?   @relation("BrandSeoImage", fields: [seoImageId], references: [id], onDelete: SetNull)
+  isActive   Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  translations BrandTranslation[]
+  products     Product[]
+  images       BrandImage[]
+
+  @@index([isActive])
+  @@index([sortOrder])
+}
+
+model BrandTranslation {
+  id             String  @id @default(cuid())
+  brandId        String
+  lang           String
+  slug           String
+  name           String
+  description    String?
+  seoTitle       String?
+  seoDescription String?
+  seoKeywords    String?
+  brand          Brand   @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@unique([brandId, lang])
+  @@unique([lang, slug])
+  @@index([name])
+}
+
+model BrandImage {
+  id        String  @id @default(cuid())
+  brandId   String
+  imageId   String
+  sortOrder Int     @default(0)
+  isPrimary Boolean @default(false)
+
+  brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  image Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@unique([brandId, imageId])
+  @@index([brandId, sortOrder])
+}
+
+/////////////////////////
+// CATEGORIES
+/////////////////////////
+
+model Category {
+  id         String     @id @default(cuid())
+  parentId   String?
+  parent     Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children   Category[] @relation("CategoryHierarchy")
+  imageId    String?
+  seoImageId String?
+  image      Image?     @relation("CategoryMainImage", fields: [imageId], references: [id], onDelete: SetNull)
+  seoImage   Image?     @relation("CategorySeoImage", fields: [seoImageId], references: [id], onDelete: SetNull)
+  isActive   Boolean    @default(true)
+  sortOrder  Int        @default(0)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  translations CategoryTranslation[]
+  products     Product[]
+  images       CategoryImage[]
+
+  @@index([parentId])
+  @@index([isActive])
+  @@index([sortOrder])
+}
+
+model CategoryTranslation {
+  id             String   @id @default(cuid())
+  categoryId     String
+  lang           String
+  slug           String
+  name           String
+  description    String?
+  seoTitle       String?
+  seoDescription String?
+  seoKeywords    String?
+  category       Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, lang])
+  @@unique([lang, slug])
+  @@index([name])
+}
+
+model CategoryImage {
+  id         String  @id @default(cuid())
+  categoryId String
+  imageId    String
+  sortOrder  Int     @default(0)
+  isPrimary  Boolean @default(false)
+
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  image    Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, imageId])
+  @@index([categoryId, sortOrder])
+}
+
+/////////////////////////
+// COLLECTIONS
+/////////////////////////
+
+model Collection {
+  id         String   @id @default(cuid())
+  imageId    String?
+  seoImageId String?
+  image      Image?   @relation("CollectionMainImage", fields: [imageId], references: [id], onDelete: SetNull)
+  seoImage   Image?   @relation("CollectionSeoImage", fields: [seoImageId], references: [id], onDelete: SetNull)
+  isActive   Boolean  @default(true)
+  isFeatured Boolean  @default(false)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  translations CollectionTranslation[]
+  products     CollectionProduct[]
+  images       CollectionImage[]
+
+  @@index([isActive])
+  @@index([isFeatured])
+  @@index([sortOrder])
+}
+
+model CollectionTranslation {
+  id             String     @id @default(cuid())
+  collectionId   String
+  lang           String
+  slug           String
+  name           String
+  description    String?
+  seoTitle       String?
+  seoDescription String?
+  seoKeywords    String?
+  collection     Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, lang])
+  @@unique([lang, slug])
+  @@index([name])
+}
+
+model CollectionImage {
+  id           String  @id @default(cuid())
+  collectionId String
+  imageId      String
+  sortOrder    Int     @default(0)
+  isPrimary    Boolean @default(false)
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  image      Image      @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, imageId])
+  @@index([collectionId, sortOrder])
+}
+
+model CollectionProduct {
+  collectionId String
+  productId    String
+  sortOrder    Int        @default(0)
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, productId])
+  @@index([collectionId, sortOrder])
+}
+
+/////////////////////////
+// TAGS
+/////////////////////////
+
+model Tag {
+  id        String       @id @default(cuid())
+  name      String       @unique
+  slug      String       @unique
+  createdAt DateTime     @default(now())
+  products  ProductTag[]
+
+  @@index([name])
+  @@index([slug])
+}
+
+model ProductTag {
+  productId String
+  tagId     String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([productId, tagId])
+  @@index([productId])
+  @@index([tagId])
+}
+
+/////////////////////////
+// PRODUCTS
+/////////////////////////
+
+model Product {
+  id         String    @id @default(cuid())
+  sku        String    @unique
+  brandId    String?
+  categoryId String?
+  imageId    String? // main image
+  seoImageId String? // seo image
+  brand      Brand?    @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  image    Image? @relation("ProductDirectImage", fields: [imageId], references: [id], onDelete: SetNull)
+  seoImage Image? @relation("ProductSeoImage", fields: [seoImageId], references: [id], onDelete: SetNull)
+
+  basePrice      Float
+  compareAtPrice Float?
+  cost           Float?
+
+  trackInventory Boolean @default(true)
+  stockQuantity  Int     @default(0)
+  lowStockAlert  Int?
+
+  isActive    Boolean   @default(true)
+  isFeatured  Boolean   @default(false)
+  publishedAt DateTime?
+
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String?
+
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  translations ProductTranslation[]
+  images       ProductImage[]
+  variants     ProductVariant[]
+  attributes   ProductAttribute[]
+  tags         ProductTag[]
+  discounts    ProductDiscount[]
+  collections  CollectionProduct[]
+
+  @@index([sku])
+  @@index([brandId])
+  @@index([categoryId])
+  @@index([isActive])
+  @@index([isFeatured])
+  @@index([publishedAt])
+  @@index([sortOrder])
+}
+
+model ProductTranslation {
+  id               String  @id @default(cuid())
+  productId        String
+  lang             String
+  name             String
+  slug             String
+  description      String? @db.Text
+  shortDescription String?
+  product          Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, lang])
+  @@unique([lang, slug])
+  @@index([name])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  imageId   String
+  isPrimary Boolean @default(false)
+  sortOrder Int     @default(0)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  image   Image   @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, imageId])
+  @@index([productId, sortOrder])
+  @@index([productId, isPrimary])
+}
+
+/////////////////////////
+// VARIANTS & ATTRIBUTES
+/////////////////////////
+
+model ProductVariant {
+  id        String  @id @default(cuid())
+  productId String
+  sku       String  @unique
+  imageId   String?
+  image     Image?  @relation(fields: [imageId], references: [id], onDelete: SetNull)
+
+  price          Float?
+  compareAtPrice Float?
+  cost           Float?
+  stockQuantity  Int      @default(0)
+  isActive       Boolean  @default(true)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+
+  product Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  options VariantOption[]
+
+  @@index([productId])
+  @@index([sku])
+  @@index([isActive])
+  @@index([sortOrder])
+}
+
+model Attribute {
+  id             String                 @id @default(cuid())
+  type           AttributeType
+  sortOrder      Int                    @default(0)
+  createdAt      DateTime               @default(now())
+  translations   AttributeTranslation[]
+  values         AttributeValue[]
+  products       ProductAttribute[]
+  variantOptions VariantOption[]
+
+  @@index([type])
+  @@index([sortOrder])
+}
+
+model AttributeTranslation {
+  id          String    @id @default(cuid())
+  attributeId String
+  lang        String
+  name        String
+  attribute   Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+
+  @@unique([attributeId, lang])
+  @@index([name])
+}
+
+model AttributeValue {
+  id             String                      @id @default(cuid())
+  attributeId    String
+  value          String
+  colorHex       String?
+  sortOrder      Int                         @default(0)
+  attribute      Attribute                   @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  translations   AttributeValueTranslation[]
+  products       ProductAttribute[]
+  variantOptions VariantOption[]
+
+  @@index([attributeId])
+  @@index([sortOrder])
+}
+
+model AttributeValueTranslation {
+  id               String         @id @default(cuid())
+  attributeValueId String
+  lang             String
+  name             String
+  attributeValue   AttributeValue @relation(fields: [attributeValueId], references: [id], onDelete: Cascade)
+
+  @@unique([attributeValueId, lang])
+  @@index([name])
+}
+
+model ProductAttribute {
+  id               String         @id @default(cuid())
+  productId        String
+  attributeId      String
+  attributeValueId String
+  product          Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  attribute        Attribute      @relation(fields: [attributeId], references: [id])
+  attributeValue   AttributeValue @relation(fields: [attributeValueId], references: [id])
+
+  @@unique([productId, attributeId, attributeValueId])
+  @@index([productId])
+  @@index([attributeId])
+}
+
+model VariantOption {
+  id               String         @id @default(cuid())
+  variantId        String
+  attributeId      String
+  attributeValueId String
+  variant          ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  attribute        Attribute      @relation(fields: [attributeId], references: [id])
+  attributeValue   AttributeValue @relation(fields: [attributeValueId], references: [id])
+
+  @@unique([variantId, attributeId])
+  @@index([variantId])
+  @@index([attributeId])
+}
+
+/////////////////////////
+// DISCOUNTS
+/////////////////////////
+
+model ProductDiscount {
+  id          String       @id @default(cuid())
+  productId   String
+  product     Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  type        DiscountType
+  value       Float
+  startDate   DateTime
+  endDate     DateTime?
+  isActive    Boolean      @default(true)
+  priority    Int          @default(0)
+  minQuantity Int?
+  maxQuantity Int?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now()) @updatedAt
+
+  @@index([productId])
+  @@index([startDate, endDate])
+  @@index([isActive])
+  @@index([priority])
+}
+
+/////////////////////////
+// MISC
+/////////////////////////
+
+// Keep Prisma migrations healthy: run prisma format before migrate

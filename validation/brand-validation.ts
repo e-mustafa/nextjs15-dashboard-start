@@ -1,39 +1,50 @@
 import { msg } from '@/lib/utils';
 import z from 'zod';
-import { slugSchema } from './fields-validation';
+import { SEODefaultValues, SEOFormSchema } from './seo-validation';
 
-export const fields = ['name', 'slug', 'description'];
+export type TBrandFormValues = z.infer<typeof formSchemaBrand> & { id?: string };
 
-export const defaultValues_brand = {
+/** ✅ Unified fields using camelCase naming */
+export const fields = ['name', 'description', 'slug', 'seoTitle', 'seoDescription', 'seoKeywords'];
+
+export const defaultValuesBrand = {
 	name_ar: '',
 	name_en: '',
 	description_ar: '',
 	description_en: '',
-	image: '',
+	images: [],
 
-	slug_ar: '',
-	slug_en: '',
-
-	// ...SEODefaultValues,
+	...SEODefaultValues,
 };
 
-export const formSchema_brand = z.object({
-	name_ar: z
-		.string()
-		.trim()
-		.min(2, { message: msg('forms.validation.name_ar_min', { min: 2 }) })
-		.max(30, { message: msg('forms.validation.name_ar_max', { min: 30 }) }),
-	name_en: z
-		.string()
-		.trim()
-		.min(2, { message: msg('forms.validation.name_ar_min', { min: 2 }) })
-		.max(30, { message: msg('forms.validation.name_ar_max', { min: 30 }) }),
-	description_ar: z.string().optional(),
-	description_en: z.string().optional(),
-	slug_ar: slugSchema('ar'),
-	slug_en: slugSchema('en'),
-	image: z.any().optional(),
-});
+export const formSchemaBrand = z
+	.object({
+		name_ar: z
+			.string()
+			.trim()
+			.min(2, { message: msg('forms.validation.name_ar_min', { min: 2 }) })
+			.max(30, { message: msg('forms.validation.name_ar_max', { min: 30 }) }),
+		name_en: z
+			.string()
+			.trim()
+			.min(2, { message: msg('forms.validation.name_ar_min', { min: 2 }) })
+			.max(30, { message: msg('forms.validation.name_ar_max', { min: 30 }) }),
+		description_ar: z.string().optional(),
+		description_en: z.string().optional(),
+
+		isActive: z.boolean(),
+
+		images: z
+			.array(
+				z.object({
+					url: z.string().url({ message: msg('forms.validation.invalid_url') }),
+					fileId: z.string(),
+				})
+			)
+			.optional(),
+		products: z.array(z.string()).optional(),
+	})
+	.extend(SEOFormSchema.shape);
 // .merge(SEOFormSchema);
 
 // export const formSchema_brand2 = z.object({

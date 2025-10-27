@@ -1,66 +1,27 @@
 'use client';
 
 import { url_segment } from '@/app/[locale]/dashboard/(products-management)/brands/page';
+import LoaderInstElement from '@/components/shard/loaders/loader-inst-element';
 import { Form } from '@/components/ui-custom/custom-form';
+import { config_env } from '@/configs/general';
 import { useFormResponse } from '@/hooks/use-form-response';
 import { useServerResponse } from '@/hooks/use-server-response';
+import { formSectionSEO } from '@/lib/create-forms/form-section-seo';
 import { renderField } from '@/lib/create-forms/input-registry';
 import { SectionConfig } from '@/lib/create-forms/types-create-forms';
+import { msg } from '@/lib/utils';
 import { createBrandAction, updateBrandAction } from '@/server/actions/brand-actions';
 import { ActionResult } from '@/types/api';
-import { defaultValues_brand, formSchema_brand } from '@/validation/brand-validation';
+import { defaultValuesBrand, formSchemaBrand, TBrandFormValues } from '@/validation/brand-validation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { z } from 'zod';
 import SubmitButton from './submit-button';
 
-export type TBrandFormValues = z.infer<typeof formSchema_brand> & { id?: string };
+type TFormValues = TBrandFormValues;
 
-// export const formSectionSEO: SectionConfig = {
-// 	title: 'forms.sections.seo_details',
-// 	fields: [
-// 		{
-// 			type: 'text',
-// 			name: 'seo_title_ar',
-// 			label: 'forms.labels.seo_title_ar',
-// 			placeholder: 'forms.placeholders.seo_title_ar',
-// 		},
-// 		{
-// 			type: 'text',
-// 			name: 'seo_title_en',
-// 			label: 'forms.labels.seo_title_en',
-// 			placeholder: 'forms.placeholders.seo_title_en',
-// 		},
-// 		{
-// 			type: 'text',
-// 			name: 'seo_description_ar',
-// 			label: 'forms.labels.seo_description_ar',
-// 			placeholder: 'forms.placeholders.seo_description_ar',
-// 		},
-// 		{
-// 			type: 'text',
-// 			name: 'seo_description_en',
-// 			label: 'forms.labels.seo_description_en',
-// 			placeholder: 'forms.placeholders.seo_description_en',
-// 		},
-// 		{ type: 'text', name: 'seo_link', label: 'forms.labels.seo_link', placeholder: 'forms.placeholders.seo_link' },
-// 		{
-// 			type: 'text',
-// 			name: 'seo_keywords',
-// 			label: 'forms.labels.seo_keywords',
-// 			placeholder: 'forms.placeholders.seo_keywords',
-// 		},
-// 		{
-// 			type: 'seoMockupCard',
-// 			name: 'seo_info',
-// 			parentClass: 'sm:col-span-full',
-// 		},
-// 	],
-// };
-
-export const formSections_brand: SectionConfig<TBrandFormValues>[] = [
+export const formSections_brand: SectionConfig<TFormValues>[] = [
 	{
 		title: 'forms.sections.brand_info',
 		fields: [
@@ -79,43 +40,35 @@ export const formSections_brand: SectionConfig<TBrandFormValues>[] = [
 				required: true,
 			},
 			{
+				type: 'switch',
+				name: 'isActive',
+				label: 'forms.labels.is_active',
+				placeholder: 'forms.placeholders.is_active',
+				required: true,
+				// parentClass: 'col-span-full',
+				variants: 'input', // 'switch',
+			},
+			{
+				type: 'empty',
+				name: 'isActive',
+			},
+			{
 				type: 'richtext',
 				name: 'description_ar',
 				label: 'forms.labels.description_ar',
 				placeholder: 'forms.placeholders.description_ar',
+				parentClass: 'col-span-full xl:col-span-1',
 			},
 			{
 				type: 'richtext',
 				name: 'description_en',
 				label: 'forms.labels.description_en',
 				placeholder: 'forms.placeholders.description_en',
+				parentClass: 'col-span-full xl:col-span-1',
 			},
-			{
-				type: 'slug',
-				name: 'slug_ar',
-				locale: 'ar',
-				referenceInput: 'name_ar',
-			},
-
-			{
-				type: 'slug',
-				name: 'slug_en',
-				locale: 'en',
-				referenceInput: 'name_en',
-			},
-			// {
-			// 	type: 'imageManager',
-			// 	name: 'image',
-			// 	label: 'forms.labels.image',
-			// 	placeholder: 'forms.placeholders.image',
-			// 	file: {
-			// 		// accept: 'image/*',
-			// 		// multiple: false,
-			// 	},
-			// },
 			{
 				type: 'imageUpload',
-				name: 'image',
+				name: 'images',
 				label: 'forms.labels.image',
 				placeholder: 'forms.placeholders.image',
 				parentClass: 'col-span-full',
@@ -124,55 +77,67 @@ export const formSections_brand: SectionConfig<TBrandFormValues>[] = [
 				// 	// accept: 'image/*',
 				// 	// multiple: false,
 				// },
-				// multiple: true,
+				multiple: true,
+			},
+		],
+	},
+	{
+		title: 'forms.sections.extra_info',
+		fields: [
+			{
+				type: 'combobox',
+				name: 'products',
+				label: msg('common.actions.choose_', { item: 'common.sections.products' }),
+				placeholder: 'forms.placeholders.choose_categorys_products',
+				optionUrl: `${config_env.domainAPI}/dashboard/brands`,
 			},
 		],
 	},
 	// SEO sections inputs with mockup card
-	// formSectionSEO,
+	formSectionSEO as SectionConfig<TFormValues>,
 ];
 
 export default function BrandForm({
 	type = 'create',
 	response,
-	defaultValues = (response?.data as TBrandFormValues) || defaultValues_brand,
+	defaultValues = (response?.data as TFormValues) || defaultValuesBrand,
 }: {
 	type?: 'create' | 'update';
-	response?: ActionResult<TBrandFormValues>;
-	defaultValues?: TBrandFormValues & { id?: string };
+	response?: ActionResult<TFormValues>;
+	defaultValues?: TFormValues & { id?: string };
 }) {
 	const { t } = useTranslation();
 
 	// for handling server response errors & messages
 	useServerResponse(response);
 
-	const form = useForm<TBrandFormValues>({
-		resolver: zodResolver(formSchema_brand),
+	const form = useForm<TFormValues>({
+		resolver: zodResolver(formSchemaBrand),
 		defaultValues,
 		// delayError: 1000,
 	});
 
-	const [result, setResult] = useState<ActionResult<TBrandFormValues> | null>(null);
+	const [result, setResult] = useState<ActionResult<TFormValues> | null>(null);
+	const [isPending, startTransition] = useTransition();
 
-	useFormResponse<TBrandFormValues>(result!, form, {
+	useFormResponse<TFormValues>(result!, form, {
 		redirectUrl: `/${url_segment}`,
-		reset_on_success: (result?.data as TBrandFormValues) || true,
+		reset_on_success: (result?.data as TFormValues) || true,
 	});
 
-	console.log('errors', form.formState.errors);
+	async function onSubmit(data: TFormValues) {
+		startTransition(async () => {
+			const result =
+				type == 'create' ? await createBrandAction(data) : await updateBrandAction(defaultValues.id || '', data);
 
-	async function onSubmit(data: TBrandFormValues) {
-		const result =
-			type == 'create' ? await createBrandAction(data) : await updateBrandAction(defaultValues.id || '', data);
-
-		setResult(result as ActionResult<TBrandFormValues>);
-
-		console.log('res brand form', result);
+			setResult(result as ActionResult<TFormValues>);
+		});
 	}
 
 	return (
 		<Form {...form}>
-			<form id='brand-form' onSubmit={form.handleSubmit(onSubmit)} method='post' className='w-full grid gap-6'>
+			<form id='brand-form' onSubmit={form.handleSubmit(onSubmit)} method='post' className='w-full grid gap-6 relative'>
+				{(form.formState.isSubmitting || isPending) && <LoaderInstElement />}
 				{formSections_brand.map((section, sectionIndex) => (
 					<div key={'section-' + sectionIndex} className='form-section'>
 						<div className='section-title font-medium text-muted-foreground'>{t(section.title)}</div>
@@ -187,7 +152,7 @@ export default function BrandForm({
 				))}
 
 				{/* submit & cancel buttons */}
-				<SubmitButton isPending={form.formState.isSubmitting} formId='brand-form' />
+				<SubmitButton isPending={form.formState.isSubmitting || isPending} formId='brand-form' />
 			</form>
 		</Form>
 	);

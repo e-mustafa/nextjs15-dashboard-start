@@ -5,12 +5,13 @@ import ImageUploadField from '@/components/inputs/image-upload-field';
 import PasswordInput from '@/components/inputs/password-input';
 import RichTextField from '@/components/inputs/rich-text-field';
 import SlugInputField from '@/components/inputs/slug-input-field';
-// import TextareaInputField from '@/components/inputs/textarea-input-field';
+import ShardPostMockupCard from '@/components/Dashboard/shared-post-mockup';
+import SwitchInputField from '@/components/inputs/switch-input-field';
+import TextareaInputField from '@/components/inputs/textarea-input-field';
 import { JSX } from 'react';
 import { FieldValues, Path } from 'react-hook-form';
 import BaseInputField from './base-input-field';
 import { FieldTypeMap, RenderFieldProps } from './types-create-forms';
-import TextareaInputField from '@/components/inputs/textarea-input-field';
 
 /**
  * A registry mapping input field types to their corresponding render functions.
@@ -37,6 +38,10 @@ export const inputRegistry: InputRegistry = {
 	password: ({ fieldConfig, form }) => <PasswordInput fieldConfig={fieldConfig} form={form} />,
 	textarea: ({ fieldConfig, form }) => <TextareaInputField fieldConfig={fieldConfig} form={form} />,
 
+	empty: () => <div />,
+
+	switch: ({ fieldConfig, form }) => <SwitchInputField fieldConfig={fieldConfig} form={form} />,
+
 	// uploadFile: <T extends FieldValues>({ fieldConfig, form }: RenderFieldProps<T, 'uploadFile'>) => (
 	// 	<FileInputField fieldConfig={fieldConfig} form={form} />
 	// ),
@@ -54,17 +59,35 @@ export const inputRegistry: InputRegistry = {
 	seoMockupCard: <T extends FieldValues>({ form }: RenderFieldProps<T, 'seoMockupCard'>) => {
 		const data = {
 			ar: {
-				title: form.watch('seo_title_ar' as Path<T>),
-				description: form.watch('seo_description_ar' as Path<T>),
+				title: form.watch('seoTitle_ar' as Path<T>),
+				description: form.watch('seoDescription_ar' as Path<T>),
 				slug: form.watch('slug_ar' as Path<T>),
 			},
 			en: {
-				title: form.watch('seo_title_en' as Path<T>),
-				description: form.watch('seo_description_en' as Path<T>),
+				title: form.watch('seoTitle_en' as Path<T>),
+				description: form.watch('seoDescription_en' as Path<T>),
 				slug: form.watch('slug_en' as Path<T>),
 			},
 		};
-		return <SEOMockupCard data={data} />;
+		const image = form.watch('seoImage' as Path<T>)?.[0]?.url || form.watch('images' as Path<T>)?.[0]?.url;
+		return <SEOMockupCard data={data} image={image} />;
+	},
+
+	shardPostMockupCard: <T extends FieldValues>({ form }: RenderFieldProps<T, 'shardPostMockupCard'>) => {
+		const data = {
+			ar: {
+				title: form.watch('seoTitle_ar' as Path<T>),
+				description: form.watch('seoDescription_ar' as Path<T>),
+				slug: form.watch('slug_ar' as Path<T>),
+			},
+			en: {
+				title: form.watch('seoTitle_en' as Path<T>),
+				description: form.watch('seoDescription_en' as Path<T>),
+				slug: form.watch('slug_en' as Path<T>),
+			},
+		};
+		const image = form.watch('seoImage' as Path<T>)?.[0]?.url || form.watch('images' as Path<T>)?.[0]?.url;
+		return <ShardPostMockupCard data={data} image={image} />;
 	},
 };
 

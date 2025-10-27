@@ -126,7 +126,7 @@ export default function ImageUploadField<T extends FieldValues>({
 								multiple && images.length > 1 ? (
 									<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
 										<SortableContext items={images.map((img) => img.fileId)} strategy={rectSortingStrategy}>
-											<div className='grid grid-cols-3 lg:grid-cols-6 gap-3 max-h-[400px] overflow-y-auto overflow-x-hidden flex-1'>
+											<div className='grid grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 max-h-[460px] overflow-y-auto overflow-x-hidden flex-1'>
 												{images.map((image, index) => (
 													<SortableImageItem
 														key={image.fileId}
@@ -149,7 +149,7 @@ export default function ImageUploadField<T extends FieldValues>({
 									</DndContext>
 								) : (
 									// non-dnd fallback (single image or multiple disabled) — show static grid
-									<div className='grid grid-cols-3 lg:grid-cols-7 gap-3 max-h-[400px] overflow-y-auto'>
+									<div className='grid grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 max-h-[400px] overflow-y-auto'>
 										{images.map((image) => (
 											<StaticImageItem
 												key={image.fileId}
