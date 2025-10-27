@@ -3,7 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 export default function LoaderTableSkeleton() {
 	return (
-		<div className='rounded-lg z-[10] absolute inset-0 size-full bg-black'>
+		<div className='rounded-lg z-10 absolute inset-0 size-full bg-black'>
 			<Table className='w-full'>
 				<TableHeader>
 					<TableRow>

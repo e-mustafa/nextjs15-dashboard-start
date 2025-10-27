@@ -6,25 +6,27 @@ import { mapTranslations } from '@/lib/utils.server/mapTranslations.server';
 import { ValidateFormAction } from '@/lib/utils.server/validate-data-server';
 import { prisma_DB } from '@/prisma/prisma.db';
 import { ActionResult, TImage } from '@/types/api';
-import { fields, formSchemaCategory, TCategoryFormValues } from '@/validation/category-validation';
+import { fields, formSchemaCollection, TCollectionFormValues } from '@/validation/collection-validation';
 import { Prisma } from '@prisma/client';
 import { revalidatePath, updateTag } from 'next/cache';
 import { cookies } from 'next/headers';
 
-type TFormValues = TCategoryFormValues;
+type TFormValues = TCollectionFormValues;
 
 let user: { id: string; name: string } | null = null;
 
-type CategoryWithRelations = Prisma.CategoryGetPayload<{
+type CollectionWithRelations = Prisma.CollectionGetPayload<{
 	include: { translations: true; images: { include: { image: true } }; seoImage: true };
 }>;
 
-export type Category = {
+export type Collection = {
 	id: string;
 	name: string;
 	description?: string;
 	slug?: string;
 	isActive: boolean;
+	isFeatured: boolean;
+	sortOrder: number;
 	seoTitle?: string;
 	seoDescription?: string;
 	seoKeywords?: string;
@@ -34,8 +36,11 @@ export type Category = {
 	seoImage?: TImage;
 };
 
-async function formatCategory(category: CategoryWithRelations, acceptLanguage?: string): Promise<TFormValues | Category> {
-	const { translations, images, seoImage, imageId, seoImageId, ...rest } = category;
+async function formatCollection(
+	collection: CollectionWithRelations,
+	acceptLanguage?: string
+): Promise<TFormValues | Collection> {
+	const { translations, images, seoImage, ...rest } = collection;
 
 	const translationData = await mapTranslations(translations, {
 		accept_language: acceptLanguage,
@@ -44,30 +49,27 @@ async function formatCategory(category: CategoryWithRelations, acceptLanguage?: 
 
 	return {
 		...rest,
-		images:
-			images?.map((img) => ({
-				url: img.image?.url ?? '',
-				fileId: img.image?.fileId ?? '',
-			})) ?? [],
-
+		images: images?.map((img) => ({
+			url: img.image?.url ?? '',
+			fileId: img.image?.fileId ?? '',
+		})),
 		seoImage: seoImage ? [{ url: seoImage?.url, fileId: seoImage?.fileId }] : [],
-
 		...(translationData as TFormValues),
 	};
 }
 
 async function validateUniqueSlugs(id?: string, slug_ar?: string, slug_en?: string): Promise<ActionResult<null>> {
-	const or: Prisma.CategoryTranslationWhereInput[] = [];
+	const or: Prisma.CollectionTranslationWhereInput[] = [];
 	if (slug_ar) or.push({ lang: 'ar', slug: slug_ar });
 	if (slug_en) or.push({ lang: 'en', slug: slug_en });
 	if (!or.length) return { success: true, status: 200, data: null };
 
-	const where: Prisma.CategoryTranslationWhereInput = {
+	const where: Prisma.CollectionTranslationWhereInput = {
 		OR: or,
-		...(id ? { categoryId: { not: id } } : {}),
+		...(id ? { collectionId: { not: id } } : {}),
 	};
 
-	const duplicate = await prisma_DB.categoryTranslation.findFirst({ where });
+	const duplicate = await prisma_DB.collectionTranslation.findFirst({ where });
 	if (duplicate) {
 		return {
 			success: false,
@@ -79,11 +81,11 @@ async function validateUniqueSlugs(id?: string, slug_ar?: string, slug_en?: stri
 	return { success: true, status: 200, data: null };
 }
 
-/** 🔹 Get All Categories */
-export async function getAllCategories(
+/** 🔹 Get All Collections */
+export async function getAllCollections(
 	params?: { page?: number; limit?: number; search?: string; sortBy?: string; sortOrder?: 'asc' | 'desc' },
 	locale?: TLocalesData
-): Promise<ActionResult<Category>> {
+): Promise<ActionResult<Collection>> {
 	const cookiesStore = await cookies();
 	const userCookie = cookiesStore.get('user')?.value;
 	if (userCookie) {
@@ -99,14 +101,14 @@ export async function getAllCategories(
 	const search = params?.search?.trim() || '';
 	const skip = (page - 1) * limit;
 
-	const sortableFields = ['name', 'slug', 'createdAt'];
+	const sortableFields = ['name', 'slug', 'createdAt', 'sortOrder'];
 	const sortBy = sortableFields.includes(params?.sortBy || '') ? params?.sortBy : undefined;
 	const sortOrder = params?.sortOrder === 'desc' ? 'desc' : 'asc';
 	const localeKey = locale?.split('-')[0] || 'en';
 
 	const orderBy = sortBy ? { [`${sortBy}_${localeKey}`]: sortOrder } : undefined;
 
-	const where: Prisma.CategoryWhereInput = search
+	const where: Prisma.CollectionWhereInput = search
 		? {
 				OR: [
 					{ translations: { some: { name: { contains: search, mode: 'insensitive' } } } },
@@ -116,8 +118,8 @@ export async function getAllCategories(
 		  }
 		: {};
 
-	const [categories, total] = await Promise.all([
-		prisma_DB.category.findMany({
+	const [collections, total] = await Promise.all([
+		prisma_DB.collection.findMany({
 			where,
 			skip,
 			take: limit,
@@ -128,16 +130,14 @@ export async function getAllCategories(
 			},
 			orderBy,
 		}),
-		prisma_DB.category.count({ where }),
+		prisma_DB.collection.count({ where }),
 	]);
 
-	// if (!categories.length) throw new AppError('api.errors.not_found', 404);
-
-	const data = await Promise.all(categories.map((category) => formatCategory(category, locale)));
+	const data = await Promise.all(collections.map((c) => formatCollection(c, locale)));
 	return {
 		success: true,
 		status: 200,
-		data: data as Category[],
+		data: data as Collection[],
 		meta: {
 			pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
 			sort: sortBy ? { by: sortBy, order: sortOrder } : undefined,
@@ -145,38 +145,39 @@ export async function getAllCategories(
 	};
 }
 
-/** 🔹 Get Category By ID */
-export async function getCategory(id: string) {
+/** 🔹 Get Collection By ID */
+export async function getCollection(id: string) {
 	if (!id) throw new AppError('api.errors.invalid_id', 404);
 
-	const category = await prisma_DB.category.findUnique({
+	const collection = await prisma_DB.collection.findUnique({
 		where: { id },
 		include: { translations: true, images: { include: { image: true }, orderBy: { sortOrder: 'asc' } }, seoImage: true },
 	});
 
-	if (!category) throw new AppError('api.categories.errors.not_found', 404);
+	if (!collection) throw new AppError('api.collections.errors.not_found', 404);
 
-	const data = await formatCategory(category);
+	const data = await formatCollection(collection);
 	return { success: true, status: 200, data };
 }
 
-/** 🟢 Create Category */
-export async function createCategory(data: TFormValues): Promise<ActionResult<TFormValues>> {
-	const validation = await ValidateFormAction(formSchemaCategory, data);
+/** 🟢 Create Collection */
+export async function createCollection(data: TFormValues): Promise<ActionResult<TFormValues>> {
+	const validation = await ValidateFormAction(formSchemaCollection, data);
 	if (!validation.success)
 		return { ...validation, form_errors: JSON.stringify(validation.form_errors), error: 'api.errors.inputs_validation' };
 
 	const unique = await validateUniqueSlugs(undefined, data.slug_ar, data.slug_en);
 	if (!unique.success) return unique as unknown as ActionResult<TFormValues>;
 
-	// 🔹 handel seo image
 	const existingSeoImage = data.seoImage?.length
 		? await prisma_DB.image.findFirst({ where: { fileId: data.seoImage[0].fileId } })
 		: null;
 
-	const category = await prisma_DB.category.create({
+	const collection = await prisma_DB.collection.create({
 		data: {
 			isActive: data.isActive,
+			isFeatured: data.isFeatured ?? false,
+			// sortOrder: data.sortOrder ?? 0,
 			images: data.images?.length
 				? {
 						create: await Promise.all(
@@ -225,18 +226,18 @@ export async function createCategory(data: TFormValues): Promise<ActionResult<TF
 		include: { translations: true, images: { include: { image: true }, orderBy: { sortOrder: 'asc' } }, seoImage: true },
 	});
 
-	revalidatePath('/dashboard/categories');
-	const formattedData = await formatCategory(category as CategoryWithRelations);
-	logger.info(`✅ Category created: ${category.id}`, { context: 'CategoryService' });
+	revalidatePath('/dashboard/collections');
+	const formattedData = await formatCollection(collection as CollectionWithRelations);
+	logger.info(`✅ Collection created: ${collection.id}`, { context: 'CollectionService' });
 
-	return { success: true, status: 201, data: formattedData as TFormValues, message: 'api.categories.success.create' };
+	return { success: true, status: 201, data: formattedData as TFormValues, message: 'api.collections.success.create' };
 }
 
-/** 🟡 Update Category */
-export async function updateCategory(id: string, data: TFormValues): Promise<ActionResult<TFormValues>> {
+/** 🟡 Update Collection */
+export async function updateCollection(id: string, data: TFormValues): Promise<ActionResult<TFormValues>> {
 	if (!id) throw new AppError('api.errors.invalid_id', 404);
 
-	const validation = await ValidateFormAction(formSchemaCategory, data);
+	const validation = await ValidateFormAction(formSchemaCollection, data);
 	if (!validation.success)
 		return { ...validation, form_errors: JSON.stringify(validation.form_errors), error: 'api.errors.inputs_validation' };
 
@@ -244,16 +245,16 @@ export async function updateCategory(id: string, data: TFormValues): Promise<Act
 	if (!unique.success) return unique as unknown as ActionResult<TFormValues>;
 
 	await prisma_DB.$transaction(async (tx) => {
-		// 🔹 handel seo image
 		const existingSeoImage = data.seoImage?.length
 			? await tx.image.findFirst({ where: { fileId: data.seoImage[0].fileId } })
 			: null;
 
-		// 🔹 update data and images
-		await tx.category.update({
+		await tx.collection.update({
 			where: { id },
 			data: {
 				isActive: data.isActive,
+				isFeatured: data.isFeatured ?? false,
+				// sortOrder: data.sortOrder ?? 0,
 				images: data.images?.length
 					? {
 							deleteMany: {},
@@ -278,7 +279,6 @@ export async function updateCategory(id: string, data: TFormValues): Promise<Act
 			},
 		});
 
-		// 🔹 update translations
 		const langs = Object.keys(localesData) as TLocalesData[];
 		for (const lang of langs) {
 			const slug = data[`slug_${lang}`];
@@ -288,72 +288,71 @@ export async function updateCategory(id: string, data: TFormValues): Promise<Act
 			const seoDescription = data[`seoDescription_${lang}`];
 			const seoKeywords = data[`seoKeywords_${lang}`];
 
-			const existing = await tx.categoryTranslation.findFirst({ where: { categoryId: id, lang } });
+			const existing = await tx.collectionTranslation.findFirst({ where: { collectionId: id, lang } });
 			if (existing) {
-				await tx.categoryTranslation.update({
+				await tx.collectionTranslation.update({
 					where: { id: existing.id },
 					data: { slug, name, description, seoTitle, seoDescription, seoKeywords },
 				});
 			} else {
-				await tx.categoryTranslation.create({
-					data: { categoryId: id, lang, slug, name, description, seoTitle, seoDescription, seoKeywords },
+				await tx.collectionTranslation.create({
+					data: { collectionId: id, lang, slug, name, description, seoTitle, seoDescription, seoKeywords },
 				});
 			}
 		}
 	});
 
-	// 🔄 get updated data after update
-	const category = await prisma_DB.category.findUnique({
+	const collection = await prisma_DB.collection.findUnique({
 		where: { id },
 		include: { translations: true, images: { include: { image: true }, orderBy: { sortOrder: 'asc' } }, seoImage: true },
 	});
 
-	if (!category) throw new AppError('api.categories.errors.not_found', 404);
+	if (!collection) throw new AppError('api.collections.errors.not_found', 404);
 
-	updateTag('categories');
+	updateTag('collections');
+	const formattedData = await formatCollection(collection as CollectionWithRelations);
+	logger.info(`✅ Collection updated: ${collection.id}`, { context: 'CollectionService' });
 
-	const formattedData = await formatCategory(category as CategoryWithRelations);
-	logger.info(`✅ Category updated: ${category.id}`, { context: 'CategoryService' });
-	return { success: true, status: 200, data: formattedData as TFormValues, message: 'api.categories.success.update' };
+	return { success: true, status: 200, data: formattedData as TFormValues, message: 'api.collections.success.update' };
 }
 
-/** 🟡 Toggle State Category */
-export async function toggleStateCategory(id: string, isActive: boolean) {
-	if (!id) throw new AppError('api.errors.invalid_id', 404);
-
-	const updated = await prisma_DB.category.update({
+/** 🟢 Toggle Active */
+export async function toggleStateCollection(id: string, isActive: boolean) {
+	const updated = await prisma_DB.collection.update({
 		where: { id },
 		data: { isActive },
 		select: { id: true, isActive: true },
 	});
-
-	if (!updated) throw new AppError('api.errors.update_status', 404);
-
-	updateTag('categories');
-	logger.info(`✅ Category updated: ${updated.id}`, { context: 'CategoryService' });
+	updateTag('collections');
 	return { success: true, status: 200, data: updated, message: 'api.success.update_status' };
 }
 
-/** 🔴 Delete Category */
-export async function deleteCategory(id: string) {
-	if (!id) throw new AppError('api.errors.invalid_id', 404);
-
-	await prisma_DB.category.delete({ where: { id } });
-	// revalidateTag('categories');
-	updateTag('categories');
-	logger.info(`✅ Category deleted: ${id} by ${user?.name}`, { context: 'CategoryService' });
-
-	return { success: true, status: 200, data: null, message: 'api.categories.success.delete' };
+/** 🟢 Toggle Featured */
+export async function toggleFeaturedCollection(id: string, isFeatured: boolean) {
+	const updated = await prisma_DB.collection.update({
+		where: { id },
+		data: { isFeatured },
+		select: { id: true, isFeatured: true },
+	});
+	updateTag('collections');
+	return { success: true, status: 200, data: updated, message: 'api.success.update_status' };
 }
 
-export async function deleteManyCategories(ids: string[]) {
+/** 🔴 Delete */
+export async function deleteCollection(id: string) {
+	await prisma_DB.collection.delete({ where: { id } });
+	updateTag('collections');
+	logger.info(`✅ Collection deleted: ${id}`, { context: 'CollectionService' });
+	return { success: true, status: 200, data: null, message: 'api.collections.success.delete' };
+}
+
+/** 🔴 Delete Many */
+export async function deleteManyCollections(ids: string[]) {
 	if (!ids?.length) throw new AppError('api.errors.empty_ids', 400);
+	const deleted = await prisma_DB.collection.deleteMany({ where: { id: { in: ids } } });
+	if (!deleted.count) throw new AppError('api.collections.errors.delete', 404);
 
-	const deleted = await prisma_DB.category.deleteMany({ where: { id: { in: ids } } });
-	if (!deleted.count) throw new AppError('api.categories.errors.delete', 404);
-
-	// revalidateTag('categories');
-	updateTag('categories');
-	logger.info(`✅ ${deleted.count} categories deleted by ${user?.name}`, { context: 'CategoryService' });
-	return { success: true, status: 200, data: null, message: 'api.categories.success.delete_many' };
+	updateTag('collections');
+	logger.info(`✅ ${deleted.count} collections deleted`, { context: 'CollectionService' });
+	return { success: true, status: 200, data: null, message: 'api.collections.success.delete_many' };
 }
