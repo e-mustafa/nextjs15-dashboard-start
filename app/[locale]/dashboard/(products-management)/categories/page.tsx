@@ -1,5 +1,3 @@
-// import DataTableComponent from '@/components/Dashboard/dataTable/data-table';
-// import { BrandDataTable } from '@/components/Dashboard/brands-table-data';
 import { TLayoutProps } from '@/app/[locale]/layout';
 import initTranslations from '@/app/i18n';
 import BreadcrumbDashboard from '@/components/Dashboard/breadcrumb-dashboard';
@@ -12,7 +10,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
-const CategoryDataTable = dynamic(() => import('@/components/Dashboard/categories-table-data'), {
+const CategoryDataTable = dynamic(() => import('@/components/Dashboard/dataTable-sections/categories-dataTable'), {
 	// ssr: false,
 });
 

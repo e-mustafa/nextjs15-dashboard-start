@@ -1,13 +1,9 @@
 'use server';
 
-import { TTypeFormValues } from '@/components/Dashboard/forms/category-form';
 import { TLocalesData } from '@/configs/general';
 import { runAction } from '@/lib/error-handler/error-handler.server';
 import * as categoryService from '@/server/services/category-service';
-
-// export async function getAllCategoriesAction() {
-// 	return runAction(() => categoryService.getAllCategories());
-// }
+import { TCategoryFormValues } from '@/validation/category-validation';
 
 export async function getAllCategoriesAction(
 	params?: {
@@ -26,12 +22,16 @@ export async function getCategoryAction(id: string) {
 	return runAction(() => categoryService.getCategory(id));
 }
 
-export async function createCategoryAction(data: TTypeFormValues) {
+export async function createCategoryAction(data: TCategoryFormValues) {
 	return runAction(() => categoryService.createCategory(data));
 }
 
-export async function updateCategoryAction(id: string, data: TTypeFormValues) {
+export async function updateCategoryAction(id: string, data: TCategoryFormValues) {
 	return runAction(() => categoryService.updateCategory(id, data));
+}
+
+export async function toggleStateCategoryAction(id: string, data: boolean) {
+	return runAction(() => categoryService.toggleStateCategory(id, data ?? false));
 }
 
 export async function deleteCategoryAction(id: string) {

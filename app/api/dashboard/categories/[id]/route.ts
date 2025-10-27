@@ -5,19 +5,22 @@ import { deleteCategory, getCategory, updateCategory } from '@/server/services/c
 // GET /api/categories/:id
 
 async function getCategoryAction(_req: Request, ctx?: HandlerContext) {
-	if (!ctx?.params?.id) throw new AppError('api.errors.invalid_id', 400);
-	return getCategory(ctx.params.id);
+	const { id } = (await ctx?.params) ?? {};
+	if (!id) throw new AppError('api.errors.invalid_id', 400);
+	return getCategory(id);
 }
 
 async function updateCategoryAction(req: Request, ctx?: HandlerContext) {
-	if (!ctx?.params?.id) throw new AppError('api.errors.invalid_id', 400);
+	const { id } = (await ctx?.params) ?? {};
+	if (!id) throw new AppError('api.errors.invalid_id', 400);
 	const body = await req.json();
-	return updateCategory(ctx.params.id, body);
+	return updateCategory(id, body);
 }
 
 async function deleteCategoryAction(_req: Request, ctx?: HandlerContext) {
-	if (!ctx?.params?.id) throw new AppError('api.errors.invalid_id', 400);
-	return deleteCategory(ctx.params.id);
+	const { id } = (await ctx?.params) ?? {};
+	if (!id) throw new AppError('api.errors.invalid_id', 400);
+	return deleteCategory(id);
 }
 
 export const { GET, PUT, DELETE } = errorHandler({

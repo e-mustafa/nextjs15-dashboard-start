@@ -1,26 +1,30 @@
 'use client';
-import { url_segment } from '@/app/[locale]/dashboard/(products-management)/brands/page';
+import { url_segment } from '@/app/[locale]/dashboard/(products-management)/categories/page';
 import { imagesPlaceholder, TLocalesData } from '@/configs/general';
 import { useServerResponse } from '@/hooks/use-server-response';
 import { getDataInPage } from '@/lib/utils.server/api.server';
-import { deleteCategoryAction, deleteManyCategoriesAction } from '@/server/actions/category-actions';
-import { TImage } from '@/server/services/brand-service';
+import {
+	deleteCategoryAction,
+	deleteManyCategoriesAction,
+	toggleStateCategoryAction,
+} from '@/server/actions/category-actions';
 import { Category } from '@/server/services/category-service';
-import { ActionResult, ApiMeta, TQueryParams } from '@/types/api';
+import { ActionResult, ApiMeta, TImage, TQueryParams } from '@/types/api';
 import { ColumnDef } from '@tanstack/react-table';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useOptimistic, useState, useTransition } from 'react';
-import ReusableDataTable from './dataTable/reusable-data-table';
+import { Switch } from '../../ui/switch';
+import ReusableDataTable from '../dataTable/reusable-data-table';
 
 export default function CategoryDataTable({ result, locale }: { result: ActionResult<Category>; locale: TLocalesData }) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 
 	const [isPending, startTransition] = useTransition();
-
-	useServerResponse(result);
+	const [response, setResponse] = useState<ActionResult | null>(result);
+	useServerResponse(response);
 
 	// ✅ Optimistic UI state
 	const [optimisticData, setOptimisticData] = useOptimistic<Category[]>((result.data as Category[]) ?? []);
@@ -30,10 +34,10 @@ export default function CategoryDataTable({ result, locale }: { result: ActionRe
 	// ---------------------------------------------------------
 	// URL Query Parameters
 	// ---------------------------------------------------------
-	const page = Number(searchParams.get('page')) || meta?.pagination?.page;
-	const search = searchParams.get('search') || meta?.query?.search || '';
-	const sortBy = searchParams.get('sortBy') || meta?.sort?.by;
-	const sortOrder = (searchParams.get('sortOrder') as 'asc' | 'desc') || meta?.sort?.order || 'desc';
+	// const page = Number(searchParams.get('page')) || meta?.pagination?.page;
+	// const search = searchParams.get('search') || meta?.query?.search || '';
+	// const sortBy = searchParams.get('sortBy') || meta?.sort?.by;
+	// const sortOrder = (searchParams.get('sortOrder') as 'asc' | 'desc') || meta?.sort?.order || 'desc';
 
 	// ---------------------------------------------------------
 	// Update URL Parameters
@@ -77,7 +81,7 @@ export default function CategoryDataTable({ result, locale }: { result: ActionRe
 		startTransition(() => setOptimisticData((prev) => prev.filter((b) => b.id !== id)));
 		// await runWithFeedback(() => deleteCategoryAction(id));
 		const result = await deleteCategoryAction(id);
-		useServerResponse(result);
+		setResponse(result);
 	};
 
 	// ---------------------------------------------------------
@@ -86,7 +90,13 @@ export default function CategoryDataTable({ result, locale }: { result: ActionRe
 	const handleDeleteMany = async (ids: string[]) => {
 		startTransition(() => setOptimisticData((prev) => prev.filter((b) => !ids.includes(b.id))));
 		const result = await deleteManyCategoriesAction(ids);
-		useServerResponse(result);
+		setResponse(result);
+	};
+
+	const handleToggleStatus = async (row: Category) => {
+		const result = await toggleStateCategoryAction(row.id, !row.isActive);
+		console.log('result', result);
+		setResponse(result);
 	};
 
 	// ---------------------------------------------------------
@@ -98,7 +108,7 @@ export default function CategoryDataTable({ result, locale }: { result: ActionRe
 			header: 'columns.image',
 			cell: ({ row }) => (
 				<Image
-					src={(row.original.image as TImage)?.url ?? imagesPlaceholder.imgMedium}
+					src={(row.original.images?.[0] as TImage)?.url ?? imagesPlaceholder.imgMedium}
 					width={40}
 					height={40}
 					alt={row.original.name}
@@ -123,6 +133,26 @@ export default function CategoryDataTable({ result, locale }: { result: ActionRe
 			),
 		},
 		{ accessorKey: 'description', header: 'columns.description' },
+		{
+			accessorKey: 'isActive',
+			header: 'columns.status',
+			cell: ({ row }) => {
+				const isActive = row.original.isActive;
+				return (
+					<div className='flex justify-center'>
+						<Switch
+							dir='ltr'
+							aria-checked={isActive}
+							aria-label={isActive ? 'Active' : 'Inactive'}
+							id={row.original.id}
+							checked={isActive}
+							onClick={(e) => e.stopPropagation()}
+							onCheckedChange={() => handleToggleStatus(row.original)}
+						/>
+					</div>
+				);
+			},
+		},
 		{ accessorKey: 'slug', header: 'columns.slug' },
 	];
 

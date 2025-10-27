@@ -1,10 +1,10 @@
 import initTranslations from '@/app/i18n';
 import BreadcrumbDashboard from '@/components/Dashboard/breadcrumb-dashboard';
-import { TCategoryFormValues } from '@/components/Dashboard/forms/category-form';
 import LoaderBlock from '@/components/shard/loaders/loader-block';
 import { Button } from '@/components/ui-custom/custom-button';
 import { TLocalesData } from '@/configs/general';
 import { getDataInPage } from '@/lib/utils.server/api.server';
+import { TCategoryFormValues } from '@/validation/category-validation';
 import { ArrowRightIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';

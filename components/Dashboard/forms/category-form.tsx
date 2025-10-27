@@ -6,87 +6,22 @@ import { Form } from '@/components/ui-custom/custom-form';
 import { config_env } from '@/configs/general';
 import { useFormResponse } from '@/hooks/use-form-response';
 import { useServerResponse } from '@/hooks/use-server-response';
+import { formSectionSEO } from '@/lib/create-forms/form-section-seo';
 import { renderField } from '@/lib/create-forms/input-registry';
 import { SectionConfig } from '@/lib/create-forms/types-create-forms';
 import { msg } from '@/lib/utils';
 import { createCategoryAction, updateCategoryAction } from '@/server/actions/category-actions';
 import { ActionResult } from '@/types/api';
-import { defaultValues_category, formSchema_category } from '@/validation/category-validation';
-import { SEOFormValues } from '@/validation/seo-validation';
+import { defaultValuesCategory, formSchemaCategory, TCategoryFormValues } from '@/validation/category-validation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { z } from 'zod';
 import SubmitButton from './submit-button';
 
-export type TCategoryFormValues = z.infer<typeof formSchema_category> & { id?: string };
-type TTypeFormValues = TCategoryFormValues;
+type TFormValues = TCategoryFormValues;
 
-export const formSectionSEO: SectionConfig<SEOFormValues> = {
-	title: 'forms.sections.seo_details',
-	fields: [
-		{
-			type: 'text',
-			name: 'seo_title_ar',
-			label: 'forms.labels.seo_title_ar',
-			placeholder: 'forms.placeholders.seo_title_ar',
-		},
-		{
-			type: 'text',
-			name: 'seo_title_en',
-			label: 'forms.labels.seo_title_en',
-			placeholder: 'forms.placeholders.seo_title_en',
-		},
-		{
-			type: 'textarea',
-			name: 'seo_description_ar',
-			label: 'forms.labels.seo_description_ar',
-			placeholder: 'forms.placeholders.seo_description_ar',
-			rows: 6,
-		},
-		{
-			type: 'textarea',
-			name: 'seo_description_en',
-			label: 'forms.labels.seo_description_en',
-			placeholder: 'forms.placeholders.seo_description_en',
-			rows: 6,
-		},
-		{
-			type: 'text',
-			name: 'slug_ar',
-			label: 'forms.labels.slug_ar',
-			placeholder: 'forms.placeholders.slug_ar',
-			referenceInput: 'name_ar',
-		},
-		{
-			type: 'text',
-			name: 'slug_en',
-			label: 'forms.labels.slug_en',
-			placeholder: 'forms.placeholders.slug_en',
-			referenceInput: 'name_en',
-		},
-		{
-			type: 'text',
-			name: 'seo_keywords_ar',
-			label: 'forms.labels.seo_keywords_ar',
-			placeholder: 'forms.placeholders.seo_keywords_ar',
-		},
-		{
-			type: 'text',
-			name: 'seo_keywords_en',
-			label: 'forms.labels.seo_keywords_en',
-			placeholder: 'forms.placeholders.seo_keywords_en',
-		},
-		// {
-		// 	type: 'seoMockupCard',
-		// 	name: 'seo_info',
-		// 	parentClass: 'sm:col-span-full',
-		// },
-	],
-};
-
-export const formSections_category: SectionConfig<TTypeFormValues>[] = [
+export const formSections_category: SectionConfig<TFormValues>[] = [
 	{
 		title: 'forms.sections.category_info',
 		fields: [
@@ -105,20 +40,35 @@ export const formSections_category: SectionConfig<TTypeFormValues>[] = [
 				required: true,
 			},
 			{
+				type: 'switch',
+				name: 'isActive',
+				label: 'forms.labels.is_active',
+				placeholder: 'forms.placeholders.is_active',
+				required: true,
+				// parentClass: 'col-span-full',
+				variants: 'input', // 'switch',
+			},
+			{
+				type: 'empty',
+				name: 'isActive',
+			},
+			{
 				type: 'richtext',
 				name: 'description_ar',
 				label: 'forms.labels.description_ar',
 				placeholder: 'forms.placeholders.description_ar',
+				parentClass: 'col-span-full xl:col-span-1',
 			},
 			{
 				type: 'richtext',
 				name: 'description_en',
 				label: 'forms.labels.description_en',
 				placeholder: 'forms.placeholders.description_en',
+				parentClass: 'col-span-full xl:col-span-1',
 			},
 			{
 				type: 'imageUpload',
-				name: 'image',
+				name: 'images',
 				label: 'forms.labels.image',
 				placeholder: 'forms.placeholders.image',
 				parentClass: 'col-span-full',
@@ -127,7 +77,7 @@ export const formSections_category: SectionConfig<TTypeFormValues>[] = [
 				// 	// accept: 'image/*',
 				// 	// multiple: false,
 				// },
-				// multiple: true,
+				multiple: true,
 			},
 		],
 	},
@@ -139,127 +89,49 @@ export const formSections_category: SectionConfig<TTypeFormValues>[] = [
 				name: 'products',
 				label: msg('common.actions.choose_', { item: 'common.sections.products' }),
 				placeholder: 'forms.placeholders.choose_categorys_products',
-				optionUrl: `${config_env.domainAPI}/dashboard/brands`,
+				optionUrl: `${config_env.domainAPI}/dashboard/categories`,
 			},
 		],
 	},
 	// SEO sections inputs with mockup card
-	{
-		title: 'forms.sections.seo_info',
-		fields: [
-			{
-				type: 'text',
-				name: 'seo_title_ar',
-				label: 'forms.labels.seo_title_ar',
-				placeholder: 'forms.placeholders.seo_title_ar',
-				referenceInput: 'name_ar',
-			},
-			{
-				type: 'text',
-				name: 'seo_title_en',
-				label: 'forms.labels.seo_title_en',
-				placeholder: 'forms.placeholders.seo_title_en',
-				referenceInput: 'name_en',
-			},
-			{
-				type: 'textarea',
-				name: 'seo_description_ar',
-				label: 'forms.labels.seo_description_ar',
-				placeholder: 'forms.placeholders.seo_description_ar',
-				referenceInput: 'description_ar',
-				rows: 6,
-			},
-			{
-				type: 'textarea',
-				name: 'seo_description_en',
-				label: 'forms.labels.seo_description_en',
-				placeholder: 'forms.placeholders.seo_description_en',
-				rows: 6,
-				referenceInput: 'description_en',
-			},
-			{
-				type: 'slug',
-				name: 'slug_ar',
-				label: 'forms.labels.slug_ar',
-				placeholder: 'forms.placeholders.slug_ar',
-				referenceInput: 'name_ar',
-			},
-			{
-				type: 'slug',
-				name: 'slug_en',
-				label: 'forms.labels.slug_en',
-				placeholder: 'forms.placeholders.slug_en',
-				referenceInput: 'name_en',
-			},
-			{
-				type: 'text',
-				name: 'seo_keywords_ar',
-				label: 'forms.labels.seo_keywords_ar',
-				placeholder: 'forms.placeholders.seo_keywords_ar',
-			},
-			{
-				type: 'text',
-				name: 'seo_keywords_en',
-				label: 'forms.labels.seo_keywords_en',
-				placeholder: 'forms.placeholders.seo_keywords_en',
-			},
-			{
-				type: 'seoMockupCard',
-				name: 'seo_title_ar',
-				parentClass: 'sm:col-span-full',
-			},
-			{
-				type: 'imageUpload',
-				name: 'seo_image',
-				label: 'forms.labels.seo_image',
-				placeholder: 'forms.placeholders.seo_image',
-				parentClass: 'col-span-full',
-				folder: 'categories',
-				description: 'forms.descriptions.seo_image',
-			},
-		],
-	},
+	formSectionSEO as SectionConfig<TFormValues>,
 ];
 
 export default function CategoryForm({
 	type = 'create',
 	response,
-	defaultValues = (response?.data as TTypeFormValues) || defaultValues_category,
+	defaultValues = (response?.data as TFormValues) || defaultValuesCategory,
 }: {
 	type?: 'create' | 'update';
-	response?: ActionResult<TTypeFormValues>;
-	defaultValues?: TTypeFormValues & { id?: string };
+	response?: ActionResult<TFormValues>;
+	defaultValues?: TFormValues & { id?: string };
 }) {
 	const { t } = useTranslation();
 
 	// for handling server response errors & messages
 	useServerResponse(response);
 
-	const form = useForm<TTypeFormValues>({
-		resolver: zodResolver(formSchema_category),
+	const form = useForm<TFormValues>({
+		resolver: zodResolver(formSchemaCategory),
 		defaultValues,
 		// delayError: 1000,
 	});
 
-	console.log('defaultValues', defaultValues);
+	const [result, setResult] = useState<ActionResult<TFormValues> | null>(null);
+	const [isPending, startTransition] = useTransition();
 
-	const [result, setResult] = useState<ActionResult<TTypeFormValues> | null>(null);
-
-	useFormResponse<TTypeFormValues>(result!, form, {
+	useFormResponse<TFormValues>(result!, form, {
 		redirectUrl: `/${url_segment}`,
-		reset_on_success: (result?.data as TTypeFormValues) || true,
+		reset_on_success: (result?.data as TFormValues) || true,
 	});
 
-	console.log('errors', form.formState.errors);
+	async function onSubmit(data: TFormValues) {
+		startTransition(async () => {
+			const result =
+				type == 'create' ? await createCategoryAction(data) : await updateCategoryAction(defaultValues.id || '', data);
 
-	async function onSubmit(data: TTypeFormValues) {
-		console.log('onSubmit data', data);
-		const result =
-			type == 'create' ? await createCategoryAction(data) : await updateCategoryAction(defaultValues.id || '', data);
-
-		setResult(result as ActionResult<TTypeFormValues>);
-
-		console.log('res category form', result);
+			setResult(result as ActionResult<TFormValues>);
+		});
 	}
 
 	return (
@@ -270,7 +142,7 @@ export default function CategoryForm({
 				method='post'
 				className='w-full grid gap-6 relative'
 			>
-				{form.formState.isSubmitting && <LoaderInstElement />}
+				{(form.formState.isSubmitting || isPending) && <LoaderInstElement />}
 				{formSections_category.map((section, sectionIndex) => (
 					<div key={'section-' + sectionIndex} className='form-section'>
 						<div className='section-title font-medium text-muted-foreground'>{t(section.title)}</div>
@@ -285,7 +157,7 @@ export default function CategoryForm({
 				))}
 
 				{/* submit & cancel buttons */}
-				<SubmitButton isPending={form.formState.isSubmitting} formId='category-form' />
+				<SubmitButton isPending={form.formState.isSubmitting || isPending} formId='category-form' />
 			</form>
 		</Form>
 	);

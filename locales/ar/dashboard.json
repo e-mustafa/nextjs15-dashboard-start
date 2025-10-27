@@ -47,7 +47,11 @@
 
 			"categories": "التصنيفات",
 			"create_category": "اضافة تصنيف",
-			"edit_category": "تعديل التصنيف"
+			"edit_category": "تعديل التصنيف",
+
+			"collections": "المجموعات",
+			"create_collection": "اضافة مجموعة",
+			"edit_collection": "تعديل المجموعة"
 		},
 		"messages": {
 			"processing": "جارٍ المعالجة...",
@@ -144,6 +148,9 @@
 			"seo_info": "معلومات تحسين محركات البحث (SEO)",
 			"brand_info": "معلومات العلامة التجارية (براند)",
 			"category_info": "معلومات التصنيف",
+			"collection_info": "معلومات المجموعة",
+			"product_info": "معلومات المنتج",
+			"products_info": "معلومات المنتجات",
 			"extra_info": "معلومات اضافية"
 		},
 		"labels": {
@@ -196,7 +203,8 @@
 			"image_multiple": "صور",
 			"file_single": "ملف",
 			"file_multiple": "ملفات",
-			"is_active": "حالة التفعيل"
+			"is_active": "حالة التفعيل",
+			"is_featured": "مجموعة مميزه"
 		},
 		"placeholders": {
 			"name": "اكتب الاسم",
@@ -257,7 +265,8 @@
 			"change_image": "تغير الصورة",
 			"choose_categorys_products": "حدد المنتجات تحت هذا التصنيف",
 			"choose_items": "حدد العناصر...",
-			"is_active": "تفعيل ليظهر في الموقع"
+			"is_active": "تفعيل ليظهر في الموقع",
+			"is_featured": "تفعيل لتعينها كمجموعة مميزة"
 		},
 		"validation": {
 			"required": "هذا الحقل مطلوب",
@@ -418,6 +427,18 @@
 		"create_subcategory": "إضافة تصنيف فرعي",
 		"edit_subcategory": "تعديل تصنيف فرعي",
 
+		"collections": "المجموعات",
+		"create_collection": "إضافة مجموعة",
+		"edit_collection": "تعديل مجموعة",
+
+		"attributes": "الخصائص",
+		"create_attribute": "إضافة خصائص",
+		"edit_attribute": "تعديل خصائص",
+
+		"tags": "التاغات",
+		"create_tag": "إضافة تاغ",
+		"edit_tag": "تعديل تاغ",
+
 		"coupons": "الكوبونات",
 		"create_coupon": "إضافة كوبون",
 		"edit_coupon": "تعديل كوبون"
@@ -481,6 +502,21 @@
 				"delete": "فشل حذف التصنيف",
 				"not_found": "التصنيف غير موجود",
 				"exists": "التصنيف موجود بالفعل"
+			}
+		},
+		"collections": {
+			"success": {
+				"create": "تم انشاء المجموعة بنجاح",
+				"update": "تم تحديث المجموعة بنجاح",
+				"delete": "تم حذف المجموعة بنجاح",
+				"delete_many": "تم حذف المجموعات بنجاح"
+			},
+			"errors": {
+				"create": "فشل انشاء المجموعة",
+				"update": "فشل تحديث المجموعة",
+				"delete": "فشل حذف المجموعة",
+				"not_found": "المجموعة غير موجودة",
+				"exists": "المجموعة موجودة بالفعل"
 			}
 		},
 		"products": "المنتجات",
