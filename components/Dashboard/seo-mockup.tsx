@@ -19,8 +19,11 @@ export interface SEOMockupCardData {
 	};
 }
 
-export default function SEOMockupCard({ data }: { data?: SEOMockupCardData }) {
-	const { t, i18n: { language } } = useTranslation();
+export default function SEOMockupCard({ data, image }: { data?: SEOMockupCardData; image?: string }) {
+	const {
+		t,
+		i18n: { language },
+	} = useTranslation();
 
 	const infos = data && data[language as SEODataKey];
 
@@ -67,7 +70,14 @@ export default function SEOMockupCard({ data }: { data?: SEOMockupCardData }) {
 			<Card className='bg-background/50 text-white border-0 p-4 shadow-md rounded-2xl'>
 				<CardContent className='space-y-2 px-0'>
 					<div className='flex items-center gap-2 mb-4'>
-						<Image src='/assets/images/brand/icon.png' alt='website logo' width={46} height={46} priority />
+						<Image
+							src={image || '/assets/images/brand/icon.png'}
+							alt='website logo'
+							height={46}
+							width={46}
+							priority
+							className='w-auto h-12 aspect-auto object-contain'
+						/>
 						<div className='grid gap-1.5'>
 							<p className='text-sm text-foreground'>{seoData[language as SEODataKey]?.title}</p>
 							<a href='#' className='text-sm text-foreground hover:underline'>
