@@ -1,5 +1,6 @@
 import { msg } from '@/lib/utils';
 import z from 'zod';
+import { imagesField, nameArField, nameEnField } from './fields-validation';
 import { SEODefaultValues, SEOFormSchema } from './seo-validation';
 
 export type TBrandFormValues = z.infer<typeof formSchemaBrand> & { id?: string };
@@ -19,29 +20,14 @@ export const defaultValuesBrand = {
 
 export const formSchemaBrand = z
 	.object({
-		name_ar: z
-			.string()
-			.trim()
-			.min(2, { message: msg('forms.validation.name_ar_min', { min: 2 }) })
-			.max(30, { message: msg('forms.validation.name_ar_max', { min: 30 }) }),
-		name_en: z
-			.string()
-			.trim()
-			.min(2, { message: msg('forms.validation.name_ar_min', { min: 2 }) })
-			.max(30, { message: msg('forms.validation.name_ar_max', { min: 30 }) }),
+		name_ar: nameArField,
+		name_en: nameEnField,
 		description_ar: z.string().optional(),
 		description_en: z.string().optional(),
 
 		isActive: z.boolean(),
 
-		images: z
-			.array(
-				z.object({
-					url: z.string().url({ message: msg('forms.validation.invalid_url') }),
-					fileId: z.string(),
-				})
-			)
-			.optional(),
+		images: imagesField,
 		products: z.array(z.string()).optional(),
 	})
 	.extend(SEOFormSchema.shape);

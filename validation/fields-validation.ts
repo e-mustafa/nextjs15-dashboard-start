@@ -42,3 +42,24 @@ export const otpField = z
 	.string()
 	.nonempty({ message: 'validation.otp_required' })
 	.min(4, { message: 'validation.otp_required' });
+
+export const imagesField = z
+	.array(
+		z.object({
+			url: z.string().url({ message: msg('forms.validation.invalid_url') }),
+			fileId: z.string(),
+		})
+	)
+	.optional();
+
+export const nameArField = z
+	.string()
+	.trim()
+	.min(2, { message: msg('forms.validation.name_ar_min', { min: 2 }) })
+	.max(30, { message: msg('forms.validation.name_ar_max', { min: 30 }) });
+
+export const nameEnField = z
+	.string()
+	.trim()
+	.min(2, { message: msg('forms.validation.name_en_min', { min: 2 }) })
+	.max(30, { message: msg('forms.validation.name_en_max', { min: 30 }) });

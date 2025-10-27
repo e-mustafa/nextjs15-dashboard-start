@@ -28,14 +28,14 @@ export const formSectionSEO = {
 			rows: 6,
 		},
 		{
-			type: 'text',
+			type: 'slug',
 			name: 'slug_ar',
 			label: 'forms.labels.slug_ar',
 			placeholder: 'forms.placeholders.slug_ar',
 			referenceInput: 'name_ar',
 		},
 		{
-			type: 'text',
+			type: 'slug',
 			name: 'slug_en',
 			label: 'forms.labels.slug_en',
 			placeholder: 'forms.placeholders.slug_en',

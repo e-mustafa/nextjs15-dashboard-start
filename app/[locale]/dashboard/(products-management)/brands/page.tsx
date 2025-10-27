@@ -12,7 +12,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
-const BrandDataTable = dynamic(() => import('@/components/Dashboard/brands-table-data'), {
+const BrandDataTable = dynamic(() => import('@/components/Dashboard/dataTable-sections/brands-dataTable'), {
 	// ssr: false,
 });
 

@@ -7,6 +7,7 @@ import { ArrowRightIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Suspense } from 'react';
+import { url_segment } from '../page';
 
 const BrandForm = dynamic(() => import('@/components/Dashboard/forms/brand-form'), {
 	// ssr: false,
@@ -23,7 +24,7 @@ export default async function AddBrandPage({ params }: TLayoutProps) {
 			<BreadcrumbDashboard lastPath={t('breadcrumbs.create_brand')} />
 			<div className='flex gap-2 items-center'>
 				<Button asChild variant='ghost' size='icon'>
-					<Link href='/dashboard/brands'>
+					<Link href={`/${url_segment}`}>
 						<ArrowRightIcon className='size-6 text-muted-foreground' />
 					</Link>
 				</Button>

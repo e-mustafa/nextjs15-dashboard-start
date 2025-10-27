@@ -3,16 +3,16 @@ import { url_segment } from '@/app/[locale]/dashboard/(products-management)/bran
 import { imagesPlaceholder, TLocalesData } from '@/configs/general';
 import { useServerResponse } from '@/hooks/use-server-response';
 import { getDataInPage } from '@/lib/utils.server/api.server';
-import { deleteBrandAction, deleteManyBrandsAction } from '@/server/actions/brand-actions';
-import { Brand, toggleStateBrand } from '@/server/services/brand-service';
+import { deleteBrandAction, deleteManyBrandsAction, toggleStateBrandAction } from '@/server/actions/brand-actions';
+import { Brand } from '@/server/services/brand-service';
 import { ActionResult, ApiMeta, TImage, TQueryParams } from '@/types/api';
 import { ColumnDef } from '@tanstack/react-table';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useOptimistic, useState, useTransition } from 'react';
-import { Switch } from '../ui/switch';
-import ReusableDataTable from './dataTable/reusable-data-table';
+import { Switch } from '../../ui/switch';
+import ReusableDataTable from '../dataTable/reusable-data-table';
 
 export default function BrandDataTable({ result, locale }: { result: ActionResult<Brand>; locale: TLocalesData }) {
 	const router = useRouter();
@@ -89,8 +89,11 @@ export default function BrandDataTable({ result, locale }: { result: ActionResul
 		setResponse(result);
 	};
 
+	// ---------------------------------------------------------
+	// Toggle Status
+	// ---------------------------------------------------------
 	const handleToggleStatus = async (row: Brand) => {
-		const result = await toggleStateBrand(row.id, !row.isActive);
+		const result = await toggleStateBrandAction(row.id, !row.isActive);
 		console.log('result', result);
 		setResponse(result);
 	};

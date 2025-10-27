@@ -36,21 +36,21 @@ export default function SlugInputField<T extends FieldValues, K extends keyof Fi
 }: RenderFieldProps<T, K>): JSX.Element {
 	const { t } = useTranslation();
 
-	const formatSlug = (slug: string, form: UseFormReturn<T>) => {
+	const formatSlug = async (slug: string, form: UseFormReturn<T>) => {
 		// if (slug) return;
 
-		const formattedSlug = slugify(slug, locale);
+		const formattedSlug = await slugify(slug, locale);
 
 		form.setValue(name as Path<T>, formattedSlug as PathValue<T, Path<T>>, { shouldValidate: true });
 	};
 
+	const referenceData = form.watch(referenceInput as Path<T>);
+
 	useEffect(() => {
-		const referenceData = form.watch(referenceInput as Path<T>)?.trim();
-
-		if (!referenceData) return;
-
-		formatSlug(referenceData, form);
-	}, [form.watch(referenceInput as Path<T>)]);
+		if (referenceData?.trim()) {
+			formatSlug(referenceData.trim(), form);
+		}
+	}, [referenceData]);
 
 	return (
 		<FormField
