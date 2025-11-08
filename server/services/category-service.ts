@@ -8,7 +8,7 @@ import { prisma_DB } from '@/prisma/prisma.db';
 import { ActionResult, TImage } from '@/types/api';
 import { fields, formSchemaCategory, TCategoryFormValues } from '@/validation/category-validation';
 import { Prisma } from '@prisma/client';
-import { revalidatePath, updateTag } from 'next/cache';
+import { revalidatePath, revalidateTag, updateTag } from 'next/cache';
 import { cookies } from 'next/headers';
 
 type TFormValues = TCategoryFormValues;
@@ -310,7 +310,7 @@ export async function updateCategory(id: string, data: TFormValues): Promise<Act
 
 	if (!category) throw new AppError('api.categories.errors.not_found', 404);
 
-	updateTag('categories');
+	revalidateTag('categories', 'max');
 
 	const formattedData = await formatCategory(category as CategoryWithRelations);
 	logger.info(`✅ Category updated: ${category.id}`, { context: 'CategoryService' });
@@ -329,7 +329,7 @@ export async function toggleStateCategory(id: string, isActive: boolean) {
 
 	if (!updated) throw new AppError('api.errors.update_status', 404);
 
-	updateTag('categories');
+	revalidateTag('categories', 'max');
 	logger.info(`✅ Category updated: ${updated.id}`, { context: 'CategoryService' });
 	return { success: true, status: 200, data: updated, message: 'api.success.update_status' };
 }
@@ -340,7 +340,7 @@ export async function deleteCategory(id: string) {
 
 	await prisma_DB.category.delete({ where: { id } });
 	// revalidateTag('categories');
-	updateTag('categories');
+	revalidateTag('categories', 'max');
 	logger.info(`✅ Category deleted: ${id} by ${user?.name}`, { context: 'CategoryService' });
 
 	return { success: true, status: 200, data: null, message: 'api.categories.success.delete' };
@@ -353,7 +353,7 @@ export async function deleteManyCategories(ids: string[]) {
 	if (!deleted.count) throw new AppError('api.categories.errors.delete', 404);
 
 	// revalidateTag('categories');
-	updateTag('categories');
+	revalidateTag('categories', 'max');
 	logger.info(`✅ ${deleted.count} categories deleted by ${user?.name}`, { context: 'CategoryService' });
 	return { success: true, status: 200, data: null, message: 'api.categories.success.delete_many' };
 }

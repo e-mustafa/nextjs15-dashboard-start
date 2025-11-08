@@ -8,7 +8,7 @@ import { prisma_DB } from '@/prisma/prisma.db';
 import { ActionResult, TImage } from '@/types/api';
 import { fields, formSchemaBrand, TBrandFormValues } from '@/validation/brand-validation';
 import { Prisma } from '@prisma/client';
-import { revalidatePath, updateTag } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { cookies } from 'next/headers';
 
 type TFormValues = TBrandFormValues;
@@ -310,7 +310,8 @@ export async function updateBrand(id: string, data: TFormValues): Promise<Action
 
 	if (!brand) throw new AppError('api.brands.errors.not_found', 404);
 
-	updateTag('brands');
+	revalidateTag('brands', 'max');
+	// updateTag('brands');
 
 	const formattedData = await formatBrand(brand as BrandWithRelations);
 	logger.info(`✅ Brand updated: ${brand.id}`, { context: 'BrandService' });
@@ -329,7 +330,8 @@ export async function toggleStateBrand(id: string, isActive: boolean) {
 
 	if (!updated) throw new AppError('api.errors.update_status', 404);
 
-	updateTag('brands');
+	revalidateTag('brands', 'max');
+	// updateTag('brands');
 	logger.info(`✅ Brand updated: ${updated.id}`, { context: 'BrandService' });
 	return { success: true, status: 200, data: updated, message: 'api.success.update_status' };
 }
@@ -339,8 +341,8 @@ export async function deleteBrand(id: string) {
 	if (!id) throw new AppError('api.errors.invalid_id', 404);
 
 	await prisma_DB.brand.delete({ where: { id } });
-	// revalidateTag('brands');
-	updateTag('brands');
+	revalidateTag('brands', 'max');
+	// updateTag('brands');
 	logger.info(`✅ Brand deleted: ${id} by ${user?.name}`, { context: 'BrandService' });
 
 	return { success: true, status: 200, data: null, message: 'api.brands.success.delete' };
@@ -352,8 +354,8 @@ export async function deleteManyBrands(ids: string[]) {
 	const deleted = await prisma_DB.brand.deleteMany({ where: { id: { in: ids } } });
 	if (!deleted.count) throw new AppError('api.brands.errors.delete', 404);
 
-	// revalidateTag('brands');
-	updateTag('brands');
+	revalidateTag('brands', 'max');
+	// updateTag('brands');
 	logger.info(`✅ ${deleted.count} brands deleted by ${user?.name}`, { context: 'BrandService' });
 	return { success: true, status: 200, data: null, message: 'api.brands.success.delete_many' };
 }

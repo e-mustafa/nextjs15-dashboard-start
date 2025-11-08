@@ -8,7 +8,7 @@ import { prisma_DB } from '@/prisma/prisma.db';
 import { ActionResult, TImage } from '@/types/api';
 import { fields, formSchemaCollection, TCollectionFormValues } from '@/validation/collection-validation';
 import { Prisma } from '@prisma/client';
-import { revalidatePath, updateTag } from 'next/cache';
+import { revalidatePath, revalidateTag, updateTag } from 'next/cache';
 import { cookies } from 'next/headers';
 
 type TFormValues = TCollectionFormValues;
@@ -309,7 +309,7 @@ export async function updateCollection(id: string, data: TFormValues): Promise<A
 
 	if (!collection) throw new AppError('api.collections.errors.not_found', 404);
 
-	updateTag('collections');
+	revalidateTag('collections', 'max');
 	const formattedData = await formatCollection(collection as CollectionWithRelations);
 	logger.info(`✅ Collection updated: ${collection.id}`, { context: 'CollectionService' });
 
@@ -323,7 +323,7 @@ export async function toggleStateCollection(id: string, isActive: boolean) {
 		data: { isActive },
 		select: { id: true, isActive: true },
 	});
-	updateTag('collections');
+	revalidateTag('collections', 'max');
 	return { success: true, status: 200, data: updated, message: 'api.success.update_status' };
 }
 
@@ -334,14 +334,14 @@ export async function toggleFeaturedCollection(id: string, isFeatured: boolean) 
 		data: { isFeatured },
 		select: { id: true, isFeatured: true },
 	});
-	updateTag('collections');
+	revalidateTag('collections', 'max');
 	return { success: true, status: 200, data: updated, message: 'api.success.update_status' };
 }
 
 /** 🔴 Delete */
 export async function deleteCollection(id: string) {
 	await prisma_DB.collection.delete({ where: { id } });
-	updateTag('collections');
+	revalidateTag('collections', 'max');
 	logger.info(`✅ Collection deleted: ${id}`, { context: 'CollectionService' });
 	return { success: true, status: 200, data: null, message: 'api.collections.success.delete' };
 }
@@ -352,7 +352,7 @@ export async function deleteManyCollections(ids: string[]) {
 	const deleted = await prisma_DB.collection.deleteMany({ where: { id: { in: ids } } });
 	if (!deleted.count) throw new AppError('api.collections.errors.delete', 404);
 
-	updateTag('collections');
+	revalidateTag('collections', 'max');
 	logger.info(`✅ ${deleted.count} collections deleted`, { context: 'CollectionService' });
 	return { success: true, status: 200, data: null, message: 'api.collections.success.delete_many' };
 }
