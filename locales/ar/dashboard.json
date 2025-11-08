@@ -4,6 +4,7 @@
 			"add": "إضافة",
 			"edit": "تعديل",
 			"delete": "حذف",
+			"delete_permanently": "حذف نهائي من قاعدة البيانات",
 			"delete_confirm": "تأكيد الحذف",
 			"delete_selected": "حذف المحدد",
 			"delete_image": "حذف الصورة",
@@ -35,20 +36,19 @@
 			"settings": "الإعدادات",
 			"permissions": "الأذونات",
 			"selected_images": "الصور المحددة",
+			"selected_Products": "المنتجات المحددة",
+			"no_selected_Products": "لم يتم تحديد منتجات.",
 			"all_images": "جميع الصور",
 			"library": "المكتبة",
 			"images_library": "مكتبة الصور",
 			"images_library_description": "في هذه المكتبة يمكنك رفع وتحميل وحذف واعادة تسمية الصور.",
 			"products": "المنتجات",
-
 			"brands": "العلامات التجارية",
 			"create_brand": "اضافة علامة تجارية ( براند )",
 			"edit_brand": "تعديل العلامة تجارية (براند)",
-
 			"categories": "التصنيفات",
 			"create_category": "اضافة تصنيف",
 			"edit_category": "تعديل التصنيف",
-
 			"collections": "المجموعات",
 			"create_collection": "اضافة مجموعة",
 			"edit_collection": "تعديل المجموعة"
@@ -143,7 +143,6 @@
 			"settings": "الإعدادات",
 			"permissions": "الأذونات",
 			"info": "المعلومات",
-
 			"general_info": "المعلومات الأساسية",
 			"seo_info": "معلومات تحسين محركات البحث (SEO)",
 			"brand_info": "معلومات العلامة التجارية (براند)",
@@ -204,7 +203,9 @@
 			"file_single": "ملف",
 			"file_multiple": "ملفات",
 			"is_active": "حالة التفعيل",
-			"is_featured": "مجموعة مميزه"
+			"is_featured": "مجموعة مميزه",
+			"tag": "اسم التاغ",
+			"tag_slug": "المعرف النصي (Slug) للتاغ"
 		},
 		"placeholders": {
 			"name": "اكتب الاسم",
@@ -253,7 +254,6 @@
 			"slug": "اكتب المعرّف النصي (Slug)...",
 			"slug_ar": "اكتب المعرّف النصي (Slug) بالعربية...",
 			"slug_en": "اكتب المعرّف النصي (Slug) بالإنجليزية...",
-
 			"image_drag_and_drop": "اسحب الصور هنا، او انقر لتحديد صورة",
 			"file_drag_and_drop": "اسحب الملفات هنا، او انقر لتحديد الملفات",
 			"image_on_drag": "اسحب الصورة هنا لتحميلها...",
@@ -263,10 +263,14 @@
 			"upload_file": "رفع ملف",
 			"upload_general": "رفع صور او ملفات",
 			"change_image": "تغير الصورة",
+			"choose_brands_products": "حدد المنتجات تحت هذا البراند",
 			"choose_categorys_products": "حدد المنتجات تحت هذا التصنيف",
+			"choose_collections_products": "حدد المنتجات تحت هذه المجموعه",
 			"choose_items": "حدد العناصر...",
 			"is_active": "تفعيل ليظهر في الموقع",
-			"is_featured": "تفعيل لتعينها كمجموعة مميزة"
+			"is_featured": "تفعيل لتعينها كمجموعة مميزة",
+			"tag": "اكتب التاغ",
+			"tag_slug": "اكتب المعرف النصي (Slug) للتاغ"
 		},
 		"validation": {
 			"required": "هذا الحقل مطلوب",
@@ -383,7 +387,8 @@
 		"updated_at": "تاريخ التحديث",
 		"description": "الوصف",
 		"image": "الصورة",
-		"actions": "العمليات"
+		"actions": "العمليات",
+		"isActive": "الحالة"
 	},
 	"charts": {
 		"sales_over_time": "المبيعات مع مرور الوقت",
@@ -419,26 +424,21 @@
 		"brands": "الماركات",
 		"create_brand": "إضافة ماركة",
 		"edit_brand": "تعديل ماركة",
-
 		"categories": "التصنيفات",
 		"create_category": "إضافة تصنيف",
 		"edit_category": "تعديل تصنيف",
 		"subcategories": "التصنيفات الفرعية",
 		"create_subcategory": "إضافة تصنيف فرعي",
 		"edit_subcategory": "تعديل تصنيف فرعي",
-
 		"collections": "المجموعات",
 		"create_collection": "إضافة مجموعة",
 		"edit_collection": "تعديل مجموعة",
-
 		"attributes": "الخصائص",
 		"create_attribute": "إضافة خصائص",
 		"edit_attribute": "تعديل خصائص",
-
 		"tags": "التاغات",
 		"create_tag": "إضافة تاغ",
 		"edit_tag": "تعديل تاغ",
-
 		"coupons": "الكوبونات",
 		"create_coupon": "إضافة كوبون",
 		"edit_coupon": "تعديل كوبون"
@@ -517,6 +517,21 @@
 				"delete": "فشل حذف المجموعة",
 				"not_found": "المجموعة غير موجودة",
 				"exists": "المجموعة موجودة بالفعل"
+			}
+		},
+		"tags": {
+			"success": {
+				"create": "تم انشاء التاغ بنجاح",
+				"update": "تم تحديث التاغ بنجاح",
+				"delete": "تم حذف التاغ بنجاح",
+				"delete_many": "تم حذف المجموعات بنجاح"
+			},
+			"errors": {
+				"create": "فشل انشاء التاغ",
+				"update": "فشل تحديث التاغ",
+				"delete": "فشل حذف التاغ",
+				"not_found": "التاغ غير موجودة",
+				"exists": "التاغ موجودة بالفعل"
 			}
 		},
 		"products": "المنتجات",

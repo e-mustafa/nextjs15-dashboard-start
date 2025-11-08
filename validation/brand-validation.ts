@@ -1,4 +1,3 @@
-import { msg } from '@/lib/utils';
 import z from 'zod';
 import { imagesField, nameArField, nameEnField } from './fields-validation';
 import { SEODefaultValues, SEOFormSchema } from './seo-validation';
@@ -13,6 +12,7 @@ export const defaultValuesBrand = {
 	name_en: '',
 	description_ar: '',
 	description_en: '',
+	isActive: true,
 	images: [],
 
 	...SEODefaultValues,

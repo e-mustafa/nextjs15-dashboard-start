@@ -9,6 +9,7 @@ const regExp_slugEn = /^[A-Za-z0-9-]+$/; // allow latin characters and numbers
 export const slugSchema = (locale: TLocalesData = 'ar') =>
 	z
 		.string()
+		.trim()
 		.min(1, 'forms.validation.slug_required')
 		.max(200, 'forms.validation.slug_max')
 		.refine(
