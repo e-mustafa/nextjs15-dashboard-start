@@ -79,6 +79,10 @@ export interface FieldConfig<T extends FieldValues = FieldValues, K extends Fiel
 		page?: number
 	) => Promise<PaginatedResponse<T extends ComboboxOption ? T : ComboboxOption>>;
 	optionUrl?: string;
+	revalidateTags?: string[];
+	isTags?: boolean;
+	isProducts?: boolean;
+	deleteTag?: (id: string) => Promise<void>;
 	// getOptionFn;
 
 	searchPlaceholder?: string;

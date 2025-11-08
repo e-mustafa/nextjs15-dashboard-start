@@ -12,6 +12,7 @@ import { JSX } from 'react';
 import { FieldValues, Path } from 'react-hook-form';
 import BaseInputField from './base-input-field';
 import { FieldTypeMap, RenderFieldProps } from './types-create-forms';
+import CheckboxInputField from '@/components/inputs/checkbox-input-field';
 
 /**
  * A registry mapping input field types to their corresponding render functions.
@@ -31,9 +32,6 @@ type InputRegistry = {
 };
 
 export const inputRegistry: InputRegistry = {
-	// password: <T extends FieldValues>({ fieldConfig, form }: RenderFieldProps<T, 'password'>) => (
-	// 	<PasswordInput fieldConfig={fieldConfig} form={form as UseFormReturn<FieldValues>} />
-	// ),
 
 	password: ({ fieldConfig, form }) => <PasswordInput fieldConfig={fieldConfig} form={form} />,
 	textarea: ({ fieldConfig, form }) => <TextareaInputField fieldConfig={fieldConfig} form={form} />,
@@ -41,15 +39,11 @@ export const inputRegistry: InputRegistry = {
 	empty: () => <div />,
 
 	switch: ({ fieldConfig, form }) => <SwitchInputField fieldConfig={fieldConfig} form={form} />,
-
-	// uploadFile: <T extends FieldValues>({ fieldConfig, form }: RenderFieldProps<T, 'uploadFile'>) => (
-	// 	<FileInputField fieldConfig={fieldConfig} form={form} />
-	// ),
+	checkbox: ({ fieldConfig, form }) => <CheckboxInputField fieldConfig={fieldConfig} form={form} />,
 
 	slug: ({ fieldConfig, form }) => <SlugInputField fieldConfig={fieldConfig} form={form} />,
 
 	uploadFile: ({ fieldConfig, form }) => <FileInputField fieldConfig={fieldConfig} form={form} />,
-	// imageManager: ({ fieldConfig, form }) => <ImageManagerField fieldConfig={fieldConfig} form={form} />,
 	imageUpload: ({ fieldConfig, form }) => <ImageUploadField fieldConfig={fieldConfig} form={form} />,
 
 	richtext: ({ fieldConfig, form }) => <RichTextField fieldConfig={fieldConfig} form={form} />,
@@ -91,6 +85,7 @@ export const inputRegistry: InputRegistry = {
 	},
 };
 
+
 /**
  * This function renders a field based on the type of the field and the props passed in.
  *
@@ -108,15 +103,3 @@ export function renderField<T extends FieldValues, K extends keyof FieldTypeMap>
 	}
 	return <BaseInputField {...props} />;
 }
-
-// export function renderField<T extends FieldValues, K extends keyof FieldTypeMap>(
-// 	props: RenderFieldProps<T, K>
-// ): JSX.Element {
-// 	const renderer = inputRegistry[props.fieldConfig.type] as InputRegistry[K] | undefined;
-
-// 	if (renderer) {
-// 		return renderer(props);
-// 	}
-
-// 	return <BaseInputField {...props} />;
-// }
