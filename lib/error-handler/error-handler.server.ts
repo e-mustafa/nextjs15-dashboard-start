@@ -104,12 +104,16 @@ export async function handleErrorServer<T = unknown>(e: unknown): Promise<Action
 		};
 	}
 
-	if (isDEV) console.error('Unexpected Error:', e);
-	logger.error(`Unhandled Error: ${JSON.stringify(e)}`, { context: 'Server' });
+	if (isDEV) {
+		console.error('\n🔥 Unexpected error in Action Server:\n', JSON.stringify(e, Object.getOwnPropertyNames(e), 2));
+	}
+	logger.error(`Unhandled Error: ${JSON.stringify(e)}  -> stack: ${(e as Error).stack}`, { context: 'Server' });
+
 	return {
 		success: false,
 		status: 500,
 		error: 'api.errors.unexpected',
+		...(isDEV && { details: e, stack: (e as Error).stack }),
 	};
 }
 
