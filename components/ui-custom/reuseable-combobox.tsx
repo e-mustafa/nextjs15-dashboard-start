@@ -13,9 +13,9 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import TagForm from '../Dashboard/forms/tag-form';
 import { Badge } from '../ui/badge';
+import { Label } from '../ui/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { Button } from './custom-button';
-import { Label } from '../ui/label';
 
 export type ComboboxOptionWithIdAndName<T> = T & { id: string; name: string };
 

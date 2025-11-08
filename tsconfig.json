@@ -33,7 +33,6 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "components/ExampleClientComponent.js",
     ".next\\dev/types/**/*.ts",
     ".next\\dev/types/**/*.ts"
   ],
