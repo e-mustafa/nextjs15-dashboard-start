@@ -15,13 +15,13 @@ export function ComboboxInputField<T extends FieldValues, K extends keyof FieldT
 	fieldConfig,
 	form,
 }: RenderFieldProps<T, K>): JSX.Element {
-	const { name, label, placeholder, required, description, optionUrl, fetchOptions } = fieldConfig;
+	const { name, label, placeholder, required, description, optionUrl, revalidateTags, fetchOptions } = fieldConfig;
 	const { t, i18n } = useTranslation();
 
 	// const [brandsValue, setBrandsValue] = useState<string[]>(form.getValues(name) as string[]);
 
-	// async function fetchBrandsFromAPI<T>(query: string, page: number = 1): Promise<PaginatedResponse<T>> {
-	// async function fetchBrandsFromAPI(
+	// async function fetchItemsFromAPI<T>(query: string, page: number = 1): Promise<PaginatedResponse<T>> {
+	// async function fetchItemsFromAPI(
 	// 	query: string,
 	// 	page: number = 1
 	// ): Promise<PaginatedResponse<ComboboxOptionWithIdAndName<any>> | ComboboxOptionWithIdAndName<any>[]> {
@@ -34,7 +34,7 @@ export function ComboboxInputField<T extends FieldValues, K extends keyof FieldT
 		[key: string]: any;
 	};
 
-	async function fetchBrandsFromAPI(query: string, page: number = 1) {
+	async function fetchItemsFromAPI(query: string, page: number = 1) {
 		const params = new URLSearchParams({
 			search: query || '',
 			page: page.toString(),
@@ -46,6 +46,7 @@ export function ComboboxInputField<T extends FieldValues, K extends keyof FieldT
 			headers: {
 				'Accept-Language': i18n.language, // or get from context
 			},
+			next: { tags: revalidateTags },
 		});
 		console.log('response', response);
 		if (!response.ok) {
@@ -98,15 +99,18 @@ export function ComboboxInputField<T extends FieldValues, K extends keyof FieldT
 						)}
 						<FormControl>
 							<ReusableCombobox
-								fetchOptions={fetchOptions ? fetchOptions : fetchBrandsFromAPI}
+								fetchOptions={fetchOptions ? fetchOptions : fetchItemsFromAPI}
 								multiple={fieldConfig.multiple}
 								placeholder={placeholder}
 								searchPlaceholder={fieldConfig.searchPlaceholder}
 								emptyMessage={fieldConfig.emptyMessage}
-								className='w-full max-w-md'
+								className='w-full'
 								debounceMs={400}
 								pageSize={10}
 								enableInfiniteScroll={true}
+								isProducts={fieldConfig.isProducts}
+								isTags={fieldConfig.isTags}
+								deleteTag={fieldConfig.deleteTag}
 								// value={value}
 								// onChange={(val) => setBrandsValue(val as string[])}
 								// onChange={field.onChange}

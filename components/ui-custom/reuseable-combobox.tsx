@@ -1,17 +1,21 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn, renderErrorMessage } from '@/lib/utils';
-import { Check, ChevronsUpDown, Loader2, XIcon } from 'lucide-react';
+import { CheckIcon, ChevronsUpDown, Loader2, Trash2Icon, XIcon } from 'lucide-react';
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 
 import { imagesPlaceholder } from '@/configs/general';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import TagForm from '../Dashboard/forms/tag-form';
 import { Badge } from '../ui/badge';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { Button } from './custom-button';
+import { Label } from '../ui/label';
 
 export type ComboboxOptionWithIdAndName<T> = T & { id: string; name: string };
 
@@ -37,6 +41,9 @@ export interface PaginatedResponse<T> {
 interface ComboboxProps<T extends ComboboxOption> {
 	options?: T[];
 	fetchOptions?: (query: string, page?: number) => Promise<PaginatedResponse<T>>;
+	isProducts?: boolean;
+	isTags?: boolean;
+	deleteTag?: (id: string) => Promise<void>;
 	// PaginatedResponse<ComboboxOption> | ComboboxOption[]
 
 	value?: string | string[];
@@ -60,6 +67,9 @@ interface ComboboxProps<T extends ComboboxOption> {
 export default function ReusableCombobox<T extends ComboboxOption>({
 	options: staticOptions = [],
 	fetchOptions,
+	isProducts = false,
+	isTags = false,
+	deleteTag,
 	value,
 	onChange,
 	multiple = false,
@@ -250,7 +260,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 			return renderSelected(selectedOptions);
 		}
 
-		if (multiple && selectedOptions.length > 0) {
+		if (multiple && !isProducts && selectedOptions.length > 0) {
 			return (
 				<div className='flex flex-wrap gap-1 flex-1 min-w-0'>
 					{selectedOptions.slice(0, 2).map((opt) => (
@@ -266,7 +276,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 			);
 		}
 
-		if (!multiple && selectedOptions.length > 0) {
+		if (!multiple && !isProducts && selectedOptions.length > 0) {
 			return (
 				<span>{selectedOptions[0].name}</span>
 				// <div className='flex flex-wrap gap-1 flex-1 min-w-0'>
@@ -293,98 +303,186 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 	const isLoading = isPending || isSearching;
 
 	return (
-		<Popover open={open} onOpenChange={setOpen}>
-			<PopoverTrigger asChild>
-				<Button
-					variant='outline'
-					role='combobox'
-					aria-expanded={open}
-					disabled={disabled}
-					className={cn('w-full justify-between px-3', !selectedOptions.length && 'text-muted-foreground', className)}
-				>
-					<div className='flex items-center gap-2 flex-1 min-w-0 overflow-hidden'>
-						<div className='grow text-start'>{renderTriggerContent()}</div>
-						<ChevronsUpDown className='size-4 shrink-0 opacity-50 ms-auto' />
-					</div>
-				</Button>
-			</PopoverTrigger>
-			<PopoverContent className='w-[var(--radix-popover-trigger-width)] p-0' align='start'>
-				<Command shouldFilter={!fetchOptions}>
-					<CommandInput
-						placeholder={renderErrorMessage(searchPlaceholder, t)}
-						value={searchQuery}
-						onValueChange={handleSearch}
-						className='h-9'
-					/>
-					<CommandList ref={scrollContainerRef} className='border-t border-muted-foreground/30'>
-						{isLoading && currentPage === 1 ? (
-							<div className='flex items-center justify-center gap-1 py-6'>
-								<Loader2 className='h-4 w-4 animate-spin text-muted-foreground' />
-								<span className='ml-2 text-sm text-muted-foreground'>{t('forms.search.searching')}</span>
-							</div>
-						) : filteredOptions.length === 0 ? (
-							<CommandEmpty>
-								{typeof emptyMessage === 'string'
-									? renderErrorMessage(emptyMessage as string, t)
-									: (emptyMessage as unknown as ReactNode)}
-							</CommandEmpty>
-						) : (
-							<>
-								<CommandGroup>
-									{filteredOptions.map((option) => {
-										const isSelected = selectedIds.includes(option.id);
-
-										return (
-											<CommandItem
-												key={option.id}
-												value={option.id}
-												onSelect={() => handleSelect(option.id)}
-												className='cursor-pointer'
-											>
-												<Check className={cn('size-5 text-primary', isSelected ? 'opacity-100' : 'opacity-0')} />
-												<div className='flex items-center gap-2 flex-1'>
-													{hasImage && (
-														<Image
-															src={
-																typeof option.image === 'string'
-																	? option.image
-																	: option.images[0]?.url || imagesPlaceholder.imgMedium
-															}
-															alt={option.name}
-															width={40}
-															height={40}
-															className='size-10 object-cover aspect-square rounded'
-														/>
-													)}
-													<span className='line-clamp-1'>
-														{renderOption ? renderOption(option) : option.name}
-													</span>
-												</div>
-											</CommandItem>
-										);
-									})}
-								</CommandGroup>
-
-								{enableInfiniteScroll && fetchOptions && (
-									<div ref={observerTarget} className='py-2'>
-										{isLoadingMore && (
-											<div className='flex items-center justify-center gap-2 pb-2 text-muted-foreground text-xs'>
-												<Loader2 className='size-4 animate-spin' />
-												{t('common.messages.loading_more')}
-											</div>
-										)}
-										{!hasMore && filteredOptions.length > 0 && (
-											<div className='text-center pb-2 text-xs text-muted-foreground'>
-												{t('common.messages.no_more_items')}
-											</div>
-										)}
-									</div>
-								)}
-							</>
+		<div className='flex flex-col gap-3'>
+			<Popover open={open} onOpenChange={setOpen}>
+				<PopoverTrigger asChild>
+					<Button
+						variant='outline'
+						role='combobox'
+						aria-expanded={open}
+						disabled={disabled}
+						className={cn(
+							'w-full justify-between px-3',
+							!selectedOptions.length && 'text-muted-foreground',
+							className
 						)}
-					</CommandList>
-				</Command>
-			</PopoverContent>
-		</Popover>
+					>
+						<div className='flex items-center gap-2 flex-1 min-w-0 overflow-hidden'>
+							<div className='grow text-start'>{renderTriggerContent()}</div>
+							<ChevronsUpDown className='size-4 shrink-0 opacity-50 ms-auto' />
+						</div>
+					</Button>
+				</PopoverTrigger>
+				<PopoverContent className='w-[var(--radix-popover-trigger-width)] p-0' align='start'>
+					<Command shouldFilter={!fetchOptions}>
+						<CommandInput
+							placeholder={renderErrorMessage(searchPlaceholder, t)}
+							value={searchQuery}
+							onValueChange={handleSearch}
+							className='h-9'
+						/>
+						<CommandList ref={scrollContainerRef} className='border-t border-muted-foreground/30'>
+							{isLoading && currentPage === 1 ? (
+								<div className='flex items-center justify-center gap-1 py-6'>
+									<Loader2 className='h-4 w-4 animate-spin text-muted-foreground' />
+									<span className='ml-2 text-sm text-muted-foreground'>{t('forms.search.searching')}</span>
+								</div>
+							) : filteredOptions.length === 0 ? (
+								<>
+									{isTags && (
+										<TagForm
+											defaultValue={searchQuery}
+											onSuccess={(newTag) => {
+												handleSearch('');
+												handleSelect(newTag.id as string);
+											}}
+										/>
+									)}
+									<CommandEmpty>
+										{typeof emptyMessage === 'string'
+											? renderErrorMessage(emptyMessage as string, t)
+											: (emptyMessage as unknown as ReactNode)}
+									</CommandEmpty>
+								</>
+							) : (
+								<>
+									<CommandGroup>
+										{filteredOptions.map((option) => {
+											const isSelected = selectedIds.includes(option.id);
+
+											return (
+												<CommandItem
+													key={option.id}
+													value={option.id}
+													onSelect={() => handleSelect(option.id)}
+													className='cursor-pointer items-center'
+												>
+													<CheckIcon
+														className={cn('size-5 text-primary', isSelected ? 'opacity-100' : 'opacity-0')}
+													/>
+													<div className='flex items-center gap-2 flex-1'>
+														{hasImage && (
+															<Image
+																src={
+																	typeof option.image === 'string'
+																		? option.image
+																		: option.images[0]?.url || imagesPlaceholder.imgMedium
+																}
+																alt={option.name}
+																width={40}
+																height={40}
+																className='size-10 object-cover aspect-square rounded'
+															/>
+														)}
+														<span className='line-clamp-1 grow'>
+															{renderOption ? renderOption(option) : option.name}
+														</span>
+
+														{isTags && (
+															<Tooltip>
+																<TooltipTrigger asChild>
+																	<Button
+																		variant='delete'
+																		size='icon'
+																		className='size-6'
+																		onClick={() => deleteTag?.(option.id)}
+																	>
+																		<Trash2Icon className='h-4 w-4 text-foreground' />
+																	</Button>
+																</TooltipTrigger>
+																<TooltipContent side='left'>
+																	{t('common.actions.delete_permanently')}
+																</TooltipContent>
+															</Tooltip>
+														)}
+													</div>
+												</CommandItem>
+											);
+										})}
+									</CommandGroup>
+
+									{enableInfiniteScroll && fetchOptions && (
+										<div ref={observerTarget} className='py-2'>
+											{isLoadingMore && (
+												<div className='flex items-center justify-center gap-2 pb-2 text-muted-foreground text-xs'>
+													<Loader2 className='size-4 animate-spin' />
+													{t('common.messages.loading_more')}
+												</div>
+											)}
+											{!hasMore && filteredOptions.length > 0 && (
+												<div className='text-center pb-2 text-xs text-muted-foreground'>
+													{t('common.messages.no_more_items')}
+												</div>
+											)}
+										</div>
+									)}
+								</>
+							)}
+						</CommandList>
+					</Command>
+				</PopoverContent>
+			</Popover>
+
+			{isProducts && (
+				<div className='grid gap-1'>
+					<Label>{t('common.sections.selected_Products')}:</Label>
+					<div className='flex flex-col gap-2 rounded-md border bg-input/30 inset-shadow p-3 text-muted-foreground max-h-96 overflow-y-auto'>
+						{!selectedOptions.length ? (
+							<span className='text-center'>{t('common.sections.no_selected_Products')}</span>
+						) : (
+							selectedOptions.map((option) => {
+								const isSelected = selectedIds.includes(option.id);
+
+								return (
+									<div
+										key={option.id}
+										className='cursor-pointer flex gap-2 items-center hover:bg-accent hover:text-accent-foreground rounded-md'
+									>
+										{/* <CheckIcon className={cn('size-5 text-primary', isSelected ? 'opacity-100' : 'opacity-0')} /> */}
+										<div className='flex items-center gap-2 flex-1'>
+											{hasImage && (
+												<Image
+													src={
+														typeof option.image === 'string'
+															? option.image
+															: option.images[0]?.url || imagesPlaceholder.imgMedium
+													}
+													alt={option.name}
+													width={40}
+													height={40}
+													className='size-10 object-cover aspect-square rounded'
+												/>
+											)}
+											<Link href={`/dashboard/brands/${option.id}`} className='line-clamp-1 grow'>
+												{renderOption ? renderOption(option) : option.name}
+											</Link>
+
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<Button variant='delete' size='icon' onClick={(e) => handleRemove(option.id, e)}>
+														<XIcon className='h-4 w-4 text-foreground' />
+													</Button>
+												</TooltipTrigger>
+												<TooltipContent side='left'>{t('common.actions.remove')}</TooltipContent>
+											</Tooltip>
+										</div>
+									</div>
+								);
+							})
+						)}
+					</div>
+				</div>
+			)}
+		</div>
 	);
 }

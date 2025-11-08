@@ -11,10 +11,11 @@ import { renderField } from '@/lib/create-forms/input-registry';
 import { SectionConfig } from '@/lib/create-forms/types-create-forms';
 import { msg } from '@/lib/utils';
 import { createBrandAction, updateBrandAction } from '@/server/actions/brand-actions';
+import { useGProgressBarStore } from '@/stores/global-progress-bar.store';
 import { ActionResult } from '@/types/api';
 import { defaultValuesBrand, formSchemaBrand, TBrandFormValues } from '@/validation/brand-validation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import SubmitButton from './submit-button';
@@ -88,8 +89,11 @@ export const formSections_brand: SectionConfig<TFormValues>[] = [
 				type: 'combobox',
 				name: 'products',
 				label: msg('common.actions.choose_', { item: 'common.sections.products' }),
-				placeholder: 'forms.placeholders.choose_categorys_products',
+				placeholder: 'forms.placeholders.choose_brands_products',
 				optionUrl: `${config_env.domainAPI}/dashboard/brands`,
+				revalidateTags: ['brands'],
+				multiple: true,
+				isProducts: true,
 			},
 		],
 	},
@@ -107,6 +111,7 @@ export default function BrandForm({
 	defaultValues?: TFormValues & { id?: string };
 }) {
 	const { t } = useTranslation();
+	const { setProcessing } = useGProgressBarStore();
 
 	// for handling server response errors & messages
 	useServerResponse(response);
@@ -124,6 +129,10 @@ export default function BrandForm({
 		redirectUrl: `/${url_segment}`,
 		reset_on_success: (result?.data as TFormValues) || true,
 	});
+
+	useEffect(() => {
+		setProcessing(isPending);
+	}, [isPending, setProcessing]);
 
 	async function onSubmit(data: TFormValues) {
 		startTransition(async () => {
