@@ -45,6 +45,7 @@ import {
 } from 'lucide-react';
 import { Fragment, RefObject, useEffect, useId, useMemo, useRef, useState } from 'react';
 
+import { Checkbox } from '@/components/ui-custom/custom-checkbox';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -58,7 +59,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
@@ -1558,13 +1558,15 @@ export function TableComponent({
 											key={h.id}
 											header={h}
 											style={
-												pinned ? {
-													position: 'sticky',
-													left: h.column.getIsPinned() === 'left' ? offset : undefined,
-													right: h.column.getIsPinned() === 'right' ? offset : undefined,
-													zIndex: 30,
-													background: 'var(--background)',
-												} : {}
+												pinned
+													? {
+															position: 'sticky',
+															left: h.column.getIsPinned() === 'left' ? offset : undefined,
+															right: h.column.getIsPinned() === 'right' ? offset : undefined,
+															zIndex: 30,
+															background: 'var(--background)',
+													  }
+													: {}
 											}
 										/>
 									);

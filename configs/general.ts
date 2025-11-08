@@ -93,3 +93,9 @@ export const imagesPlaceholder = {
 	// blur: 10,
 	// base64: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=',
 };
+
+
+
+// settings
+// redirect after create item
+// redirect after update item

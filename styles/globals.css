@@ -10,6 +10,14 @@
 /* @custom-variant dark (&:is(.dark *)); */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* disable animations when user Reduce Motion*/
+@media (prefers-reduced-motion: reduce) {
+	* {
+		animation: none !important;
+		transition-duration: 0s !important;
+	}
+}
+
 @theme inline {
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
@@ -231,7 +239,7 @@
 	}
 	html {
 		@apply scroll-smooth;
-		scrollbar-gutter: stable; /* don't fill while hide or disable scroll bar  */
+		/* scrollbar-gutter: stable; don't fill while hide or disable scroll bar  */
 	}
 	body {
 		@apply bg-background text-foreground font-sans scroll-smooth;
@@ -256,12 +264,12 @@
 
 	/* to remove margin while dialog/modal opened */
 	body[data-scroll-locked] {
-		@apply !mr-0;
+		@apply mr-0!;
 	}
 
 	/* valid state for inputs */
 	input[data-valid='true']:not([aria-invalid='true']) {
-		@apply !border-green-600 focus-visible:!border-green-600 ring-green-600 focus-visible:!ring-green-600/20;
+		@apply border-green-600! focus-visible:border-green-600! ring-green-600 focus-visible:ring-green-600/20!;
 	}
 
 	/* add astrict to label if input is required */
@@ -295,7 +303,7 @@
 
 	/* component  */
 	.page-component {
-		@apply flex gap-6 p-2 md:p-4 bg-muted rounded-md shadow-lg shadow-primary/10;
+		@apply flex gap-6 p-2 md:p-4 bg-muted rounded-md shadow-lg shadow-primary/10 my-4 md:my-6;
 	}
 	.stack-component {
 		@apply flex gap-3 justify-between items-center py-3 px-2 sm:px-4 shadow-lg shadow-primary/10 rounded-md bg-muted;

@@ -48,6 +48,7 @@ import {
 } from 'lucide-react';
 import { Fragment, RefObject, useEffect, useId, useMemo, useRef, useState } from 'react';
 
+import { Checkbox } from '@/components/ui-custom/custom-checkbox';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -60,7 +61,6 @@ import {
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,

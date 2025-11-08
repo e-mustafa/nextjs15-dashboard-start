@@ -89,7 +89,7 @@ export default function SEOMockupCard({ data, image }: { data?: SEOMockupCardDat
 						{infos?.title || t('forms.labels.seo_title')}
 					</h2>
 					{infos?.description ? (
-						<p className='text-sm text-foreground'>{infos?.description}</p>
+						<p className='text-sm text-foreground line-clamp-3'>{infos?.description}</p>
 					) : (
 						<div className='space-y-1'>
 							<Skeleton className='h-4 w-full bg-muted-foreground' />

@@ -28,7 +28,7 @@ export default function ShardPostMockupCard({ data, image }: { data?: ShardPostM
 	console.log('image', image);
 
 	return (
-		<div className='w-full h-full grid place-content-center space-y-4 bg-background bg-accent/20xxx p-2 rounded-2xl'>
+		<div className='w-full h-full grid xl:place-content-center space-y-4 bg-background bg-accent/20xxx p-2 rounded-2xl'>
 			{/* Result Card */}
 			<div className='p-2 lg:p-3 bg-accent/20 rounded-2xl max-w-80xxx max-w-[80%]'>
 				<Card className='bg-background/50 gap-3 text-white border-0 p-0 shadow-md rounded-2xl overflow-hidden'>
@@ -39,20 +39,22 @@ export default function ShardPostMockupCard({ data, image }: { data?: ShardPostM
 							width={300}
 							height={100}
 							priority
-							className='w-full h-auto aspect-auto object-contain lg:w-1/3 lg:aspect-square lg:object-cover'
+							className='w-full h-auto aspect-auto object-contain lg:w-1/3 lg:aspect-squarexxx lg:object-cover'
 						/>
 
-						<div className='flex flex-col gap-3 p-3 justify-between'>
+						<div className='flex flex-col gap-3 p-3 justify-between flex-1'>
 							<h5 className='font-medium line-clamp-2 lg:line-clamp-1'>
 								{infos?.title || t('forms.labels.seo_title')}
 							</h5>
 							{infos?.description ? (
-								<p className='text-sm text-foreground line-clamp-3 lg:line-clamp-1 xl:line-clamp-2'>{infos?.description}</p>
+								<p className='text-sm text-foreground line-clamp-3 lg:line-clamp-1 xl:line-clamp-2'>
+									{infos?.description}
+								</p>
 							) : (
 								<div className='space-y-1'>
 									<Skeleton className='h-4 w-full bg-muted-foreground' />
-									<Skeleton className='h-4 w-3/4 bg-muted-foreground' />
-									<Skeleton className='h-4 w-1/2 bg-muted-foreground' />
+									<Skeleton className='h-4 w-3/4 bg-muted-foreground lg:hidden xl:block' />
+									<Skeleton className='h-4 w-1/2 bg-muted-foreground lg:hidden' />
 								</div>
 							)}
 

@@ -13,9 +13,9 @@ import {
 	PaginationState,
 	Row,
 	SortingState,
+	Table as TableType,
 	useReactTable,
 	VisibilityState,
-	Table as TableType,
 } from '@tanstack/react-table';
 import {
 	AArrowDownIcon,
@@ -36,8 +36,9 @@ import {
 	ListFilterIcon,
 	TrashIcon,
 } from 'lucide-react';
-import React, { Fragment, JSX, RefObject, useEffect, useId, useMemo, useRef, useState } from 'react';
+import React, { Fragment, JSX, useEffect, useId, useMemo, useRef, useState } from 'react';
 
+import { Checkbox } from '@/components/ui-custom/custom-checkbox';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -51,7 +52,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
@@ -294,7 +294,7 @@ export default function DataTableComponent() {
 	);
 
 	const { visibleCols, collapsedCols, autoHiddenCols } = useAutoCollapseColumns(
-		tableRef  ,
+		tableRef,
 		measuredColumnIds,
 		// Object.keys(userColumnVisibility),
 		[
@@ -875,10 +875,7 @@ export default function DataTableComponent() {
 			</div>
 
 			{/* Table */}
-			<div
-				ref={tableRef }
-				className='bg-background overflow-hidden rounded-md border w-full'
-			>
+			<div ref={tableRef} className='bg-background overflow-hidden rounded-md border w-full'>
 				{isClient ? (
 					<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
 						<SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>

@@ -15,6 +15,7 @@ import {
 	SidebarMenuSubItem,
 	useSidebar,
 } from '@/components/ui/sidebar-rtl';
+import { TLocalesData } from '@/configs/general';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -56,9 +57,9 @@ export function NavMain({ items }: { items: TSidebarItems[] }) {
 												<SidebarMenuButton
 													size='lg'
 													tooltip={item.title[locale]}
-													className='rtl:text-start group-data-[state=open]/collapsible:!bg-muted'
+													className='rtl:text-start group-data-[state=open]/collapsible:bg-muted!'
 												>
-													{item.icon && <item.icon className='!size-6' />}
+													{item.icon && <item.icon className='size-6!' />}
 													<span className='grow truncate capitalize'>{item.title[locale]}</span>
 													<ChevronRight className='ms-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180' />
 												</SidebarMenuButton>
@@ -69,7 +70,7 @@ export function NavMain({ items }: { items: TSidebarItems[] }) {
 														<SidebarMenuSubItem key={subItem.title[locale] + subIndex} className='group'>
 															<SidebarMenuSubButton asChild className='p-2 h-auto'>
 																<Link href={subItem.url} className='flex items-center gap-2 capitalize'>
-																	{subItem.icon && <subItem.icon className='!size-full' />}
+																	{subItem.icon && <subItem.icon className='size-full!' />}
 																	{subItem.title[locale]}
 																</Link>
 															</SidebarMenuSubButton>
@@ -92,11 +93,11 @@ export function NavMain({ items }: { items: TSidebarItems[] }) {
 													size='lg'
 													tooltip={state !== 'collapsed' ? item.title[locale] : ''}
 													className={cn(
-														'rtl:text-start !p-1',
+														'rtl:text-start p-1!',
 														openPopoverIndex === index && ' bg-sidebar-accent text-sidebar-foreground'
 													)}
 												>
-													{item.icon && <item.icon className='!size-full' />}
+													{item.icon && <item.icon className='size-full!' />}
 													{state !== 'collapsed' && (
 														<span className='grow truncate capitalize'>{item.title[locale]}</span>
 													)}
@@ -117,7 +118,7 @@ export function NavMain({ items }: { items: TSidebarItems[] }) {
 														<SidebarMenuSubItem key={subItem.title[locale] + subIndex} className='group'>
 															<SidebarMenuSubButton asChild className='p-2 h-auto'>
 																<Link href={subItem.url} className='flex items-center gap-2 capitalize'>
-																	{subItem.icon && <subItem.icon className='!size-full' />}
+																	{subItem.icon && <subItem.icon className='size-full!' />}
 																	{subItem.title[locale]}
 																</Link>
 															</SidebarMenuSubButton>
@@ -130,7 +131,7 @@ export function NavMain({ items }: { items: TSidebarItems[] }) {
 								)
 							) : (
 								<SidebarMenuButton size='lg' tooltip={item.title[locale]} className='rtl:text-start'>
-									{item.icon && <item.icon className={cn(state == 'collapsed' ? '!size-8' : '!size-6')} />}
+									{item.icon && <item.icon className={cn(state == 'collapsed' ? 'size-8!' : 'size-6!')} />}
 									<span className='grow truncate capitalize'>{item.title[locale]}</span>
 								</SidebarMenuButton>
 							)}

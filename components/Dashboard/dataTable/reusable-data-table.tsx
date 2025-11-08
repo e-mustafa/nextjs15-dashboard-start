@@ -76,8 +76,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { cn } from '@/lib/utils';
 
 import { Button } from '@/components/ui-custom/custom-button';
+import { Checkbox } from '@/components/ui-custom/custom-checkbox';
 import TooltipElement from '@/components/ui-custom/tooltip-element';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import useIsClient from '@/hooks/useIsClient';
@@ -624,7 +624,7 @@ function SortableColumnItem<T>({ column }: { column: ColumnType<T, unknown> }) {
 		>
 			<span
 				{...listeners}
-				className='cursor-grab size-9 shrink-0 grid place-items-center opacity-50 hover:opacity-80 hover:[&>*]:scale-125 transition-all duration-300'
+				className='cursor-grab size-9 shrink-0 grid place-items-center opacity-50 hover:opacity-80 hover:[&>svg]:scale-125 transition-all duration-300'
 			>
 				<GripVerticalIcon size={16} aria-label='grab' />
 			</span>
@@ -633,9 +633,9 @@ function SortableColumnItem<T>({ column }: { column: ColumnType<T, unknown> }) {
 				checked={column.getIsVisible()}
 				onCheckedChange={(checked) => column.toggleVisibility(checked as boolean)}
 				onSelect={(e) => e.preventDefault()}
-				className='hover:!bg-transparent grow justify-start'
+				className='hover:bg-transparent! grow justify-start'
 			>
-				<span className='capitalize'>{column.id}</span>
+				<span className='capitalize line-clamp-1'>{t(`columns.${column.id}`, { defaultValue: column.id })}</span>
 			</DropdownMenuCheckboxItem>
 
 			{/* Pin toggle button */}
@@ -756,9 +756,11 @@ export function ColumnVisibilityDropdown<T>({
 									checked={column.getIsVisible()}
 									onCheckedChange={(checked) => column.toggleVisibility(checked as boolean)}
 									onSelect={(e) => e.preventDefault()}
-									className='hover:!bg-transparent'
+									className='hover:bg-transparent!'
 								>
-									<span className='capitalize'>{column.id}</span>
+									<span className='capitalize line-clamp-1'>
+										{t(`columns.${column.id}`, { defaultValue: column.id })}
+									</span>
 								</DropdownMenuCheckboxItem>
 
 								<TooltipElement content={<p>{t('datatable.unpin_column')}</p>}>
