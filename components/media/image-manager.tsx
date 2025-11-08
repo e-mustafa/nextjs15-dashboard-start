@@ -225,7 +225,7 @@ export default function ImageManager({ multiple = true, folder, onChange, value 
 		<div className='space-y-4 min-h-full overflow-y-auto'>
 			{/* Toolbar */}
 			<div className='flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between'>
-				<div className='flex items-center gap-2'>
+				<div className='flex items-center gap-2 m-1'>
 					<Input
 						placeholder={t('forms.search.search_images_placeholder')}
 						value={search}

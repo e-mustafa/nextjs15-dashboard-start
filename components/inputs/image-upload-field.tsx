@@ -7,13 +7,14 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { FieldValues, Path, PathValue, UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import ImageManagerDialog from '../media/image-manager-dialog';
+// import ImageManagerDialog from '../media/image-manager-dialog';
 import { Button } from '../ui-custom/custom-button';
 import { Checkbox } from '../ui/checkbox';
 
 import { DndContext, DragEndEvent, PointerSensor, TouchSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, arrayMove, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import ImageManagerModal from '../media/image-manager-modal';
 import { FormDescription, FormField, FormItem, FormLabel, FormMessageTranslated } from '../ui-custom/custom-form';
 
 type ImageFieldProps<T extends FieldValues> = {
@@ -217,7 +218,8 @@ export default function ImageUploadField<T extends FieldValues>({
 				)}
 			/>
 
-			<ImageManagerDialog
+			{/* <ImageManagerDialog */}
+			<ImageManagerModal
 				open={open}
 				setOpen={setOpen}
 				value={images}

@@ -1,4 +1,3 @@
-// app/components/ui/modal.tsx
 'use client';
 
 import { cn } from '@/lib/utils';
@@ -7,18 +6,30 @@ import { XIcon } from 'lucide-react';
 import * as React from 'react';
 import { Button } from './custom-button';
 
-// ===== Root =====
-function Modal(props: React.ComponentProps<typeof DialogPrimitive.Root>) {
+type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | 'full';
+type ModalHeightState = 'half' | 'full';
+
+const sizeClasses: Record<ModalSize, string> = {
+	sm: 'max-w-sm',
+	md: 'max-w-md',
+	lg: 'max-w-lg',
+	xl: 'max-w-xl',
+	'2xl': 'max-w-2xl',
+	'3xl': 'max-w-3xl',
+	'4xl': 'max-w-4xl',
+	'5xl': 'max-w-5xl',
+	full: 'max-w-[calc(100%-2rem)] sm:max-w-[90dvw] h-[90dvh]',
+};
+
+export function Modal(props: React.ComponentProps<typeof DialogPrimitive.Root>) {
 	return <DialogPrimitive.Root {...props} />;
 }
 
-// ===== Trigger =====
-function ModalTrigger(props: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
+export function ModalTrigger(props: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
 	return <DialogPrimitive.Trigger {...props} />;
 }
 
-// ===== Close =====
-function ModalClose({ className, children, ...props }: React.ComponentProps<typeof DialogPrimitive.Close>) {
+export function ModalClose({ className, children, ...props }: React.ComponentProps<typeof DialogPrimitive.Close>) {
 	return (
 		<DialogPrimitive.Close
 			className={cn(
@@ -32,38 +43,20 @@ function ModalClose({ className, children, ...props }: React.ComponentProps<type
 	);
 }
 
-// ===== Header =====
-// function ModalHeader({ className, children, ...props }: React.ComponentProps<'div'>) {
-// 	return (
-// 		<div className={cn('flex items-center justify-between bg-muted px-4 py-2', className)} {...props}>
-// 			<div className='font-semibold text-base'>{children}</div>
-// 			<ModalClose />
-// 		</div>
-// 	);
-// }
-
-function ModalHeader({
+export function ModalHeader({
 	className,
 	children,
 	showCloseButton = true,
-	...props
-}: React.ComponentProps<'div'> & {
-	showCloseButton?: boolean;
-}) {
+}: React.ComponentProps<'div'> & { showCloseButton?: boolean }) {
 	return (
-		<div data-slot='dialog-header' className={cn('flex gap-4 bg-muted rounded-t-lg p-4 md: px-6 shadow-lg', className)} {...props}>
+		<div
+			data-slot='dialog-header'
+			className={cn('flex gap-4 bg-muted/30 sm:bg-muted rounded-t-lg p-2 md:p-4 md:px-6 shadow-lg', className)}
+		>
 			<div className='flex flex-col gap-2 text-center sm:text-start grow'>{children}</div>
 			{showCloseButton && (
-				<DialogPrimitive.Close
-					asChild
-					data-slot='dialog-close'
-					className="ring-offset-background focus:ring-ring opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-				>
-					<Button
-						size='icon'
-						variant='ghost'
-						className=' data-[state=open]:bg-accent data-[state=open]:text-muted-foreground'
-					>
+				<DialogPrimitive.Close asChild data-slot='dialog-close'>
+					<Button size='icon' variant='ghost'>
 						<XIcon />
 						<span className='sr-only'>Close</span>
 					</Button>
@@ -73,28 +66,7 @@ function ModalHeader({
 	);
 }
 
-function ModalTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) {
-	return (
-		<DialogPrimitive.Title
-			data-slot='dialog-title'
-			className={cn('text-lg leading-none font-semibold', className)}
-			{...props}
-		/>
-	);
-}
-
-function ModalDescription({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Description>) {
-	return (
-		<DialogPrimitive.Description
-			data-slot='dialog-description'
-			className={cn('text-muted-foreground text-sm', className)}
-			{...props}
-		/>
-	);
-}
-
-// ===== Footer =====
-function ModalFooter({ className, children, ...props }: React.ComponentProps<'div'>) {
+export function ModalFooter({ className, children, ...props }: React.ComponentProps<'div'>) {
 	return (
 		<div className={cn('flex items-center justify-end bg-muted px-4 py-2', className)} {...props}>
 			{children}
@@ -102,28 +74,58 @@ function ModalFooter({ className, children, ...props }: React.ComponentProps<'di
 	);
 }
 
-// ===== Variants =====
-type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | 'full';
+export function ModalTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) {
+	return <DialogPrimitive.Title className={cn('text-lg leading-none font-semibold', className)} {...props} />;
+}
 
-const sizeClasses: Record<ModalSize, string> = {
-	sm: 'max-w-sm',
-	md: 'max-w-md',
-	lg: 'max-w-lg',
-	xl: 'max-w-xl',
-	'2xl': 'max-w-2xl',
-	'3xl': 'max-w-3xl',
-	'4xl': 'max-w-4xl',
-	'5xl': 'max-w-5xl',
-	full: 'max-w-[calc(100%-2rem)] sm:max-w-[90vw] h-[90vh]',
-};
+export function ModalDescription({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Description>) {
+	return <DialogPrimitive.Description className={cn('text-muted-foreground text-xs md:text-sm', className)} {...props} />;
+}
 
-// ===== Content =====
 interface ModalContentProps extends React.ComponentProps<typeof DialogPrimitive.Content> {
 	size?: ModalSize;
 	children: React.ReactNode;
+	mobileBehavior?: 'modal' | 'drawer';
 }
 
-function ModalContent({ className, children, size = 'lg', ...props }: ModalContentProps) {
+export function ModalContent({ className, children, size = 'lg', mobileBehavior = 'drawer', ...props }: ModalContentProps) {
+	const contentRef = React.useRef<HTMLDivElement>(null);
+	const [translateY, setTranslateY] = React.useState(0);
+	const [startY, setStartY] = React.useState<number | null>(null);
+	const [heightState, setHeightState] = React.useState<ModalHeightState>('half');
+	const [isDragging, setIsDragging] = React.useState(false);
+
+	const handleTouchStart = (e: React.TouchEvent) => {
+		if (window.innerWidth >= 640 || mobileBehavior !== 'drawer') return;
+		setStartY(e.touches[0].clientY);
+		setIsDragging(true);
+	};
+
+	const handleTouchMove = (e: React.TouchEvent) => {
+		if (!isDragging || startY === null) return;
+		const delta = e.touches[0].clientY - startY;
+		if (delta > 0 || heightState === 'half') setTranslateY(delta);
+	};
+
+	const handleTouchEnd = () => {
+		if (!isDragging) return;
+		setIsDragging(false);
+
+		if (translateY > 120) {
+			// إغلاق عند السحب للأسفل كثيرًا
+			const closeButton = contentRef.current?.querySelector('[data-slot="dialog-close"]') as HTMLElement;
+			closeButton?.click();
+		} else if (translateY < -100) {
+			// تمدد للأعلى عند السحب لأعلى
+			setHeightState('full');
+		} else if (translateY > 30 && heightState === 'full') {
+			// العودة للنصف عند السحب للأسفل قليلاً
+			setHeightState('half');
+		}
+
+		setTranslateY(0);
+	};
+
 	const header = React.Children.toArray(children).find(
 		(child): child is React.ReactElement<typeof ModalHeader> => React.isValidElement(child) && child.type === ModalHeader
 	);
@@ -136,23 +138,47 @@ function ModalContent({ className, children, size = 'lg', ...props }: ModalConte
 
 	return (
 		<DialogPrimitive.Portal>
-			<DialogPrimitive.Overlay className='fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0' />
+			{/* Overlay */}
+			<DialogPrimitive.Overlay className='fixed inset-0 z-50 bg-black/50 backdrop-blur-[1px] data-[state=open]:animate-in data-[state=closed]:animate-out' />
+
+			{/* Content */}
 			<DialogPrimitive.Content
+				ref={contentRef}
+				onTouchStart={handleTouchStart}
+				onTouchMove={handleTouchMove}
+				onTouchEnd={handleTouchEnd}
+				style={{
+					transform: mobileBehavior === 'drawer' && window.innerWidth < 640 ? `translateY(${translateY}px)` : undefined,
+					transition: isDragging ? 'none' : 'transform 0.25s ease, height 0.25s ease',
+					height:
+						mobileBehavior === 'drawer' && window.innerWidth < 640
+							? heightState === 'full'
+								? '95dvh'
+								: '60dvh'
+							: undefined,
+				}}
 				className={cn(
-					'fixed top-1/2 left-1/2 z-50 translate-x-[-50%] translate-y-[-50%] flex flex-col justify-between gap-0 p-0 w-full overflow-hidden rounded-lg border bg-background shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
+					'fixed z-50 flex flex-col bg-background shadow-lg border border-border overflow-hidden',
+					// Desktop modal
+					'sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-lg',
+					// Mobile drawer
+					'bottom-0 left-0 w-full rounded-t-2xl sm:rounded-lg sm:w-autoxx sm:h-auto transition-all',
 					sizeClasses[size],
 					className
 				)}
 				{...props}
 			>
+				{/* Handle bar */}
+				{mobileBehavior === 'drawer' && (
+					<div className='sm:hidden flex justify-center py-2 cursor-grab active:cursor-grabbing'>
+						<div className='w-12 h-1.5 bg-muted-foreground/40 rounded-full' />
+					</div>
+				)}
+
 				{header ?? <ModalHeader />}
-				<div className='grow'>
-					<div className='px-6 py-4 overflow-y-auto h-[70dvh]'>{body}</div>
-				</div>
+				<div className='grow overflow-y-auto px-3 py-4'>{body}</div>
 				{footer ?? <ModalFooter />}
 			</DialogPrimitive.Content>
 		</DialogPrimitive.Portal>
 	);
 }
-
-export { Modal, ModalClose, ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle, ModalTrigger };
