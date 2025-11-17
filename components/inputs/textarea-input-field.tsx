@@ -17,28 +17,24 @@ import { Textarea } from '../ui/textarea';
 
 /**
  * Textarea input field
+ *
+ * @param {RenderFieldProps<T, K>} props
+ * rows: number of rows for the textarea
+ * @returns {JSX.Element}
  */
-export default function TextareaInputField<T extends FieldValues, K extends keyof FieldTypeMap>({
+
+export default function TextareaInputField<T extends FieldValues, K extends FieldTypeMap>({
 	fieldConfig,
 	form,
 }: RenderFieldProps<T, K>): JSX.Element {
 	const { t } = useTranslation();
-
-	// useEffect(() => {
-	// 	if (!fieldConfig.referenceInput) return;
-	// 	const referenceData = form.watch(fieldConfig.referenceInput as Path<T>)?.trim();
-
-	// 	if (!referenceData) return;
-
-	// 	form.setValue(fieldConfig.name as Path<T>, referenceData, { shouldValidate: true });
-	// }, [form.watch(fieldConfig.referenceInput as Path<T>)]);
 
 	return (
 		<FormField
 			control={form.control}
 			name={fieldConfig.name as Path<T>}
 			render={({ field }) => (
-				<FormItem>
+				<FormItem className={fieldConfig.class}>
 					{!fieldConfig.infoContent ? (
 						<FormLabel aria-required={!!fieldConfig.required}>{t(fieldConfig.label as string)}</FormLabel>
 					) : (
@@ -51,7 +47,6 @@ export default function TextareaInputField<T extends FieldValues, K extends keyo
 								t={t}
 								Icon={fieldConfig.InfoIcon && fieldConfig.InfoIcon}
 							/>
-							{/* <div className='absolute top-1/2 -translate-y-1/2 end-0 [&_svg]:size-5 text-muted-foreground'></div> */}
 						</div>
 					)}
 
@@ -62,7 +57,6 @@ export default function TextareaInputField<T extends FieldValues, K extends keyo
 							{...field}
 							value={field.value || ''}
 							rows={fieldConfig.rows}
-							// onChange={fieldConfig.onChange ? (event) => fieldConfig.onChange?.(event, form) : field.onChange}
 						/>
 					</FormControl>
 

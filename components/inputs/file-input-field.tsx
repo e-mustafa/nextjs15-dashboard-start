@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { FormMessageTranslated } from '../ui-custom/custom-form';
 import InfoIconTooltip from './info-icon-tooltip';
 
-export function FileInputField<T extends FieldValues, K extends keyof FieldTypeMap>({
+export function FileInputField<T extends FieldValues, K extends FieldTypeMap>({
 	fieldConfig,
 	form,
 }: RenderFieldProps<T, K>): JSX.Element {
@@ -52,9 +52,9 @@ export function FileInputField<T extends FieldValues, K extends keyof FieldTypeM
 					typeof value !== 'string' ? (Array.isArray(value) ? value[0]?.preview : value?.preview) : value;
 
 				return (
-					<FormItem>
+					<FormItem className={fieldConfig.class}>
 						{!fieldConfig.infoContent ? (
-							<FormLabel aria-required={!!required}>{t(label as string)}</FormLabel>
+							label && <FormLabel aria-required={!!required}>{t(label as string)}</FormLabel>
 						) : (
 							// info icon
 							<div className='relative flex items-center justify-between h-3.5'>
@@ -69,10 +69,10 @@ export function FileInputField<T extends FieldValues, K extends keyof FieldTypeM
 						)}
 						<FormControl>
 							<div className='flex flex-col items-center gap-2'>
-								<div className={cn(previewUrl ? '!w-32' : '!w-full', 'h-32 relative flex w-full justify-center')}>
+								<div className={cn(previewUrl ? 'w-32!' : 'w-full!', 'h-32 relative flex w-full justify-center')}>
 									<button
 										type='button'
-										className='!size-full border-input hover:bg-accent/50 data-[dragging=true]:bg-accent/50 focus-visible:border-ring focus-visible:ring-ring/50 relative flex items-center justify-center overflow-hidden rounded-lg border border-dashed transition-colors outline-none focus-visible:ring-[3px] has-disabled:pointer-events-none has-disabled:opacity-50 has-[img]:border-none'
+										className='size-full! border-input hover:bg-accent/50 data-[dragging=true]:bg-accent/50 focus-visible:border-ring focus-visible:ring-ring/50 relative flex items-center justify-center overflow-hidden rounded-lg border border-dashed transition-colors outline-none focus-visible:ring-[3px] has-disabled:pointer-events-none has-disabled:opacity-50 has-[img]:border-none'
 										onClick={openFileDialog}
 										onDragEnter={handleDragEnter}
 										onDragLeave={handleDragLeave}

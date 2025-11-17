@@ -16,9 +16,15 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '../utils';
 
 /**
- * Base input field (text, email, number, etc.)
+ * Base input field
+ * text input, with optional start icon, end icon, description, and info tooltip
+ * @param {Object} fieldConfig - The configuration of the field
+ * @param {Object} form - The form object of react-hook-form
+ *
+ * @returns {JSX.Element} The rendered component
+ *
  */
-export default function BaseInputField<T extends FieldValues, K extends keyof FieldTypeMap>({
+export default function BaseInputField<T extends FieldValues, K extends FieldTypeMap>({
 	fieldConfig,
 	form,
 }: RenderFieldProps<T, K>): JSX.Element {
@@ -30,7 +36,6 @@ export default function BaseInputField<T extends FieldValues, K extends keyof Fi
 
 		if (!referenceData) return;
 		form.setValue(fieldConfig.name as Path<T>, referenceData, { shouldValidate: true });
-		
 	}, [form.watch(fieldConfig.referenceInput as Path<T>)]);
 
 	return (
@@ -38,7 +43,7 @@ export default function BaseInputField<T extends FieldValues, K extends keyof Fi
 			control={form.control}
 			name={fieldConfig.name as Path<T>}
 			render={({ field }) => (
-				<FormItem>
+				<FormItem className={fieldConfig.class}>
 					{!fieldConfig.infoContent ? (
 						<FormLabel aria-required={!!fieldConfig.required}>{t(fieldConfig.label as string)}</FormLabel>
 					) : (
@@ -68,14 +73,14 @@ export default function BaseInputField<T extends FieldValues, K extends keyof Fi
 						</FormControl>
 
 						{fieldConfig.IconStart && (
-							<div className='absolute top-1/2 -translate-y-1/2 start-2 me-2 w-5 text-muted-foreground'>
-								<fieldConfig.IconStart />
+							<div className='absolute top-1/2 -translate-y-1/2 start-2 me-2 w-6 h-auto text-muted-foreground [&_svg]:size-4 text-sm'>
+								{typeof fieldConfig.IconStart === 'string' ? t(fieldConfig.IconStart) : <fieldConfig.IconStart />}
 							</div>
 						)}
 
 						{fieldConfig.IconEnd && (
-							<div className='absolute top-1/2 -translate-y-1/2 end-2 ms-2 w-5 text-muted-foreground'>
-								<fieldConfig.IconEnd />
+							<div className='absolute top-1/2 -translate-y-1/2 end-2 ms-2 w-7 text-muted-foreground [&_svg]:size-4 text-sm'>
+								{typeof fieldConfig.IconEnd === 'string' ? t(fieldConfig.IconEnd) : <fieldConfig.IconEnd />}
 							</div>
 						)}
 					</div>

@@ -2,38 +2,72 @@ import { ComboboxOption, PaginatedResponse } from '@/components/ui-custom/reusea
 import { ChangeEvent, ElementType, ReactNode } from 'react';
 import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
 
-export type FieldTypeMap = {
+export type FieldTypeMap =
 	// Base Field Types
-	text: string;
-	textarea: string;
-	number: number;
-	email: string;
-	tel: string;
-	url: string;
-	date: string;
-	time: string;
-
-	empty: string;
-
-	switch: boolean;
-	checkbox: boolean;
-	radio: boolean;
+	| 'text'
+	| 'textarea'
+	| 'number'
+	| 'email'
+	| 'tel'
+	| 'url'
+	| 'date'
+	| 'time'
+	| 'datetime'
+	| 'empty'
+	| 'switch'
+	| 'checkbox'
+	| 'radio'
 
 	// Special Field Types
-	password: string;
-	richtext: string;
-	combobox: string | string[] | number;
-	otp: string;
-	uploadFile: File | File[] | null;
-	slug: string;
+	| 'password'
+	| 'richtext'
+	| 'combobox'
+	| 'otp'
+	| 'uploadFile'
+	| 'slug'
+	| 'productVariants'
+	| 'attributes'
+	| 'imageManager'
+	| 'imageUpload'
+	| 'seoMockupCard'
+	| 'shardPostMockupCard';
 
-	imageManager: File | File[] | null;
-	imageUpload: string | string[] | null;
-	seoMockupCard: never;
-	shardPostMockupCard: never;
-};
+// export type FieldTypeMap = {
+// 	// Base Field Types
+// 	text: string;
+// 	textarea: string;
+// 	number: number;
+// 	email: string;
+// 	tel: string;
+// 	url: string;
+// 	date: string;
+// 	time: string;
+// 	datetime: string;
 
-export type FieldType = keyof FieldTypeMap;
+// 	empty: string;
+
+// 	switch: boolean;
+// 	checkbox: boolean;
+// 	radio: boolean;
+
+// 	// Special Field Types
+// 	password: string;
+// 	richtext: string;
+// 	combobox: string | string[] | number;
+// 	otp: string;
+// 	uploadFile: File | File[] | null;
+// 	slug: string;
+
+// 	productVariants: string;
+// 	attributes: string;
+
+// 	imageManager: File | File[] | null;
+// 	imageUpload: string | string[] | null;
+// 	seoMockupCard: never;
+// 	shardPostMockupCard: never;
+// };
+
+export type FieldType = FieldTypeMap;
 
 export interface FieldConfig<T extends FieldValues = FieldValues, K extends FieldType = FieldType> {
 	type: K;
@@ -43,12 +77,13 @@ export interface FieldConfig<T extends FieldValues = FieldValues, K extends Fiel
 	description?: string;
 	required?: boolean;
 	IconStart?: ElementType;
-	IconEnd?: ElementType;
+	IconEnd?: string | ElementType;
 	InfoIcon?: ElementType;
 	infoContent?: string | ReactNode;
 	// for textarea
 	rows?: number;
 
+	class?: string;
 	parentClass?: string;
 	onChange?: (event: ChangeEvent<HTMLInputElement>, form: UseFormReturn<T>) => void;
 
@@ -85,20 +120,24 @@ export interface FieldConfig<T extends FieldValues = FieldValues, K extends Fiel
 	deleteTag?: (id: string) => Promise<void>;
 	// getOptionFn;
 
+	// productVariants
+	attributesName?: string;
+	skuName?: string;
+
 	searchPlaceholder?: string;
 	emptyMessage?: string | ReactNode;
 }
 
-export interface RenderFieldProps<T extends FieldValues, K extends keyof FieldTypeMap> {
+export interface RenderFieldProps<T extends FieldValues, K extends FieldTypeMap> {
 	fieldConfig: FieldConfig<T, K>;
 	form: UseFormReturn<T>;
 }
 
 export type SectionConfig<T extends FieldValues = FieldValues> = {
-	title: string;
+	title?: string;
 	fields: FieldConfig<T>[];
 };
 
 // export type InputRegistry = {
-// 	[K in keyof FieldTypeMap]?: <T extends FieldValues>(props: RenderFieldProps<T, K>) => JSX.Element;
+// 	[K in FieldTypeMap]?: <T extends FieldValues>(props: RenderFieldProps<T, K>) => JSX.Element;
 // };

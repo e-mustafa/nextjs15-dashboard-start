@@ -6,6 +6,14 @@ import { Button } from '@/components/ui/button';
 import { useFileUpload } from '@/hooks/use-file-upload';
 import { cn } from '@/lib/utils';
 
+/**
+ * A component for uploading an image file.
+ *
+ * @returns A React component for uploading an image file.
+ *
+ * @example
+ * <UploadImage />
+ */
 export default function UploadImage() {
 	const [
 		{ files, isDragging },
@@ -23,11 +31,11 @@ export default function UploadImage() {
 
 	return (
 		<div className='flex flex-col items-center gap-2'>
-			<div className={cn(files.length > 0 ? '!w-32' : '!w-full', 'h-32 relative flex w-full justify-center')}>
+			<div className={cn(files.length > 0 ? 'w-32!' : 'w-full'!, 'h-32 relative flex w-full justify-center')}>
 				{/* Drop area */}
 				<button
 					type='button'
-					className='!size-full border-input hover:bg-accent/50 data-[dragging=true]:bg-accent/50 focus-visible:border-ring focus-visible:ring-ring/50 relative flex items-center justify-center overflow-hidden rounded-lg border border-dashed transition-colors outline-none focus-visible:ring-[3px] has-disabled:pointer-events-none has-disabled:opacity-50 has-[img]:border-none'
+					className='size-full! border-input hover:bg-accent/50 data-[dragging=true]:bg-accent/50 focus-visible:border-ring focus-visible:ring-ring/50 relative flex items-center justify-center overflow-hidden rounded-lg border border-dashed transition-colors outline-none focus-visible:ring-[3px] has-disabled:pointer-events-none has-disabled:opacity-50 has-[img]:border-none'
 					onClick={openFileDialog}
 					onDragEnter={handleDragEnter}
 					onDragLeave={handleDragLeave}

@@ -1,18 +1,19 @@
 import SEOMockupCard from '@/components/Dashboard/seo-mockup';
+import ShardPostMockupCard from '@/components/Dashboard/shared-post-mockup';
+import CheckboxInputField from '@/components/inputs/checkbox-input-field';
 import { ComboboxInputField } from '@/components/inputs/combobox-input-field';
 import { FileInputField } from '@/components/inputs/file-input-field';
 import ImageUploadField from '@/components/inputs/image-upload-field';
 import PasswordInput from '@/components/inputs/password-input';
+import ProductVariantsField from '@/components/inputs/product-variants-field';
 import RichTextField from '@/components/inputs/rich-text-field';
 import SlugInputField from '@/components/inputs/slug-input-field';
-import ShardPostMockupCard from '@/components/Dashboard/shared-post-mockup';
 import SwitchInputField from '@/components/inputs/switch-input-field';
 import TextareaInputField from '@/components/inputs/textarea-input-field';
 import { JSX } from 'react';
 import { FieldValues, Path } from 'react-hook-form';
 import BaseInputField from './base-input-field';
 import { FieldTypeMap, RenderFieldProps } from './types-create-forms';
-import CheckboxInputField from '@/components/inputs/checkbox-input-field';
 
 /**
  * A registry mapping input field types to their corresponding render functions.
@@ -28,11 +29,10 @@ import CheckboxInputField from '@/components/inputs/checkbox-input-field';
  */
 
 type InputRegistry = {
-	[K in keyof FieldTypeMap]?: <T extends FieldValues>(props: RenderFieldProps<T, K>) => JSX.Element;
+	[K in FieldTypeMap]?: <T extends FieldValues>(props: RenderFieldProps<T, K>) => JSX.Element;
 };
 
 export const inputRegistry: InputRegistry = {
-
 	password: ({ fieldConfig, form }) => <PasswordInput fieldConfig={fieldConfig} form={form} />,
 	textarea: ({ fieldConfig, form }) => <TextareaInputField fieldConfig={fieldConfig} form={form} />,
 
@@ -49,6 +49,8 @@ export const inputRegistry: InputRegistry = {
 	richtext: ({ fieldConfig, form }) => <RichTextField fieldConfig={fieldConfig} form={form} />,
 
 	combobox: ({ fieldConfig, form }) => <ComboboxInputField fieldConfig={fieldConfig} form={form} />,
+
+	productVariants: ({ fieldConfig, form }) => <ProductVariantsField fieldConfig={fieldConfig} form={form} />,
 
 	seoMockupCard: <T extends FieldValues>({ form }: RenderFieldProps<T, 'seoMockupCard'>) => {
 		const data = {
@@ -85,7 +87,6 @@ export const inputRegistry: InputRegistry = {
 	},
 };
 
-
 /**
  * This function renders a field based on the type of the field and the props passed in.
  *
@@ -93,9 +94,7 @@ export const inputRegistry: InputRegistry = {
  * @returns {JSX.Element} - The rendered field component.
  */
 
-export function renderField<T extends FieldValues, K extends keyof FieldTypeMap>(
-	props: RenderFieldProps<T, K>
-): JSX.Element {
+export function renderField<T extends FieldValues, K extends FieldTypeMap>(props: RenderFieldProps<T, K>): JSX.Element {
 	const renderer = inputRegistry[props.fieldConfig.type] as ((props: RenderFieldProps<T, K>) => JSX.Element) | undefined;
 
 	if (renderer) {

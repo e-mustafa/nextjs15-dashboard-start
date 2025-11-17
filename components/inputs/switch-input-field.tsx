@@ -10,8 +10,11 @@ import { Switch } from '../ui/switch';
 
 /**
  * Switch input field
+ *
+ * @param {RenderFieldProps<T, K>} props variants can be 'input' to be same as input text or undefined
+ * @returns {JSX.Element}
  */
-export default function SwitchInputField<T extends FieldValues, K extends keyof FieldTypeMap>({
+export default function SwitchInputField<T extends FieldValues, K extends FieldTypeMap>({
 	fieldConfig: { name, label, placeholder, infoContent, required, IconStart, locale, variants, ...fieldConfig },
 	form,
 }: RenderFieldProps<T, K>): JSX.Element {
@@ -23,7 +26,7 @@ export default function SwitchInputField<T extends FieldValues, K extends keyof 
 			control={form.control}
 			name={name}
 			render={({ field }) => (
-				<FormItem>
+				<FormItem className={fieldConfig.class}>
 					{!infoContent ? (
 						<FormLabel aria-required={!!required}>{t(label as string)}</FormLabel>
 					) : (

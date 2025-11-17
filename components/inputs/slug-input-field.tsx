@@ -19,8 +19,15 @@ import { useTranslation } from 'react-i18next';
 
 /**
  * Slug input field
+ *
+ * @param {Object} fieldConfig - The configuration of the field
+ * @param {Object} form - The form object of react-hook-form
+ *
+ * @returns {JSX.Element} The rendered component
+ *
+ * @memberof SlugInputField
  */
-export default function SlugInputField<T extends FieldValues, K extends keyof FieldTypeMap>({
+export default function SlugInputField<T extends FieldValues, K extends FieldTypeMap>({
 	fieldConfig: {
 		name,
 		label = 'forms.labels.slug',
@@ -48,7 +55,7 @@ export default function SlugInputField<T extends FieldValues, K extends keyof Fi
 
 	useEffect(() => {
 		if (referenceData?.trim()) {
-			formatSlug(referenceData.trim(), form);
+			formatSlug(referenceData.trim() || '', form);
 		}
 	}, [referenceData]);
 
@@ -57,7 +64,7 @@ export default function SlugInputField<T extends FieldValues, K extends keyof Fi
 			control={form.control}
 			name={name as Path<T>}
 			render={({ field }) => (
-				<FormItem>
+				<FormItem className={fieldConfig.class}>
 					{!infoContent ? (
 						<FormLabel aria-required={!!required}>{t(label as string)}</FormLabel>
 					) : (

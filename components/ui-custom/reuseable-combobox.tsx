@@ -64,6 +64,18 @@ interface ComboboxProps<T extends ComboboxOption> {
 	enableInfiniteScroll?: boolean;
 }
 
+/**
+ * ReusableCombobox component
+ *
+ * @param {ComboboxProps<T>} props - The properties for the ReusableCombobox component.
+ * isProducts: boolean to indicate if the options are products
+ * isTags: boolean to indicate if the options are tags
+ * deleteTag: function to delete a tag by id
+ * multiple: boolean to indicate if multiple options can be selected
+ * searchPlaceholder: string for the search input placeholder text
+ * emptyMessage: string for the message to display when no options are found
+ * @returns {JSX.Element} - The JSX element representing the ReusableCombobox component.
+ */
 export default function ReusableCombobox<T extends ComboboxOption>({
 	options: staticOptions = [],
 	fetchOptions,
@@ -325,12 +337,22 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 				</PopoverTrigger>
 				<PopoverContent className='w-[var(--radix-popover-trigger-width)] p-0' align='start'>
 					<Command shouldFilter={!fetchOptions}>
-						<CommandInput
-							placeholder={renderErrorMessage(searchPlaceholder, t)}
-							value={searchQuery}
-							onValueChange={handleSearch}
-							className='h-9'
-						/>
+						<div className='relative'>
+							<CommandInput
+								placeholder={renderErrorMessage(searchPlaceholder, t)}
+								value={searchQuery}
+								onValueChange={handleSearch}
+								className='h-9 pe-6'
+							/>
+							<Button
+								onClick={() => !!searchQuery && handleSearch('')}
+								variant='ghost'
+								size='icon'
+								className='absolute top-1/2 end-2 -translate-y-1/2 size-5 rounded-full'
+							>
+								<XIcon className='h-4 w-4 opacity-50' />
+							</Button>
+						</div>
 						<CommandList ref={scrollContainerRef} className='border-t border-muted-foreground/30'>
 							{isLoading && currentPage === 1 ? (
 								<div className='flex items-center justify-center gap-1 py-6'>

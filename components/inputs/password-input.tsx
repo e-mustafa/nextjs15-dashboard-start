@@ -13,10 +13,10 @@ import {
 import { Input } from '../ui/input';
 import ShowHidePasswordButton from './show-hide-password-button';
 
-export default function PasswordInput<T extends FieldValues, K extends keyof FieldTypeMap>({
-	fieldConfig: { name, label, placeholder, required, description },
+export default function PasswordInput<T extends FieldValues, K extends FieldTypeMap>({
+	fieldConfig: { name, label, placeholder, required, description, ...fieldConfig },
 	form,
-}: RenderFieldProps<T, K>): JSX.Element { // }: RenderFieldProps<FieldValues, 'password'>) {
+}: RenderFieldProps<T, K>): JSX.Element {
 	const { t } = useTranslation();
 	const [showPassword, setShowPassword] = useState<boolean>(false);
 
@@ -25,7 +25,7 @@ export default function PasswordInput<T extends FieldValues, K extends keyof Fie
 			control={form.control}
 			name={name}
 			render={({ field }) => (
-				<FormItem>
+				<FormItem className={fieldConfig.class}>
 					<FormLabel aria-required={!!required}>{t(label as string)}</FormLabel>
 					<FormControl>
 						<div className='relative'>

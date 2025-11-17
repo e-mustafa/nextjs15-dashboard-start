@@ -59,7 +59,7 @@ export const formSectionSEO = {
 			label: 'forms.labels.seo_image',
 			placeholder: 'forms.placeholders.seo_image',
 			description: 'forms.descriptions.seo_image',
-			parentClass: 'col-span-full',
+			parentClass: 'min-w-full',
 			folder: 'seo_images',
 			// file: {
 			// 	// accept: 'image/*',
@@ -71,13 +71,13 @@ export const formSectionSEO = {
 			type: 'seoMockupCard',
 			name: 'seo_info',
 			// parentClass: 'sm:col-span-full',
-			parentClass: 'col-span-full xl:col-span-1',
+			parentClass: 'min-w-full xl:min-w-[calc(50%-0.75rem)]',
 		},
 		{
 			type: 'shardPostMockupCard',
 			name: 'seo_info',
 			// parentClass: 'sm:col-span-full',
-			parentClass: 'col-span-full xl:col-span-1',
+			parentClass: 'min-w-full xl:min-w-[calc(50%-0.75rem)]',
 		},
 	],
 };

@@ -11,28 +11,46 @@ import { FormMessageTranslated } from '../ui-custom/custom-form';
 import ReusableCombobox from '../ui-custom/reuseable-combobox';
 import InfoIconTooltip from './info-icon-tooltip';
 
-export function ComboboxInputField<T extends FieldValues, K extends keyof FieldTypeMap>({
+/**
+ * Combobox input field
+ *
+ * @param {RenderFieldProps<T, K>} props
+ * @returns {JSX.Element}
+ *
+ * @example
+ * <ComboboxInputField
+ *   name="brands"
+ *   label="Brands"
+ *   placeholder="Search for a brand"
+ *   required={true}
+ *   description="Please select the brand"
+ *   optionUrl="/api/brands"
+ *   revalidateTags={['brand']}
+ *   fetchOptions={fetchItemsFromAPI}
+ *   isTags={true}
+ *   multiple={true}
+ * />
+ */
+export function ComboboxInputField<T extends FieldValues, K extends FieldTypeMap>({
 	fieldConfig,
 	form,
 }: RenderFieldProps<T, K>): JSX.Element {
-	const { name, label, placeholder, required, description, optionUrl, revalidateTags, fetchOptions } = fieldConfig;
-	const { t, i18n } = useTranslation();
-
-	// const [brandsValue, setBrandsValue] = useState<string[]>(form.getValues(name) as string[]);
-
-	// async function fetchItemsFromAPI<T>(query: string, page: number = 1): Promise<PaginatedResponse<T>> {
-	// async function fetchItemsFromAPI(
-	// 	query: string,
-	// 	page: number = 1
-	// ): Promise<PaginatedResponse<ComboboxOptionWithIdAndName<any>> | ComboboxOptionWithIdAndName<any>[]> {
-
-	// Define the ComboboxOption type to match what ReusableCombobox expects
-	type ComboboxOption = {
-		id: string | number;
-		name: string;
-		image?: string;
-		[key: string]: any;
-	};
+	const {
+		name,
+		label,
+		placeholder,
+		required,
+		description,
+		optionUrl,
+		revalidateTags,
+		fetchOptions,
+		isTags,
+		multiple = isTags,
+	} = fieldConfig;
+	const {
+		t,
+		i18n: { language },
+	} = useTranslation();
 
 	async function fetchItemsFromAPI(query: string, page: number = 1) {
 		const params = new URLSearchParams({
@@ -43,15 +61,13 @@ export function ComboboxInputField<T extends FieldValues, K extends keyof FieldT
 
 		// try {
 		const response = await fetch(`${optionUrl}?${params}`, {
-			headers: {
-				'Accept-Language': i18n.language, // or get from context
-			},
+			headers: { 'Accept-Language': language },
 			next: { tags: revalidateTags },
 		});
-		console.log('response', response);
+
 		if (!response.ok) {
-			isDEV && console.error('Failed to fetch list of data');
-			throw new Error('Failed to fetch list of data');
+			isDEV && console.error(t('api.errors.Failed_fetch_list'));
+			throw new Error(t('api.errors.Failed_fetch_list'));
 		}
 
 		const result = await response.json();
@@ -77,12 +93,8 @@ export function ComboboxInputField<T extends FieldValues, K extends keyof FieldT
 			control={form.control}
 			name={name}
 			render={({ field }) => {
-				const value = field.value;
-
-				console.log('value', value);
-
 				return (
-					<FormItem>
+					<FormItem className={fieldConfig.class}>
 						{!fieldConfig.infoContent ? (
 							<FormLabel aria-required={!!required}>{renderErrorMessage(label as string, t)}</FormLabel>
 						) : (
@@ -100,7 +112,7 @@ export function ComboboxInputField<T extends FieldValues, K extends keyof FieldT
 						<FormControl>
 							<ReusableCombobox
 								fetchOptions={fetchOptions ? fetchOptions : fetchItemsFromAPI}
-								multiple={fieldConfig.multiple}
+								multiple={multiple}
 								placeholder={placeholder}
 								searchPlaceholder={fieldConfig.searchPlaceholder}
 								emptyMessage={fieldConfig.emptyMessage}
