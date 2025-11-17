@@ -9,7 +9,7 @@ import { useServerResponse } from '@/hooks/use-server-response';
 import { formSectionSEO } from '@/lib/create-forms/form-section-seo';
 import { renderField } from '@/lib/create-forms/input-registry';
 import { SectionConfig } from '@/lib/create-forms/types-create-forms';
-import { msg } from '@/lib/utils';
+import { cn, msg } from '@/lib/utils';
 import { createCollectionAction, updateCollectionAction } from '@/server/actions/collection-actions';
 import { ActionResult } from '@/types/api';
 import { defaultValuesCollection, formSchemaCollection, TCollectionFormValues } from '@/validation/collection-validation';
@@ -45,7 +45,7 @@ export const formSections_collection: SectionConfig<TFormValues>[] = [
 				label: 'forms.labels.is_active',
 				placeholder: 'forms.placeholders.is_active',
 				required: true,
-				// parentClass: 'col-span-full',
+				// parentClass: 'min-w-full',
 				variants: 'input', // 'switch',
 			},
 			{
@@ -54,7 +54,7 @@ export const formSections_collection: SectionConfig<TFormValues>[] = [
 				label: 'forms.labels.is_featured',
 				placeholder: 'forms.placeholders.is_featured',
 				required: true,
-				// parentClass: 'col-span-full',
+				// parentClass: 'min-w-full',
 				variants: 'input', // 'switch',
 			},
 			// {
@@ -66,21 +66,21 @@ export const formSections_collection: SectionConfig<TFormValues>[] = [
 				name: 'description_ar',
 				label: 'forms.labels.description_ar',
 				placeholder: 'forms.placeholders.description_ar',
-				parentClass: 'col-span-full xl:col-span-1',
+				parentClass: 'min-w-full xl:min-w-[calc(50%-1.5rem)]',
 			},
 			{
 				type: 'richtext',
 				name: 'description_en',
 				label: 'forms.labels.description_en',
 				placeholder: 'forms.placeholders.description_en',
-				parentClass: 'col-span-full xl:col-span-1',
+				parentClass: 'min-w-full xl:min-w-[calc(50%-1.5rem)]',
 			},
 			{
 				type: 'imageUpload',
 				name: 'images',
 				label: 'forms.labels.image',
 				placeholder: 'forms.placeholders.image',
-				parentClass: 'col-span-full',
+				parentClass: 'min-w-full',
 				folder: 'collections',
 				// file: {
 				// 	// accept: 'image/*',
@@ -159,7 +159,10 @@ export default function CollectionForm({
 						<div className='section-title font-medium text-muted-foreground'>{t(section.title as string)}</div>
 						<div className='form-inputs'>
 							{section.fields.map((fieldConfig, fieldIndex) => (
-								<div key={`${fieldConfig.name}-input-${fieldIndex}`} className={fieldConfig.parentClass}>
+								<div
+									key={`${fieldConfig.name}-input-${fieldIndex}`}
+									className={cn('flex-1 min-w-[calc(50%-1.5rem)]', fieldConfig.parentClass)}
+								>
 									{renderField({ fieldConfig, form })}
 								</div>
 							))}

@@ -9,7 +9,7 @@ import { useServerResponse } from '@/hooks/use-server-response';
 import { formSectionSEO } from '@/lib/create-forms/form-section-seo';
 import { renderField } from '@/lib/create-forms/input-registry';
 import { SectionConfig } from '@/lib/create-forms/types-create-forms';
-import { msg } from '@/lib/utils';
+import { cn, msg } from '@/lib/utils';
 import { createBrandAction, updateBrandAction } from '@/server/actions/brand-actions';
 import { useGProgressBarStore } from '@/stores/global-progress-bar.store';
 import { ActionResult } from '@/types/api';
@@ -46,7 +46,6 @@ export const formSections_brand: SectionConfig<TFormValues>[] = [
 				label: 'forms.labels.is_active',
 				placeholder: 'forms.placeholders.is_active',
 				required: true,
-				// parentClass: 'col-span-full',
 				variants: 'input', // 'switch',
 			},
 			{
@@ -58,21 +57,21 @@ export const formSections_brand: SectionConfig<TFormValues>[] = [
 				name: 'description_ar',
 				label: 'forms.labels.description_ar',
 				placeholder: 'forms.placeholders.description_ar',
-				parentClass: 'col-span-full xl:col-span-1',
+				parentClass: 'min-w-full xl:min-w-[calc(50%-1.5rem)]',
 			},
 			{
 				type: 'richtext',
 				name: 'description_en',
 				label: 'forms.labels.description_en',
 				placeholder: 'forms.placeholders.description_en',
-				parentClass: 'col-span-full xl:col-span-1',
+				parentClass: 'min-w-full xl:min-w-[calc(50%-1.5rem)]',
 			},
 			{
 				type: 'imageUpload',
 				name: 'images',
 				label: 'forms.labels.image',
 				placeholder: 'forms.placeholders.image',
-				parentClass: 'col-span-full',
+				parentClass: 'min-w-full',
 				folder: 'brands',
 				// file: {
 				// 	// accept: 'image/*',
@@ -152,7 +151,10 @@ export default function BrandForm({
 						<div className='section-title font-medium text-muted-foreground'>{t(section.title as string)}</div>
 						<div className='form-inputs'>
 							{section.fields.map((fieldConfig, fieldIndex) => (
-								<div key={`${fieldConfig.name}-input-${fieldIndex}`} className={fieldConfig.parentClass}>
+								<div
+									key={`${fieldConfig.name}-input-${fieldIndex}`}
+									className={cn('flex-1 min-w-[calc(50%-1.5rem)]', fieldConfig.parentClass)}
+								>
 									{renderField({ fieldConfig, form })}
 								</div>
 							))}
