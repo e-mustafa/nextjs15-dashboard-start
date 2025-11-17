@@ -2,10 +2,12 @@
 @import 'tw-animate-css';
 /* @import 'tailwindcss-rtl'; */
 
-/* data-table style  */
-@import './data-table.css';
-/* inputs styles  */
-@import './inputs.css';
+@layer components {
+	/* data-table style  */
+	@import './data-table.css';
+	/* inputs styles  */
+	@import './inputs.css';
+}
 
 /* @custom-variant dark (&:is(.dark *)); */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -315,8 +317,12 @@
 		@apply mx-1 h-1 text-destructive;
 	} */
 
+	input:is([type='number']) {
+		text-align: center;
+	}
+
 	.unicode,
-	input {
+	input:not([type='number']) {
 		unicode-bidi: plaintext;
 		/* direction:f */
 	}
@@ -325,6 +331,10 @@
 		unicode-bidi: plaintext;
 		text-align: match-parent;
 		text-align: -webkit-match-parent;
+	}
+
+	[data-dnd-draggable] {
+		touch-action: none;
 	}
 
 	/* component  */
