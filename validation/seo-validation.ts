@@ -7,15 +7,15 @@ export type SEOFormValues = z.infer<typeof SEOFormSchema>;
 export const seoFields = ['seoTitle', 'seoDescription', 'slug', 'seoKeywords'];
 
 export const SEODefaultValues = {
-	seoTitleAr: '',
-	seoTitleEn: '',
-	seoDescriptionAr: '',
-	seoDescriptionEn: '',
-	slugAr: '',
-	slugEn: '',
+	seoTitle_ar: '',
+	seoTitle_en: '',
+	seoDescription_ar: '',
+	seoDescription_en: '',
+	slug_ar: '',
+	slug_en: '',
 	seoKeywords_Ar: '',
 	seoKeywords_en: '',
-	seoImage: '',
+	seoImage: [],
 };
 
 // export const validateSlug = z
@@ -34,5 +34,5 @@ export const SEOFormSchema = z.object({
 	seoKeywords_ar: z.string().optional(),
 	seoKeywords_en: z.string().optional(),
 	// seoImage: z.object({ url: z.string(), fileId: z.string() }).optional(),
-	seoImage: imagesField,
+	seoImage: imagesField.optional(),
 });

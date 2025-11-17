@@ -26,7 +26,7 @@ export const formSchemaCategory = z
 
 		isActive: z.boolean(),
 
-		images: imagesField,
+		images: imagesField.optional(),
 
 		products: z.array(z.string()).optional(),
 	})

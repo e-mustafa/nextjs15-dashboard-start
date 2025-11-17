@@ -1,4 +1,4 @@
-import UploadImage from '@/components/inputs/upload-image';
+import UploadImageShaped from '@/components/inputs/upload-image-shaped';
 import { Button } from '@/components/ui-custom/custom-button';
 import { Checkbox } from '@/components/ui-custom/custom-checkbox';
 import { FormControl, FormField, FormItem, FormLabel, FormMessageTranslated } from '@/components/ui-custom/custom-form';
@@ -545,7 +545,7 @@ function CombinationsTable({ groupBy }: { groupBy?: string }) {
 															name={`combinations.${groupIdx}.images`}
 															control={control}
 															render={({ field }) => (
-																<UploadImage
+																<UploadImageShaped
 																	multiple={true}
 																	// maxFiles={5}
 																	value={field.value}
@@ -622,7 +622,7 @@ function CombinationsTable({ groupBy }: { groupBy?: string }) {
 																		name={`combinations.${comboIdx}.images`}
 																		control={control}
 																		render={({ field }) => (
-																			<UploadImage
+																			<UploadImageShaped
 																				// name={`combinations.${groupIdx}.images`}
 																				multiple={true}
 																				// maxFiles={5}
@@ -707,12 +707,12 @@ function CombinationsTable({ groupBy }: { groupBy?: string }) {
 											<div className='flex items-center gap-3'>
 												<div className='size-12 bg-muted rounded flex items-center justify-center'>
 													{/* <ImageIcon className='w-6 h-6 text-muted-foreground' /> */}
-													{/* <UploadImage {...{ name: `combinations.${idx}.image`, multiple: true }} /> */}
+													{/* <UploadImageShaped {...{ name: `combinations.${idx}.image`, multiple: true }} /> */}
 													<Controller
 														name={`combinations.${idx}.images`}
 														control={control}
 														render={({ field }) => (
-															<UploadImage
+															<UploadImageShaped
 																multiple={true}
 																// maxFiles={5}
 																value={field.value}

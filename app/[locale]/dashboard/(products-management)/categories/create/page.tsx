@@ -16,7 +16,7 @@ const CategoryForm = dynamic(() => import('@/components/Dashboard/forms/category
 
 const i18nNamespaces = ['dashboard'];
 
-export default async function AddCategoryPage({ params }: TLayoutProps) {
+export default async function CreateCategoryPage({ params }: TLayoutProps) {
 	const { locale } = await params;
 	const { t } = await initTranslations(i18nNamespaces, locale);
 

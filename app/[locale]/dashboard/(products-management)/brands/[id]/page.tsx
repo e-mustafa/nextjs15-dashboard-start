@@ -1,10 +1,10 @@
 import initTranslations from '@/app/i18n';
 import BreadcrumbDashboard from '@/components/Dashboard/breadcrumb-dashboard';
-import { TBrandFormValues } from '@/components/Dashboard/forms/brand-form';
 import LoaderBlock from '@/components/shard/loaders/loader-block';
 import { Button } from '@/components/ui-custom/custom-button';
 import { TLocalesData } from '@/configs/general';
 import { getDataInPage } from '@/lib/utils.server/api.server';
+import { TBrandFormValues } from '@/validation/brand-validation';
 import { ArrowRightIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -21,7 +21,7 @@ export interface TDRouteProps {
 	params: { locale: TLocalesData; id: string };
 }
 
-export default async function EditBrandsPage({ params }: TDRouteProps) {
+export default async function UpdateBrandsPage({ params }: TDRouteProps) {
 	const { locale, id } = await params;
 	const { t } = await initTranslations(i18nNamespaces, locale);
 

@@ -1,0 +1,6 @@
+name: "React i18n Custom"
+description: "Support t() and msg() translation functions"
+usageMatchRegex:
+  - "[^\\w\\d]t\\(['\"`]({key})['\"`][^)]*\\)"
+  - "[^\\w\\d]msg\\(['\"`]({key})['\"`][^)]*\\)"
+keyPattern: "[a-zA-Z0-9_.]+"

@@ -156,7 +156,7 @@ export default function CollectionForm({
 				{(form.formState.isSubmitting || isPending) && <LoaderInstElement />}
 				{formSections_collection.map((section, sectionIndex) => (
 					<div key={'section-' + sectionIndex} className='form-section'>
-						<div className='section-title font-medium text-muted-foreground'>{t(section.title)}</div>
+						<div className='section-title font-medium text-muted-foreground'>{t(section.title as string)}</div>
 						<div className='form-inputs'>
 							{section.fields.map((fieldConfig, fieldIndex) => (
 								<div key={`${fieldConfig.name}-input-${fieldIndex}`} className={fieldConfig.parentClass}>

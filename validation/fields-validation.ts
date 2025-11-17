@@ -47,11 +47,11 @@ export const otpField = z
 export const imagesField = z
 	.array(
 		z.object({
-			url: z.string().url({ message: msg('forms.validation.invalid_url') }),
+			url: z.url({ message: msg('forms.validation.invalid_url') }),
 			fileId: z.string(),
 		})
 	)
-	.optional();
+	// .optional();
 
 export const nameArField = z
 	.string()
@@ -64,3 +64,9 @@ export const nameEnField = z
 	.trim()
 	.min(2, { message: msg('forms.validation.name_en_min', { min: 2 }) })
 	.max(30, { message: msg('forms.validation.name_en_max', { min: 30 }) });
+
+export const shortDescription = z
+	.string({ message: 'forms.validation.short_description_required' })
+	.trim()
+	.min(20, { message: msg('forms.validation.short_description_min', { min: 20 }) })
+	.max(500, { message: msg('forms.validation.short_description_max', { max: 500 }) });

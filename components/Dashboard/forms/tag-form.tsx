@@ -78,7 +78,7 @@ export default function TagForm({ defaultValue = '', onSuccess }: Props) {
 			<form
 				id='tag-form'
 				onSubmit={form.handleSubmit(handleSubmit)}
-				className='flex items-center gap-2 p-2 bg-muted rounded-md'
+				className='flex items-baseline gap-2 flex-wrap p-2 bg-muted rounded-md [&_div]:flex-1 [&_div]:min-w-fit'
 			>
 				<FormField
 					control={form.control}
@@ -89,7 +89,7 @@ export default function TagForm({ defaultValue = '', onSuccess }: Props) {
 							<FormControl>
 								<Input type='text' placeholder={t('forms.placeholders.tag')} {...field} />
 							</FormControl>
-							{/* <FormMessageTranslated /> */}
+							<FormMessageTranslated />
 						</FormItem>
 					)}
 				/>
@@ -99,7 +99,7 @@ export default function TagForm({ defaultValue = '', onSuccess }: Props) {
 					name='slug'
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel aria-required='true'>{t('forms.labels.tag_slug')}</FormLabel>
+							<FormLabel aria-required='true'>{t('forms.labels.slug_short')}</FormLabel>
 							<FormControl>
 								<Input
 									type='text'
@@ -108,7 +108,7 @@ export default function TagForm({ defaultValue = '', onSuccess }: Props) {
 									onChange={(e) => form.setValue('slug', e.target.value, { shouldValidate: true })}
 								/>
 							</FormControl>
-							{/* <FormMessageTranslated /> */}
+							<FormMessageTranslated />
 						</FormItem>
 					)}
 				/>

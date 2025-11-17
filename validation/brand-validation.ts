@@ -27,7 +27,7 @@ export const formSchemaBrand = z
 
 		isActive: z.boolean(),
 
-		images: imagesField,
+		images: imagesField.optional(),
 		products: z.array(z.string()).optional(),
 	})
 	.extend(SEOFormSchema.shape);

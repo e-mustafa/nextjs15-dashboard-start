@@ -1,4 +1,5 @@
 import { Environments } from '@/constant/enums';
+import { SaudiRiyalIcon } from 'lucide-react';
 
 export const localesData = {
 	ar: {
@@ -16,6 +17,29 @@ export const localesData = {
 } as const;
 export type TLocalesData = keyof typeof localesData;
 export const defaultLocale = localesData['ar'];
+
+export const currenciesData = {
+	egp: {
+		label_ar: 'جنيه مصري',
+		label_en: 'Egyptian Pound',
+		symbol: 'E£',
+		short_ar: 'ج.م',
+		short_en: 'EGP',
+	},
+	sar: {
+		label_ar: 'ريال سعودي',
+		label_en: SaudiRiyalIcon,
+		symbol: 'SAR',
+		short: 'SAR',
+	},
+	usd: {
+		label: 'Dollar',
+		symbol: '$',
+		short: 'USD',
+	},
+};
+
+export type TCurrenciesData = keyof typeof currenciesData;
 
 export const logsConfigs = {
 	defaultLocale: defaultLocale.short as TLocalesData,
@@ -43,7 +67,6 @@ export const config_env = {
 
 export const isDEV = process.env.NODE_ENV === Environments.DEV;
 export const isPROD = process.env.NODE_ENV === Environments.PROD;
-
 
 export const appConfig = {
 	// Feature flags
@@ -87,14 +110,11 @@ export const appConfig = {
 	},
 };
 
-
 export const imagesPlaceholder = {
 	imgMedium: '/assets/images/placeholders/placeholder-612x612.webp',
 	// blur: 10,
 	// base64: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=',
 };
-
-
 
 // settings
 // redirect after create item

@@ -21,7 +21,7 @@ export interface TDRouteProps {
 	params: { locale: TLocalesData; id: string };
 }
 
-export default async function EditCategoryPage({ params }: TDRouteProps) {
+export default async function UpdateCategoryPage({ params }: TDRouteProps) {
 	const { locale, id } = await params;
 	const { t } = await initTranslations(i18nNamespaces, locale);
 

@@ -29,7 +29,7 @@ export const formSchemaCollection = z
 		isActive: z.boolean(),
 		isFeatured: z.boolean(),
 
-		images: imagesField,
+		images: imagesField.optional(),
 
 		products: z.array(z.string()).optional(),
 	})

@@ -15,7 +15,7 @@ const CollectionForm = dynamic(() => import('@/components/Dashboard/forms/collec
 
 const i18nNamespaces = ['dashboard'];
 
-export default async function AddCollectionPage({ params }: TLayoutProps) {
+export default async function CreateCollectionPage({ params }: TLayoutProps) {
 	const { locale } = await params;
 	const { t } = await initTranslations(i18nNamespaces, locale);
 
