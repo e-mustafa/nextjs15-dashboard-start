@@ -371,8 +371,8 @@ function VariantEditor({ index, onRemove }: { index: number; onRemove: () => voi
 							/>
 						) : (
 							<div className='flex flex-wrap gap-2'>
-								{variant.options?.map((opt) => (
-									<div key={opt.id} className='space-y-1 flex items-center flex-col'>
+								{variant.options?.map((opt, i) => (
+									<div key={opt.id || i} className='space-y-1 flex items-center flex-col'>
 										{opt.value_ar && (
 											<span className='inline-block px-3 py-1 rounded-md bg-secondary text-secondary-foreground text-sm border'>
 												{opt.value_ar}
@@ -510,19 +510,19 @@ function CombinationsTable({ groupBy }: { groupBy?: string }) {
 			)}
 
 			<div className='overflow-x-auto max-h-[500px] overflow-y-auto'>
-				<table className='w-full'>
+				<table className='w-full table-auto'>
 					<thead className='sticky top-0 bg-accent z-10'>
 						<tr className='border-b'>
-							<th className='px-4 py-3 text-left'>
+							<th className='p-2 text-center'>
 								<Checkbox
 									checked={allChecked ? true : someChecked ? 'indeterminate' : false}
 									onCheckedChange={handleCheckAll}
 								/>
 							</th>
-							<th className='px-4 py-3 text-left text-xs font-semibold uppercase'>{t('forms.labels.variant')}</th>
-							<th className='px-4 py-3 text-left text-xs font-semibold uppercase'>{t('forms.labels.price')}</th>
-							<th className='px-4 py-3 text-left text-xs font-semibold uppercase'>{t('forms.labels.quantity')}</th>
-							<th className='px-4 py-3 text-left text-xs font-semibold uppercase'>SKU</th>
+							<th className='p-2 text-center text-xs font-semibold uppercase'>{t('forms.labels.variant')}</th>
+							<th className='p-2 text-center text-xs font-semibold uppercase'>{t('forms.labels.price')}</th>
+							<th className='p-2 text-center text-xs font-semibold uppercase'>{t('forms.labels.quantity')}</th>
+							<th className='p-2 text-center text-xs font-semibold uppercase'>SKU</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -530,13 +530,13 @@ function CombinationsTable({ groupBy }: { groupBy?: string }) {
 							? groupedData.map((group, groupIdx) => (
 									<Fragment key={`group-${groupIdx}`}>
 										<tr className='border-b hover:bg-muted/50'>
-											<td className='px-4 py-3'>
+											<td className='p-2'>
 												<Checkbox
 													checked={group.items.every((item) => item.checked)}
 													onCheckedChange={(checked) => handleCheckGroup(group, checked === true)}
 												/>
 											</td>
-											<td className='px-4 py-3'>
+											<td className='p-2'>
 												{/* Variant Column */}
 												<div className='flex items-center gap-3'>
 													<div className='size-12 bg-muted rounded flex items-center justify-center'>
@@ -574,7 +574,7 @@ function CombinationsTable({ groupBy }: { groupBy?: string }) {
 													</div>
 												</div>
 											</td>
-											<td className='px-4 py-3'>
+											<td className='p-2'>
 												{/* Price Column */}
 												<div className='flex items-center gap-1 max-w-[120px]'>
 													<span className='text-muted-foreground'>$</span>
@@ -590,15 +590,15 @@ function CombinationsTable({ groupBy }: { groupBy?: string }) {
 													/>
 												</div>
 											</td>
-											<td className='px-4 py-3'>
+											<td className='p-2 text-center'>
 												{/* Quantity Column */}
 												<span className='text-sm'>
 													{group.items?.reduce((acc, item) => +acc + +item.qty, 0)}
 												</span>
 											</td>
-											<td className='px-4 py-3'>
+											<td className='p-2'>
 												{/* SKU Column - Empty for group */}
-												<span className='text-xs text-muted-foreground'>—</span>
+												<div className='text-xs text-muted-foreground text-center'>—</div>
 											</td>
 										</tr>
 
@@ -607,13 +607,13 @@ function CombinationsTable({ groupBy }: { groupBy?: string }) {
 												const comboIdx = combinations.findIndex((c) => c.id === item.id);
 												return (
 													<tr key={item.id} className='border-b hover:bg-muted/30'>
-														<td className='px-4 py-2 pl-12'>
+														<td className='p-2 pl-12'>
 															<Checkbox
 																checked={item.checked}
 																onCheckedChange={(checked) => handleCheckSingle(item.id, checked === true)}
 															/>
 														</td>
-														<td className='px-4 py-2'>
+														<td className='p-2'>
 															{/* Variant Column */}
 															<div className='flex items-center gap-3'>
 																<div className='w-10 h-10 bg-muted rounded flex items-center justify-center'>
@@ -638,7 +638,7 @@ function CombinationsTable({ groupBy }: { groupBy?: string }) {
 																</div>
 															</div>
 														</td>
-														<td className='px-4 py-2'>
+														<td className='p-2'>
 															{/* Price Column */}
 															<Controller
 																name={`combinations.${comboIdx}.price`}
@@ -658,7 +658,7 @@ function CombinationsTable({ groupBy }: { groupBy?: string }) {
 																)}
 															/>
 														</td>
-														<td className='px-4 py-2'>
+														<td className='p-2'>
 															{/* Quantity Column */}
 															<Controller
 																name={`combinations.${comboIdx}.qty`}
@@ -674,7 +674,7 @@ function CombinationsTable({ groupBy }: { groupBy?: string }) {
 																)}
 															/>
 														</td>
-														<td className='px-4 py-2'>
+														<td className='p-2'>
 															{/* SKU Column */}
 															<Controller
 																name={`combinations.${comboIdx}.sku`}
@@ -696,13 +696,13 @@ function CombinationsTable({ groupBy }: { groupBy?: string }) {
 							  ))
 							: combinations.map((combo, idx) => (
 									<tr key={combo.id} className='border-b hover:bg-muted/50'>
-										<td className='px-4 py-3'>
+										<td className='p-2'>
 											<Checkbox
 												checked={combo.checked}
 												onCheckedChange={(checked) => handleCheckSingle(combo.id, checked === true)}
 											/>
 										</td>
-										<td className='px-4 py-3'>
+										<td className='p-2'>
 											{/* Variant Column */}
 											<div className='flex items-center gap-3'>
 												<div className='size-12 bg-muted rounded flex items-center justify-center'>
@@ -732,7 +732,7 @@ function CombinationsTable({ groupBy }: { groupBy?: string }) {
 												</div>
 											</div>
 										</td>
-										<td className='px-4 py-3'>
+										<td className='p-2'>
 											{/* Price Column */}
 											<Controller
 												name={`combinations.${idx}.price`}
@@ -752,23 +752,23 @@ function CombinationsTable({ groupBy }: { groupBy?: string }) {
 												)}
 											/>
 										</td>
-										<td className='px-4 py-3'>
+										<td className='p-2'>
 											{/* Quantity Column */}
 											<Controller
 												name={`combinations.${idx}.qty`}
 												control={control}
 												render={({ field }) => (
 													<Input
-														{...field}
 														type='number'
 														placeholder='0'
 														min='0'
 														className='text-sm max-w-20'
+														{...field}
 													/>
 												)}
 											/>
 										</td>
-										<td className='px-4 py-3'>
+										<td className='p-2'>
 											{/* SKU Column */}
 											<Controller
 												name={`combinations.${idx}.sku`}
@@ -843,11 +843,12 @@ export default function ProductVariantsComponent({
 	productSKU?: string;
 }) {
 	const { t } = useTranslation();
-	const { control, watch, setValue } = useFormContext<ProductVariantsForm>();
+	const { control, watch, setValue, reset, getValues } = useFormContext<ProductVariantsForm>();
 
 	const variantsArray = useFieldArray({ control, name: 'variants' });
 	const [groupBy, setGroupBy] = useState<string | undefined>(undefined);
 	const [isInitialized, setIsInitialized] = useState(false);
+	const [skipGeneration, setSkipGeneration] = useState(false); // ✅ إضافة flag جديد
 
 	const sensors = useSensors(
 		useSensor(PointerSensor),
@@ -864,19 +865,45 @@ export default function ProductVariantsComponent({
 		if (backendVariants && backendVariants.length > 0 && !isInitialized && availableAttributes) {
 			console.log('🔄 Initializing from backend...');
 			const normalized = normalizeBackendToForm(backendVariants, availableAttributes);
-			setValue('variants', normalized.variants);
-			setValue('combinations', normalized.combinations);
+
+			console.log('✅ Normalized combinations:', normalized.combinations);
+
+			// ✅ منع توليد combinations جديدة بعد التهيئة
+			setSkipGeneration(true);
+
+			reset(
+				{
+					...getValues(),
+					variants: normalized.variants,
+					combinations: normalized.combinations,
+				},
+				{
+					keepDefaultValues: false,
+				}
+			);
+
 			setIsInitialized(true);
+
+			// ✅ السماح بتوليد combinations بعد فترة قصيرة
+			setTimeout(() => {
+				setSkipGeneration(false);
+			}, 500);
 		}
-	}, [backendVariants, availableAttributes, setValue, isInitialized]);
+	}, [backendVariants, availableAttributes, reset, getValues, isInitialized]);
 
 	const variants = watch('variants') as VariantForm[] | undefined;
-	console.log('variants', variants);
 
-	// ✅ ONLY ONE useEffect for generating combinations
+	// ✅ Generate combinations only when variants change (not on initial load)
 	useEffect(() => {
+		// ✅ تجاهل التنفيذ عند التهيئة من backend
+		if (skipGeneration) {
+			console.log('⏭️ Skipping generation - still initializing');
+			return;
+		}
+
 		// Skip if still initializing from backend
 		if (!isInitialized && backendVariants && backendVariants.length > 0) {
+			console.log('⏭️ Skipping generation - not initialized yet');
 			return;
 		}
 
@@ -918,17 +945,52 @@ export default function ProductVariantsComponent({
 			return;
 		}
 
-		// Generate combinations
-		console.log('✅ Generating combinations...');
-		const combos = generateCombinations(savedVariants, productSKU);
-		console.log('✨ Generated', combos.length, 'combinations');
+		// ✅ احتفظ بالبيانات الموجودة (qty, price, etc) عند إعادة التوليد
+		const existingCombinations = getValues('combinations') || [];
 
-		setValue('combinations', combos, {
+		// Generate new combinations
+		console.log('✅ Generating combinations...');
+		const newCombos = generateCombinations(savedVariants, productSKU);
+		console.log('✨ Generated', newCombos.length, 'combinations');
+
+		// ✅ دمج البيانات القديمة مع الجديدة
+		const mergedCombos = newCombos.map((newCombo) => {
+			// ابحث عن combination مطابق في البيانات القديمة
+			const existing = existingCombinations.find((old) => {
+				// مطابقة بناءً على الـ attributes
+				if (newCombo.attributes.length !== old.attributes.length) return false;
+
+				return newCombo.attributes.every((attr) =>
+					old.attributes.some(
+						(oldAttr) => oldAttr.attributeId === attr.attributeId && oldAttr.attributeValueId === attr.attributeValueId
+					)
+				);
+			});
+
+			// إذا وُجد، احتفظ بالبيانات القديمة
+			if (existing) {
+				return {
+					...newCombo,
+					qty: existing.qty, // ✅ احتفظ بالكمية
+					price: existing.price,
+					compareAtPrice: existing.compareAtPrice,
+					cost: existing.cost,
+					images: existing.images,
+					imageId: existing.imageId,
+					checked: existing.checked,
+					variantId: existing.variantId, // ✅ مهم للـ update
+				};
+			}
+
+			return newCombo;
+		});
+
+		setValue('combinations', mergedCombos, {
 			shouldDirty: false,
 			shouldTouch: false,
 			shouldValidate: false,
 		});
-	}, [variants, productSKU, setValue, isInitialized, backendVariants]);
+	}, [variants, productSKU, setValue, getValues, isInitialized, backendVariants, skipGeneration]);
 
 	const combinations = watch('combinations') as Combination[] | undefined;
 

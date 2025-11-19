@@ -8,7 +8,7 @@ import { prisma_DB } from '@/prisma/prisma.db';
 import { ActionResult, TImage } from '@/types/api';
 import { fields, formSchemaCollection, TCollectionFormValues } from '@/validation/collection-validation';
 import { Prisma } from '@prisma/client';
-import { revalidatePath, revalidateTag, updateTag } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { cookies } from 'next/headers';
 
 type TFormValues = TCollectionFormValues;

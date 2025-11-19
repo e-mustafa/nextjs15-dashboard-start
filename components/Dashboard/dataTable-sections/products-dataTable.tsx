@@ -4,7 +4,7 @@ import { imagesPlaceholder, TLocalesData } from '@/configs/general';
 import { useServerResponse } from '@/hooks/use-server-response';
 import { getDataInPage } from '@/lib/utils.server/api.server';
 import { deleteManyProductsAction, deleteProductAction, toggleStateProductAction } from '@/server/actions/product-actions';
-import { TProductLocale } from '@/server/services/product-service';
+import { TProduct } from '@/server/services/product-service';
 import { ActionResult, ApiMeta, TImage, TQueryParams } from '@/types/api';
 import { ColumnDef } from '@tanstack/react-table';
 import Image from 'next/image';
@@ -14,7 +14,7 @@ import { useCallback, useOptimistic, useState, useTransition } from 'react';
 import { Switch } from '../../ui/switch';
 import ReusableDataTable from '../dataTable/reusable-data-table';
 
-type sectionType = TProductLocale;
+type sectionType = TProduct;
 
 export default function ProductsDataTable({ result, locale }: { result: ActionResult<sectionType>; locale: TLocalesData }) {
 	const router = useRouter();

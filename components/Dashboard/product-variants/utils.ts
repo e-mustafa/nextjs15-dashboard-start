@@ -206,16 +206,13 @@ export const normalizeBackendToForm = (
 
 			// Get or create variant form for this attribute
 			if (!variantsMap.has(attrId)) {
-				const arTranslation = option?.attribute?.translations?.find((t) => t.lang === 'ar');
-				const enTranslation = option?.attribute?.translations?.find((t) => t.lang === 'en');
-
 				variantsMap.set(attrId, {
 					id: generateId(),
 					attributeId: attrId,
-					title_ar: arTranslation?.name || '',
-					title_en: enTranslation?.name || '',
+					title_ar: option?.attribute?.name_ar || '',
+					title_en: option?.attribute?.name_en || '',
 					options: [],
-					isEditing: arTranslation?.name || enTranslation?.name ? false : true,
+					isEditing: option?.attribute?.name_en || option?.attribute?.name_en ? false : true,
 				});
 			}
 
@@ -224,14 +221,11 @@ export const normalizeBackendToForm = (
 			const valueId = option.attributeValueId;
 
 			if (!variantForm.options.some((o) => o.attributeValueId === valueId)) {
-				const arValueTranslation = option?.attributeValue?.translations?.find((t) => t.lang === 'ar');
-				const enValueTranslation = option?.attributeValue?.translations?.find((t) => t.lang === 'en');
-
 				variantForm.options.push({
 					id: generateId(),
 					attributeValueId: valueId,
-					value_ar: arValueTranslation?.name || option?.attributeValue?.value,
-					value_en: enValueTranslation?.name || option?.attributeValue?.value,
+					value_ar: option?.attributeValue?.name_ar || option?.attributeValue?.value,
+					value_en: option?.attributeValue?.name_en || option?.attributeValue?.value,
 					colorHex: option?.attributeValue?.colorHex,
 				});
 			}
@@ -239,21 +233,19 @@ export const normalizeBackendToForm = (
 
 		// Build combination
 		const attributes: CombinationAttribute[] = variant.options.map((option) => {
-			const arAttrTranslation = option?.attribute?.translations?.find((t) => t.lang === 'ar');
-			const enAttrTranslation = option?.attribute?.translations?.find((t) => t.lang === 'en');
-			const arValueTranslation = option?.attributeValue?.translations?.find((t) => t.lang === 'ar');
-			const enValueTranslation = option?.attributeValue?.translations?.find((t) => t.lang === 'en');
-
 			return {
 				attributeId: option.attributeId,
 				attributeValueId: option.attributeValueId,
-				name_ar: arAttrTranslation?.name || '',
-				name_en: enAttrTranslation?.name || '',
-				value_ar: arValueTranslation?.name || option?.attributeValue?.value,
-				value_en: enValueTranslation?.name || option?.attributeValue?.value,
+				name_ar: option?.attribute?.name_ar || '',
+				name_en: option?.attribute?.name_en || '',
+				value_ar: option?.attributeValue?.name_ar || option?.attributeValue?.value,
+				value_en: option?.attributeValue?.name_en || option?.attributeValue?.value,
 				colorHex: option?.attributeValue?.colorHex,
 			};
 		});
+
+		console.log('variant.stockQuantity', variant.stockQuantity);
+		console.log('variant---', variant);
 
 		combinations.push({
 			id: generateId(),
@@ -269,6 +261,8 @@ export const normalizeBackendToForm = (
 			checked: variant.isActive,
 			isActive: variant.isActive,
 		});
+
+		console.log('combinations---', combinations);
 	});
 
 	return {
