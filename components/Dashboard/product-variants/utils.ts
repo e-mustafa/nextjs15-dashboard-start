@@ -3,6 +3,7 @@
 // -----------------------------
 
 import { TImage } from '@/types/api';
+import { debugMode } from '.';
 import {
 	AttributeBackend,
 	Combination,
@@ -51,16 +52,17 @@ export const generateSKU = (baseSKU: string, attributes: CombinationAttribute[],
  * Fixed: Properly handles empty options and generates correct combinations
  */
 export const generateCombinations = (variants: VariantForm[], baseSKU?: string): Combination[] => {
-	console.log('🔧 generateCombinations called with:', {
-		variantsCount: variants.length,
-		baseSKU,
-		variants: variants.map((v) => ({
-			title_ar: v.title_ar,
-			title_en: v.title_en,
-			optionsCount: v.options?.length,
-			isEditing: v.isEditing,
-		})),
-	});
+	debugMode &&
+		console.log('🔧 generateCombinations called with:', {
+			variantsCount: variants.length,
+			baseSKU,
+			variants: variants.map((v) => ({
+				title_ar: v.title_ar,
+				title_en: v.title_en,
+				optionsCount: v.options?.length,
+				isEditing: v.isEditing,
+			})),
+		});
 
 	// Filter valid variants
 	const validVariants = variants.filter(
@@ -71,10 +73,10 @@ export const generateCombinations = (variants: VariantForm[], baseSKU?: string):
 			v.options.some((opt) => opt.value_ar || opt.value_en)
 	);
 
-	console.log('✅ Valid variants:', validVariants.length);
+	debugMode && console.log('✅ Valid variants:', validVariants.length);
 
 	if (validVariants.length === 0) {
-		console.log('❌ No valid variants found');
+		debugMode && console.log('❌ No valid variants found');
 		return [];
 	}
 
@@ -101,10 +103,11 @@ export const generateCombinations = (variants: VariantForm[], baseSKU?: string):
 
 		const validOptions = variant.options.filter((opt) => opt.value_ar || opt.value_en);
 
-		console.log(`📦 Processing variant ${index}:`, {
-			title: variant.title_ar || variant.title_en,
-			validOptions: validOptions.length,
-		});
+		debugMode &&
+			console.log(`📦 Processing variant ${index}:`, {
+				title: variant.title_ar || variant.title_en,
+				validOptions: validOptions.length,
+			});
 
 		for (const option of validOptions) {
 			const newAttribute: CombinationAttribute = {
@@ -124,7 +127,7 @@ export const generateCombinations = (variants: VariantForm[], baseSKU?: string):
 	};
 
 	const result = combine(0, []);
-	console.log('✨ Generated combinations:', result.length);
+	debugMode && console.log('✨ Generated combinations:', result.length);
 
 	return result;
 };
@@ -143,7 +146,6 @@ export const groupCombinationsBy = (combinations: Combination[], groupByTitle?: 
 	combinations.forEach((combo) => {
 		// Find the attribute to group by
 		const groupAttr = combo.attributes.find((attr) => `${attr.name_ar} - ${attr.name_en}` === groupByTitle);
-
 		if (!groupAttr) return;
 
 		const key = `${groupAttr.value_ar} - ${groupAttr.value_en}`;
@@ -183,7 +185,6 @@ export const groupCombinationsBy = (combinations: Combination[], groupByTitle?: 
 
 /**
  * Normalize backend data to form format
- * Fixed: Properly handles backend structure with translations
  */
 export const normalizeBackendToForm = (
 	backendVariants: VariantBackend[],
@@ -192,8 +193,6 @@ export const normalizeBackendToForm = (
 	if (!backendVariants || backendVariants.length === 0) {
 		return { variants: [], combinations: [] };
 	}
-
-	console.log('backendVariants', backendVariants);
 
 	// Build variants map from existing combinations
 	const variantsMap = new Map<string, VariantForm>();
@@ -224,8 +223,8 @@ export const normalizeBackendToForm = (
 				variantForm.options.push({
 					id: generateId(),
 					attributeValueId: valueId,
-					value_ar: option?.attributeValue?.name_ar || option?.attributeValue?.value,
-					value_en: option?.attributeValue?.name_en || option?.attributeValue?.value,
+					value_ar: option?.attributeValue?.value_ar || '',
+					value_en: option?.attributeValue?.value_en || '',
 					colorHex: option?.attributeValue?.colorHex,
 				});
 			}
@@ -238,14 +237,11 @@ export const normalizeBackendToForm = (
 				attributeValueId: option.attributeValueId,
 				name_ar: option?.attribute?.name_ar || '',
 				name_en: option?.attribute?.name_en || '',
-				value_ar: option?.attributeValue?.name_ar || option?.attributeValue?.value,
-				value_en: option?.attributeValue?.name_en || option?.attributeValue?.value,
+				value_ar: option?.attributeValue?.value_ar || '',
+				value_en: option?.attributeValue?.value_en || '',
 				colorHex: option?.attributeValue?.colorHex,
 			};
 		});
-
-		console.log('variant.stockQuantity', variant.stockQuantity);
-		console.log('variant---', variant);
 
 		combinations.push({
 			id: generateId(),
@@ -261,8 +257,6 @@ export const normalizeBackendToForm = (
 			checked: variant.isActive,
 			isActive: variant.isActive,
 		});
-
-		console.log('combinations---', combinations);
 	});
 
 	return {

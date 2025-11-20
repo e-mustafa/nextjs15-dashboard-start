@@ -10,24 +10,16 @@ import { TImage } from '@/types/api';
 export type AttributeBackend = {
 	id: string;
 	type: 'COLOR' | 'SIZE' | 'MATERIAL' | 'STYLE' | 'CUSTOM';
-	// translations: {
-	// 	id: string;
-	// 	lang: string;
-	// 	name: string;
-	// }[];
+	// translations: { id: string; lang: string; name: string; }[];
 	name_ar: string;
 	name_en: string;
 	values: {
 		id: string;
 		value: string;
 		colorHex?: string;
-		// translations: {
-		// 	id: string;
-		// 	lang: string;
-		// 	name: string;
-		// }[];
-		name_ar: string;
-		name_en: string;
+		// translations: { id: string; lang: string; name: string; }[];
+		value_ar: string;
+		value_en: string;
 	}[];
 };
 
@@ -64,8 +56,8 @@ export type VariantBackend = {
 			value: string;
 			colorHex?: string;
 			// translations: { lang: string; name: string }[];
-			name_ar: string;
-			name_en: string;
+			value_ar: string;
+			value_en: string;
 		};
 	}[];
 };

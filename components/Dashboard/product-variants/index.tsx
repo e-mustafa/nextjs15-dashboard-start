@@ -6,6 +6,7 @@ import TooltipElement from '@/components/ui-custom/tooltip-element';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { isDEV } from '@/configs/general';
 import useLocale from '@/hooks/useLocale';
 import { cn } from '@/lib/utils';
 import {
@@ -46,6 +47,8 @@ import {
 } from './types';
 import { calculateTotals, generateCombinations, generateId, groupCombinationsBy, normalizeBackendToForm } from './utils';
 
+export const debugMode = isDEV && false; // Set to true to enable debug logs
+
 // =================================
 // SORTABLE WRAPPER
 // =================================
@@ -80,9 +83,6 @@ function VariantOptionsList({ controlName, error }: { controlName: string; error
 		name: controlName as any,
 	});
 
-	console.log('fields', fields);
-
-	// const [isColors, setIsColors] = useState(fields?.some((option) => !!option.colorHex));
 	const [isColors, setIsColors] = useState(fields?.some((option) => (option as VariantOption).colorHex));
 
 	const sensors = useSensors(
@@ -189,20 +189,8 @@ function VariantOptionsList({ controlName, error }: { controlName: string; error
 					))}
 
 					<TooltipElement content={t('common.actions.add_option') || 'Add option'}>
-						<Button
-							type='button'
-							// variant='outline'
-							size='icon'
-							onClick={() =>
-								append({
-									id: generateId(),
-									value_ar: '',
-									value_en: '',
-								})
-							}
-						>
+						<Button type='button' size='icon' onClick={() => append({ id: generateId(), value_ar: '', value_en: '' })}>
 							<PlusIcon className='size-4' />
-							{/* {t('common.actions.add_option') || 'Add option'} */}
 						</Button>
 					</TooltipElement>
 				</div>
@@ -416,8 +404,6 @@ function CombinationsTable({ groupBy }: { groupBy?: string }) {
 	const combinations = watch('combinations') as Combination[];
 
 	const [groupPrices, setGroupPrices] = useState<Record<string, string>>({});
-
-	console.log('combinations', combinations);
 
 	const groupedData = useMemo(() => {
 		if (!groupBy || !combinations) return [];
@@ -863,28 +849,25 @@ export default function ProductVariantsComponent({
 	// Initialize from backend data ONCE
 	useEffect(() => {
 		if (backendVariants && backendVariants.length > 0 && !isInitialized && availableAttributes) {
-			console.log('🔄 Initializing from backend...');
+			debugMode && console.log('🔄 Initializing from backend...');
 			const normalized = normalizeBackendToForm(backendVariants, availableAttributes);
 
-			console.log('✅ Normalized combinations:', normalized.combinations);
-
-			// ✅ منع توليد combinations جديدة بعد التهيئة
+			// ✅prevent generating new combinations after initialization
 			setSkipGeneration(true);
 
+			// Reset form with normalized data
 			reset(
 				{
 					...getValues(),
 					variants: normalized.variants,
 					combinations: normalized.combinations,
 				},
-				{
-					keepDefaultValues: false,
-				}
+				{ keepDefaultValues: false }
 			);
 
 			setIsInitialized(true);
 
-			// ✅ السماح بتوليد combinations بعد فترة قصيرة
+			// ✅ allow generating combinations after a short delay
 			setTimeout(() => {
 				setSkipGeneration(false);
 			}, 500);
@@ -895,38 +878,51 @@ export default function ProductVariantsComponent({
 
 	// ✅ Generate combinations only when variants change (not on initial load)
 	useEffect(() => {
-		// ✅ تجاهل التنفيذ عند التهيئة من backend
+		// ✅ Completely ignore if data is from backend
+		if (backendVariants && backendVariants.length > 0 && isInitialized) {
+			debugMode && console.log('⏭️ Skipping generation - using backend data');
+			return;
+		}
+
+		// ✅ Skip if still initializing
 		if (skipGeneration) {
-			console.log('⏭️ Skipping generation - still initializing');
+			debugMode && console.log('⏭️ Skipping generation - still initializing');
 			return;
 		}
 
 		// Skip if still initializing from backend
 		if (!isInitialized && backendVariants && backendVariants.length > 0) {
-			console.log('⏭️ Skipping generation - not initialized yet');
+			debugMode && console.log('⏭️ Skipping generation - not initialized yet');
 			return;
 		}
 
-		console.log('🔄 Variants changed, generating combinations...');
+		debugMode && console.log('🔄 Variants changed, generating combinations...');
 
 		if (!variants || variants.length === 0) {
-			console.log('❌ No variants found');
-			setValue('combinations', []);
+			debugMode && console.log('❌ No variants found');
+			// ✅ Do not clear combinations if they are from backend
+			if (!backendVariants || backendVariants.length === 0) {
+				setValue('combinations', []);
+			}
 			return;
 		}
 
 		// Filter only saved (non-editing) variants
 		const savedVariants = variants.filter((v) => !v.isEditing);
 
-		console.log('📊 Variants status:', {
-			total: variants.length,
-			saved: savedVariants.length,
-			editing: variants.filter((v) => v.isEditing).length,
-		});
+		debugMode &&
+			console.log('📊 Variants status:', {
+				total: variants.length,
+				saved: savedVariants.length,
+				editing: variants.filter((v) => v.isEditing).length,
+			});
 
 		if (savedVariants.length === 0) {
-			console.log('❌ No saved variants, clearing combinations');
-			setValue('combinations', []);
+			debugMode && console.log('❌ No saved variants');
+			// ✅ Do not clear combinations if they are from backend
+			if (!backendVariants || backendVariants.length === 0) {
+				setValue('combinations', []);
+			}
 			return;
 		}
 
@@ -940,24 +936,25 @@ export default function ProductVariantsComponent({
 		);
 
 		if (!hasValidData) {
-			console.log('❌ Invalid variant data');
-			setValue('combinations', []);
+			debugMode && console.log('❌ Invalid variant data');
+			// ✅ Do not clear combinations if they are from backend
+			if (!backendVariants || backendVariants.length === 0) {
+				setValue('combinations', []);
+			}
 			return;
 		}
 
-		// ✅ احتفظ بالبيانات الموجودة (qty, price, etc) عند إعادة التوليد
+		// ✅ Keep existing combinations data (qty, price, etc.) when regenerating
 		const existingCombinations = getValues('combinations') || [];
 
 		// Generate new combinations
-		console.log('✅ Generating combinations...');
+		debugMode && console.log('✅ Generating combinations...');
 		const newCombos = generateCombinations(savedVariants, productSKU);
-		console.log('✨ Generated', newCombos.length, 'combinations');
+		debugMode && console.log('✨ Generated', newCombos.length, 'combinations');
 
-		// ✅ دمج البيانات القديمة مع الجديدة
+		// ✅ Merge existing data with new data
 		const mergedCombos = newCombos.map((newCombo) => {
-			// ابحث عن combination مطابق في البيانات القديمة
 			const existing = existingCombinations.find((old) => {
-				// مطابقة بناءً على الـ attributes
 				if (newCombo.attributes.length !== old.attributes.length) return false;
 
 				return newCombo.attributes.every((attr) =>
@@ -967,18 +964,17 @@ export default function ProductVariantsComponent({
 				);
 			});
 
-			// إذا وُجد، احتفظ بالبيانات القديمة
 			if (existing) {
 				return {
 					...newCombo,
-					qty: existing.qty, // ✅ احتفظ بالكمية
+					qty: existing.qty,
 					price: existing.price,
 					compareAtPrice: existing.compareAtPrice,
 					cost: existing.cost,
 					images: existing.images,
 					imageId: existing.imageId,
 					checked: existing.checked,
-					variantId: existing.variantId, // ✅ مهم للـ update
+					variantId: existing.variantId,
 				};
 			}
 
