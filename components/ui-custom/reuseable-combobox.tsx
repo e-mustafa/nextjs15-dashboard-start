@@ -23,6 +23,7 @@ export interface ComboboxOption {
 	id: string;
 	name: string;
 	image?: string | { url?: string };
+	images?: Array<{ url: string; fileId?: string }>;
 	[key: string]: any;
 }
 
@@ -44,11 +45,14 @@ interface ComboboxProps<T extends ComboboxOption> {
 	isProducts?: boolean;
 	isTags?: boolean;
 	deleteTag?: (id: string) => Promise<void>;
-	// PaginatedResponse<ComboboxOption> | ComboboxOption[]
 
-	value?: string | string[];
-	onChange?: (value: string | string[]) => void;
+	// القيمة يمكن أن تكون: string | string[] | T | T[]
+	value?: string | string[] | T | T[];
+	onChange?: (value: string | string[] | T | T[]) => void;
 	multiple?: boolean;
+
+	// خيار جديد: إرجاع الكائن الكامل أو ID فقط
+	returnFullObject?: boolean; // default: false
 
 	placeholder?: string;
 	searchPlaceholder?: string;
@@ -65,16 +69,27 @@ interface ComboboxProps<T extends ComboboxOption> {
 }
 
 /**
- * ReusableCombobox component
+ * Combobox input field
  *
- * @param {ComboboxProps<T>} props - The properties for the ReusableCombobox component.
- * isProducts: boolean to indicate if the options are products
- * isTags: boolean to indicate if the options are tags
- * deleteTag: function to delete a tag by id
- * multiple: boolean to indicate if multiple options can be selected
- * searchPlaceholder: string for the search input placeholder text
- * emptyMessage: string for the message to display when no options are found
- * @returns {JSX.Element} - The JSX element representing the ReusableCombobox component.
+ * @param {ComboboxProps<T>} props
+ * `optionUrl`: string - API endpoint to fetch options.
+ *
+ * `fetchOptions`?: (query: string, page?: number) => Promise<{ data: ComboboxOption[]; pagination: any }>.
+ *
+ * `revalidateTags`?: string[] - Tags for revalidation.
+ *
+ * `returnFullObject`?: boolean - Whether to return the full object or just the ID/IDs.
+ *
+ * `isProducts`?: boolean - Whether the combobox has additional section to display selected products.
+ *
+ * `isTags`?: boolean - Whether the combobox is for tags.
+ *
+ * `deleteTag`?: (id: string) => Promise<void> - Function to delete a tag by ID.
+ *
+ * `multiple`?: boolean - Whether multiple selections are allowed.
+ *
+ * @returns {JSX.Element}
+ *
  */
 export default function ReusableCombobox<T extends ComboboxOption>({
 	options: staticOptions = [],
@@ -85,6 +100,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 	value,
 	onChange,
 	multiple = false,
+	returnFullObject = false, // default: false -> return IDs only
 	placeholder = 'forms.placeholders.choose_items',
 	searchPlaceholder = 'forms.search.placeholder',
 	emptyMessage = 'forms.search.no_results',
@@ -111,17 +127,42 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const observerTarget = useRef<HTMLDivElement>(null);
 
+	// extract IDs from the passed value (whether objects or strings)
 	const selectedIds = useMemo(() => {
 		if (!value) return [];
-		return Array.isArray(value) ? value : [value];
+
+		const valueArray = Array.isArray(value) ? value : [value];
+
+		return valueArray
+			.map((v) => {
+				if (typeof v === 'string') return v;
+				if (typeof v === 'object' && v.id) return v.id;
+				return '';
+			})
+			.filter(Boolean);
 	}, [value]);
 
+	// extract full objects from the passed value (for direct display)
+	const initialSelectedOptions = useMemo(() => {
+		if (!value) return [];
+
+		const valueArray = Array.isArray(value) ? value : [value];
+
+		return valueArray.filter((v) => typeof v === 'object' && v.id).map((v) => v as T);
+	}, [value]);
+
+	// marge options from static, server, and initial selected
 	const allOptions = useMemo(() => {
-		const combined = [...staticOptions, ...serverOptions];
+		const combined = [
+			...initialSelectedOptions, // add initially selected options to avoid missing data
+			...staticOptions,
+			...serverOptions,
+		];
 		const uniqueMap = new Map(combined.map((opt) => [opt.id, opt]));
 		return Array.from(uniqueMap.values());
-	}, [staticOptions, serverOptions]);
+	}, [staticOptions, serverOptions, initialSelectedOptions]);
 
+	// select full objects based on selected IDs
 	const selectedOptions = useMemo(() => {
 		return allOptions.filter((opt) => selectedIds.includes(opt.id));
 	}, [allOptions, selectedIds]);
@@ -208,7 +249,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 	}, [allOptions, searchQuery, fetchOptions]);
 
 	const hasImage = useMemo(() => {
-		return allOptions.some((opt) => opt.images?.length > 0);
+		return allOptions.some((opt) => opt?.images?.length || 0 > 0);
 	}, [allOptions]);
 
 	useEffect(() => {
@@ -241,30 +282,53 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 	const handleSelect = useCallback(
 		(optionId: string) => {
 			if (disabled) return;
-			let newValue: string | string[];
+
+			const selectedOption = allOptions.find((opt) => opt.id === optionId);
+			if (!selectedOption) return;
+
+			let newValue: string | string[] | T | T[];
 
 			if (multiple) {
-				const newIds = selectedIds.includes(optionId)
-					? selectedIds.filter((id) => id !== optionId)
-					: [...selectedIds, optionId];
-				newValue = newIds;
+				const isAlreadySelected = selectedIds.includes(optionId);
+
+				if (returnFullObject) {
+					const currentObjects = selectedOptions;
+					newValue = isAlreadySelected
+						? currentObjects.filter((opt) => opt.id !== optionId)
+						: [...currentObjects, selectedOption];
+				} else {
+					newValue = isAlreadySelected ? selectedIds.filter((id) => id !== optionId) : [...selectedIds, optionId];
+				}
 			} else {
-				newValue = selectedIds.includes(optionId) ? '' : optionId;
+				const isAlreadySelected = selectedIds.includes(optionId);
+
+				if (returnFullObject) {
+					newValue = isAlreadySelected ? ([] as T[]) : selectedOption;
+				} else {
+					newValue = isAlreadySelected ? '' : optionId;
+				}
 				setOpen(false);
 			}
+
 			onChange?.(newValue);
 		},
-		[multiple, selectedIds, onChange, disabled]
+		[multiple, selectedIds, selectedOptions, allOptions, onChange, disabled, returnFullObject]
 	);
 
 	const handleRemove = useCallback(
 		(optionId: string, e: React.MouseEvent) => {
 			e.stopPropagation();
 			if (disabled) return;
-			const newIds = selectedIds.filter((id) => id !== optionId);
-			onChange?.(newIds);
+
+			if (returnFullObject) {
+				const newObjects = selectedOptions.filter((opt) => opt.id !== optionId);
+				onChange?.(multiple ? newObjects : ([] as T[]));
+			} else {
+				const newIds = selectedIds.filter((id) => id !== optionId);
+				onChange?.(multiple ? newIds : '');
+			}
 		},
-		[selectedIds, onChange, disabled]
+		[selectedIds, selectedOptions, onChange, disabled, multiple, returnFullObject]
 	);
 
 	const renderTriggerContent = () => {
@@ -278,9 +342,9 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 					{selectedOptions.slice(0, 2).map((opt) => (
 						<Badge key={opt.id} variant='secondary' className='mr-1'>
 							{opt.name}
-							<button type='button' className='ml-1 hover:text-destructive' onClick={(e) => handleRemove(opt.id, e)}>
+							<p className='ml-1 hover:text-destructive cursor-pointer' onClick={(e) => handleRemove(opt.id, e)}>
 								<XIcon className='h-3 w-3' />
-							</button>
+							</p>
 						</Badge>
 					))}
 					{selectedOptions.length > 2 && <Badge variant='secondary'>+{selectedOptions.length - 2}</Badge>}
@@ -398,7 +462,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 																src={
 																	typeof option.image === 'string'
 																		? option.image
-																		: option.images[0]?.url || imagesPlaceholder.imgMedium
+																		: option.images?.[0]?.url || imagesPlaceholder.imgMedium
 																}
 																alt={option.name}
 																width={40}
@@ -477,7 +541,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 													src={
 														typeof option.image === 'string'
 															? option.image
-															: option.images[0]?.url || imagesPlaceholder.imgMedium
+															: option.images?.[0]?.url || imagesPlaceholder.imgMedium
 													}
 													alt={option.name}
 													width={40}

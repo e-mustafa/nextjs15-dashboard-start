@@ -118,6 +118,7 @@ export interface FieldConfig<T extends FieldValues = FieldValues, K extends Fiel
 	isTags?: boolean;
 	isProducts?: boolean;
 	deleteTag?: (id: string) => Promise<void>;
+	returnObject?: boolean;
 	// getOptionFn;
 
 	// productVariants

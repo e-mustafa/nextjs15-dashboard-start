@@ -15,21 +15,24 @@ import InfoIconTooltip from './info-icon-tooltip';
  * Combobox input field
  *
  * @param {RenderFieldProps<T, K>} props
+ * `optionUrl`: string - API endpoint to fetch options.
+ * 
+ * `fetchOptions`?: (query: string, page?: number) => Promise<{ data: ComboboxOption[]; pagination: any }>.
+ * 
+ * `revalidateTags`?: string[] - Tags for revalidation.
+ * 
+ * `returnObject`?: boolean - Whether to return the full object or just the ID/IDs.
+ * 
+ * `isProducts`?: boolean - Whether the combobox has additional section to display selected products.
+ * 
+ * `isTags`?: boolean - Whether the combobox is for tags.
+ * 
+ * `deleteTag`?: (id: string) => Promise<void> - Function to delete a tag by ID.
+ * 
+ * `multiple`?: boolean - Whether multiple selections are allowed.
+ * 
  * @returns {JSX.Element}
  *
- * @example
- * <ComboboxInputField
- *   name="brands"
- *   label="Brands"
- *   placeholder="Search for a brand"
- *   required={true}
- *   description="Please select the brand"
- *   optionUrl="/api/brands"
- *   revalidateTags={['brand']}
- *   fetchOptions={fetchItemsFromAPI}
- *   isTags={true}
- *   multiple={true}
- * />
  */
 export function ComboboxInputField<T extends FieldValues, K extends FieldTypeMap>({
 	fieldConfig,
@@ -46,6 +49,7 @@ export function ComboboxInputField<T extends FieldValues, K extends FieldTypeMap
 		fetchOptions,
 		isTags,
 		multiple = isTags,
+		returnObject = false,
 	} = fieldConfig;
 	const {
 		t,
@@ -93,6 +97,8 @@ export function ComboboxInputField<T extends FieldValues, K extends FieldTypeMap
 			control={form.control}
 			name={name}
 			render={({ field }) => {
+				const value = field.value;
+				console.log('field.value', field.value);
 				return (
 					<FormItem className={fieldConfig.class}>
 						{!fieldConfig.infoContent ? (
@@ -123,10 +129,12 @@ export function ComboboxInputField<T extends FieldValues, K extends FieldTypeMap
 								isProducts={fieldConfig.isProducts}
 								isTags={fieldConfig.isTags}
 								deleteTag={fieldConfig.deleteTag}
-								// value={value}
+								returnFullObject={returnObject}
 								// onChange={(val) => setBrandsValue(val as string[])}
 								// onChange={field.onChange}
 								{...field}
+								// options={Array.isArray(value) ? value : [value]}
+								// value={value && Array.isArray(value) ? value?.map((v: T) => v.id) : value?.id}
 							/>
 						</FormControl>
 						{description && <FormDescription>{t(description)}</FormDescription>}
