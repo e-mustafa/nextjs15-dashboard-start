@@ -10,7 +10,7 @@ import { formSectionSEO } from '@/lib/create-forms/form-section-seo';
 import { renderField } from '@/lib/create-forms/input-registry';
 import { SectionConfig } from '@/lib/create-forms/types-create-forms';
 import { cn, msg } from '@/lib/utils';
-import { createCollectionAction, updateCollectionAction } from '@/server/actions/collection-actions';
+import { createProductAction, updateProductAction } from '@/server/actions/product-actions';
 import { ActionResult } from '@/types/api';
 import { defaultValuesProduct, formSchemaProduct, TProductFormValues } from '@/validation/product-validation';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -277,7 +277,7 @@ export default function ProductForm({
 	const form = useForm<TFormValues>({
 		resolver: zodResolver(formSchemaProduct),
 		defaultValues,
-		// delayError: 1000,
+		delayError: 300,
 	});
 
 	const [result, setResult] = useState<ActionResult<TFormValues> | null>(null);
@@ -286,14 +286,13 @@ export default function ProductForm({
 	useFormResponse<TFormValues>(result!, form, {
 		redirectUrl: `/${url_segment}`,
 		reset_on_success: (result?.data as TFormValues) || true,
+		storageKey: type == 'create' ? 'create-product' : 'update-product-' + (defaultValues.id || ''),
 	});
 
 	async function onSubmit(data: TFormValues) {
 		startTransition(async () => {
 			const result =
-				type == 'create'
-					? await createCollectionAction(data)
-					: await updateCollectionAction(defaultValues.id || '', data);
+				type == 'create' ? await createProductAction(data) : await updateProductAction(defaultValues.id || '', data);
 
 			setResult(result as ActionResult<TFormValues>);
 		});

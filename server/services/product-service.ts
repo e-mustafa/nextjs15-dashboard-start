@@ -142,8 +142,6 @@ async function formatProduct(
 ): Promise<TProductFormValues | TProduct> {
 	const { translations, images, seoImage, brand, category, variants, collections, tags, ...rest } = product;
 
-	console.log('acceptLanguage ---', acceptLanguage);
-
 	const translationData = await mapTranslations(translations, {
 		accept_language: acceptLanguage,
 		fields,
@@ -183,10 +181,12 @@ async function formatProduct(
 			id: category.id,
 			name: (categoryTranslation as { name: string }).name || '',
 			...(category.images?.length > 0 && {
-				images: {
-					url: category.images?.[0]?.image?.url,
-					fileId: category.images?.[0]?.image?.fileId,
-				},
+				images: [
+					{
+						url: category.images?.[0]?.image?.url,
+						fileId: category.images?.[0]?.image?.fileId,
+					},
+				],
 			}),
 		};
 	}
@@ -203,10 +203,12 @@ async function formatProduct(
 				name: (collectionTranslation as { name: string }).name || '',
 
 				...(c.collection.images?.length > 0 && {
-					image: {
-						url: c.collection.images?.[0]?.image?.url,
-						fileId: c.collection.images?.[0]?.image?.fileId,
-					},
+					images: [
+						{
+							url: c.collection.images?.[0]?.image?.url,
+							fileId: c.collection.images?.[0]?.image?.fileId,
+						},
+					],
 				}),
 			};
 		})
@@ -232,18 +234,16 @@ async function formatProduct(
 						fields: ['name'],
 					});
 
-					console.log('attrTranslation', attrTranslation);
-
 					// Normalize attribute translation to always contain name_ar and name_en
-					const attribute = {
-						name_ar: (attrTranslation as any).name_ar ?? (attrTranslation as any).name ?? '',
-						name_en: (attrTranslation as any).name_en ?? (attrTranslation as any).name ?? '',
+					const attribute: { name_ar: string; name_en: string } = {
+						name_ar: attrTranslation.name_ar ?? attrTranslation.name ?? '',
+						name_en: attrTranslation.name_en ?? attrTranslation.name ?? '',
 					};
 
 					// Normalize attribute value translation to always contain value_ar and value_en
-					const attributeValue = {
-						value_ar: (valueTranslation as any).name_ar ?? (valueTranslation as any).name ?? '',
-						value_en: (valueTranslation as any).name_en ?? (valueTranslation as any).name ?? '',
+					const attributeValue: { value_ar: string; value_en: string; colorHex?: string } = {
+						value_ar: valueTranslation.name_ar ?? valueTranslation.name ?? '',
+						value_en: valueTranslation.name_en ?? valueTranslation.name ?? '',
 						colorHex: option.attributeValue.colorHex ?? undefined,
 					};
 
@@ -653,7 +653,7 @@ export async function getProduct(
 		});
 	}
 
-	if (!product) throw new AppError('api.products.errors.not_found', 404);
+	if (!product) throw new AppError('api.errors.not_found', 404);
 
 	const data = await formatProduct(product, locale);
 
@@ -1060,7 +1060,8 @@ export async function updateProduct(id: string, data: TProductFormValues): Promi
 			for (const combination of data.combinations) {
 				if (!combination.checked) continue;
 
-				// ✅ تأكد من إنشاء/جلب الـ Attributes و Values
+				// ✅ sure to create/get Attributes and Values
+				// Use processedAttributes to avoid duplicates
 				const processedAttributes: Array<{
 					attributeId: string;
 					attributeValueId: string;
@@ -1168,7 +1169,7 @@ export async function updateProduct(id: string, data: TProductFormValues): Promi
 		},
 	});
 
-	if (!product) throw new AppError('api.products.errors.not_found', 404);
+	if (!product) throw new AppError('api.errors.not_found', 404);
 
 	revalidateTag('products', 'max');
 	const formattedData = await formatProduct(product as ProductWithRelations);
@@ -1281,7 +1282,7 @@ export async function updateProductStock(
 		select: { stockQuantity: true },
 	});
 
-	if (!product) throw new AppError('api.products.errors.not_found', 404);
+	if (!product) throw new AppError('api.errors.not_found', 404);
 
 	let newQuantity: number;
 
@@ -1331,7 +1332,7 @@ export async function bulkUpdateProductStatus(ids: string[], isActive: boolean):
 		success: true,
 		status: 200,
 		data: { count: result.count },
-		message: 'api.products.success.bulk_update',
+		message: 'api.products.success.update_bulk',
 	};
 }
 
@@ -1407,7 +1408,7 @@ export async function getRelatedProducts(
 		select: { categoryId: true, brandId: true },
 	});
 
-	if (!product) throw new AppError('api.products.errors.not_found', 404);
+	if (!product) throw new AppError('api.errors.not_found', 404);
 
 	const products = await prisma_DB.product.findMany({
 		where: {
@@ -1484,7 +1485,7 @@ export async function getProductStockStatus(id: string): Promise<
 		},
 	});
 
-	if (!product) throw new AppError('api.products.errors.not_found', 404);
+	if (!product) throw new AppError('api.errors.not_found', 404);
 
 	const status = {
 		quantity: product.stockQuantity,
