@@ -31,12 +31,14 @@ export default function SEOMockupCard({ data, image }: { data?: SEOMockupCardDat
 		<div className='w-full mx-auto space-y-4 bg-accent/20 p-4 rounded-2xl'>
 			{/* Search bar */}
 			<div className='relative flex items-center gap-2 bg-background/50 rounded-2xl px-4 py-2 shadow-md'>
-				<SearchIcon className='w-5 h-5 text-muted-foreground' />
+				<SearchIcon className='w-5 h-5 text-muted-foreground shrink-0' />
 				{/* <Skeleton className='h-4 w-full bg-zinc-700' /> */}
-				<span dir='ltr' className='grow flex items-center gap-0 text-foreground text-sm'>
-					{`${config_env.domain || 'www.example.com'}/.../${infos?.slug || ''}`}
-				</span>
-				<span className='text-white font-bold text-lg'>
+				<div dir='ltr' className='grow flex items-center gap-0 text-foreground text-sm  truncate whitespace-pre overflow-hidden'>
+					{/* {`${config_env.domain || 'www.example.com'}/.../${infos?.slug || ''}`} */}
+					{`${config_env.domain || 'www.example.com'}/...`}
+					
+				</div>
+				<span className='text-white font-bold text-lg shrink-0'>
 					<svg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'>
 						<path
 							fillRule='evenodd'

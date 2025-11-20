@@ -30,7 +30,7 @@ export default function ShardPostMockupCard({ data, image }: { data?: ShardPostM
 	return (
 		<div className='w-full h-full grid xl:place-content-center space-y-4 bg-background bg-accent/20xxx p-2 rounded-2xl'>
 			{/* Result Card */}
-			<div className='p-2 lg:p-3 bg-accent/20 rounded-2xl max-w-80xxx max-w-[80%]'>
+			<div className='p-2 lg:p-3 bg-accent/20 rounded-2xl max-w-80xxx max-w-[90%]'>
 				<Card className='bg-background/50 gap-3 text-white border-0 p-0 shadow-md rounded-2xl overflow-hidden'>
 					<CardContent className='flex flex-col lg:flex-row px-0 overflow-hidden'>
 						<Image
@@ -39,7 +39,7 @@ export default function ShardPostMockupCard({ data, image }: { data?: ShardPostM
 							width={300}
 							height={100}
 							priority
-							className='w-full h-auto aspect-auto object-contain lg:w-1/3 lg:aspect-squarexxx lg:object-cover'
+							className='w-full h-auto aspect-auto object-contain lg:w-[40%] lg:aspect-squarexxx lg:object-cover'
 						/>
 
 						<div className='flex flex-col gap-3 p-3 justify-between flex-1'>
