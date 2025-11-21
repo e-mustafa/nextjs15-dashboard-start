@@ -260,6 +260,23 @@ export const intNotNegativeField = preprocessNumber(
 	z.int({ message: msg('forms.validation.integer') }).nonnegative({ message: msg('forms.validation.price_nonnegative') })
 );
 
+export const specificationPropertySchema = z.object({
+	id: z.string(),
+	key_ar: z.string().min(1, 'forms.validation.required'),
+	key_en: z.string().min(1, 'forms.validation.required'),
+	value_ar: z.string().min(1, 'forms.validation.required'),
+	value_en: z.string().min(1, 'forms.validation.required'),
+});
+
+export const specificationSectionSchema = z.object({
+	id: z.string(),
+	title_ar: z.string().min(1, 'forms.validation.required'),
+	title_en: z.string().min(1, 'forms.validation.required'),
+	properties: z.array(specificationPropertySchema).min(1, 'forms.validation.at_least_one_property'),
+	isEditing: z.boolean(),
+});
+
+
 export const formSchemaProduct = z
 	.object({
 		name_ar: z
@@ -329,6 +346,7 @@ export const formSchemaProduct = z
 		// ✅ Variants & Combinations
 		variants: z.array(variantFormSchema).optional(),
 		combinations: z.array(combinationSchema).optional(),
+		specifications: z.array(specificationSectionSchema),
 
 		type: z.string().optional(),
 
@@ -337,7 +355,7 @@ export const formSchemaProduct = z
 		width: preprocessNumber(z.number().nonnegative()).optional(),
 		height: preprocessNumber(z.number().nonnegative()).optional(),
 	})
-	.extend(SEOFormSchema.shape)
+	.extend(SEOFormSchema.shape);
 	// .refine((data) => !data.compareAtPrice || data.compareAtPrice >= data.basePrice, {
 	// 	message: msg('forms.validation.discount_less_than_base_price'),
 	// 	path: ['compareAtPrice'],
@@ -380,6 +398,7 @@ export const defaultValuesProduct: TProductFormValues = {
 
 	variants: [],
 	combinations: [],
+	specifications: [],
 
 	type: '',
 

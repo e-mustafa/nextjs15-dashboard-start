@@ -29,7 +29,12 @@
 			"delete_option": "حذف الخيار",
 			"group_by": "تجميع حسب",
 			"select_variant": "اختر المتغير",
-			"none": "بدون"
+			"none": "بدون",
+
+			"add_specifications": "اضافة مواصفات",
+			"add_property": "اضافة خاصية",
+			"delete_property": "حذف الخاصية",
+			"add_more": "اضافة المزيد"
 		},
 		"status": {
 			"active": "نشط",
@@ -177,6 +182,8 @@
 			"shipping_info": "معلومات الشحن",
 			"tax_info": "معلومات الضريبة",
 			"inventory_info": "معلومات المخزون",
+			"variants_info": "معلومات المتغيرات",
+			"specifications_info": "معلومات المواصفات",
 			"discount_info": "معلومات الخصم",
 			"supplier_info": "معلومات المورد",
 			"warehouse_info": "معلومات المخزن"
@@ -268,7 +275,18 @@
 			"variant_options": "الخيارات  لهذا المتغير",
 			"variant_option_ar": "الخيار عربي",
 			"variant_option_en": "الخيار انجليزي",
-			"add_color_code": "اضف كود اللون"
+			"add_color_code": "اضف كود اللون",
+
+			"product_specifications": "مواصفات المنتج",
+			"specs_section_title_ar": "اسم القسم (عربي)",
+			"specs_section_title_en": "اسم القسم (إنجليزي)",
+			"spec_section_properties": "خصائص القسم",
+			"spec_key": "اسم الخاصية",
+			"spec_key_ar": "اسم الخاصية (عربي)",
+			"spec_key_en": " اسم الخاصية (إنجليزي)",
+			"specs_value": "قيمة الخاصية",
+			"specs_value_ar": "قيمة الخاصية (عربي)",
+			"specs_value_en": "قيمة الخاصية (إنجليزي)"
 		},
 		"placeholders": {
 			"name": "اكتب الاسم",
@@ -365,7 +383,15 @@
 			"variant_option_ar": "الخيار عربي مثل أزرق...",
 			"variant_option_en": "الخيار انجليزي",
 
-			"no_variants": "لم يتم انشاء متغيرات بعد!"
+			"no_variants": "لم يتم انشاء متغيرات بعد!",
+
+			"no_specifications": "لم يتم انشاء مواصفات بعد!",
+			"specs_section_title_ar": "المواصفات التقنية, مثلا...",
+			"specs_section_title_en": " Technical Specifications , مثلا...",
+			"spec_key_ar": "الخامة , مثلا...",
+			"spec_key_en": "Material , مثلا...",
+			"spec_value_ar": "قطن 100% , مثلا...",
+			"spec_value_en": "100% Cotton , مثلا..."
 		},
 		"validation": {
 			"required": "هذا الحقل مطلوب",
@@ -408,12 +434,15 @@
 			"weight_required": "الوزن مطلوب.",
 			"variant_name_required": "اسم الخيار مطلوب.",
 			"at_least_one_option": "يجب اضافة خيار واحد على الاقل.",
-			"option_name_required": "اسم الخيار مطلوب."
+			"option_name_required": "اسم الخيار مطلوب.",
+
+			"at_least_one_property": "يجب اضافة خاصية واحدة على الاقل."
 		},
 		"descriptions": {
 			"slug": "المعرّف النصي هو نص يجب ان يكون فريدًا ويمكن فقط ان يحتوي على حروف انجليزية، ارقام و شرطه.",
 			"seo_image": "صورة تعبر عن المحتوى وتظهر في نتائج محركات البحث وعند مشاركة الرابط على مواقع التواصل الإجتماعي. \n الحجم الموصى به 1200*630 بيكسل. \n يمكنك تجاهل هذا وسيتم استخدام الصورة الرئيسية ان وجدت.",
-			"add_variants": "اضافة متغيرات مثل اللون، المقاس او المواد لانشاء اصناف مختلفة للمنتج."
+			"add_variants": "اضافة متغيرات مثل اللون، المقاس او المواد لانشاء اصناف مختلفة للمنتج.",
+			"add_specifications": "اضافة مواصفات المنتج مثل المواد، الابعاد، الوزن، او اي معلومات اخرى تساعد العملاء على فهم المنتج بشكل افضل."
 		},
 		"infos": {
 			"slug": "المعرّف النصي هو نص يجب ان يكون فريدًا، لأنه جزء من رابط صفحات الموقع. ويمكن فقط ان يحتوي على حروف انجليزية، ارقام و شرطه.",

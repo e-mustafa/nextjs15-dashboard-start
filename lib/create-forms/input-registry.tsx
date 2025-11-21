@@ -14,6 +14,7 @@ import { JSX } from 'react';
 import { FieldValues, Path } from 'react-hook-form';
 import BaseInputField from './base-input-field';
 import { FieldTypeMap, RenderFieldProps } from './types-create-forms';
+import SpecificationsListField from '@/components/inputs/specifications-list-field';
 
 /**
  * A registry mapping input field types to their corresponding render functions.
@@ -51,6 +52,8 @@ export const inputRegistry: InputRegistry = {
 	combobox: ({ fieldConfig, form }) => <ComboboxInputField fieldConfig={fieldConfig} form={form} />,
 
 	productVariants: ({ fieldConfig, form }) => <ProductVariantsField fieldConfig={fieldConfig} form={form} />,
+	
+	SpecificationsList: ({ fieldConfig, form }) => <SpecificationsListField fieldConfig={fieldConfig} form={form} />,
 
 	seoMockupCard: <T extends FieldValues>({ form }: RenderFieldProps<T, 'seoMockupCard'>) => {
 		const data = {

@@ -26,6 +26,7 @@ export type FieldTypeMap =
 	| 'uploadFile'
 	| 'slug'
 	| 'productVariants'
+	| 'SpecificationsList'
 	| 'attributes'
 	| 'imageManager'
 	| 'imageUpload'

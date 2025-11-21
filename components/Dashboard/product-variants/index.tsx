@@ -30,6 +30,7 @@ import {
 	GripHorizontalIcon,
 	GripIcon,
 	ImageIcon,
+	NetworkIcon,
 	PlusIcon,
 	Trash2Icon,
 } from 'lucide-react';
@@ -1100,7 +1101,7 @@ export default function ProductVariantsComponent({
 			{variantsArray.fields.length === 0 && (
 				<div className='border-2 border-dashed rounded-lg p-12 text-center'>
 					<div className='mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4'>
-						<ImageIcon className='w-8 h-8 text-muted-foreground' />
+						<NetworkIcon className='w-8 h-8 text-muted-foreground' />
 					</div>
 					<h3 className='text-lg font-semibold mb-2'>{t('forms.placeholders.no_variants')}</h3>
 					<p className='text-sm text-muted-foreground mb-6 max-w-md mx-auto'>{t('forms.descriptions.add_variants')}</p>

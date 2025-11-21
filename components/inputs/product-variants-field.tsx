@@ -33,7 +33,7 @@ export default function ProductVariantsField<T extends FieldValues, K extends Fi
 							<FormLabel aria-required={!!required}>{t(label as string)}</FormLabel>
 
 							<ProductVariantsComponent
-								backendVariants={form.getValues(name as Path<T>) || []}
+								backendVariants={field.value || []}
 								availableAttributes={form.getValues(fieldConfig.attributesName as Path<T>) || []}
 								productSKU={form.getValues(fieldConfig.skuName as Path<T>)}
 							/>

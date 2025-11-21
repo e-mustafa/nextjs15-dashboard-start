@@ -1,5 +1,4 @@
 'use client';
-
 import { url_segment } from '@/app/[locale]/dashboard/(products-management)/products/page';
 import LoaderInstElement from '@/components/shard/loaders/loader-inst-element';
 import { Form } from '@/components/ui-custom/custom-form';
@@ -202,8 +201,19 @@ export const formSections_product: SectionConfig<TFormValues>[] = [
 			},
 		],
 	},
+	// specifications
 	{
-		title: 'forms.labels.variants',
+		title: 'forms.sections.specifications_info',
+		fields: [
+			{
+				type: 'SpecificationsList',
+				name: 'specifications',
+			},
+		],
+	},
+	// variants
+	{
+		title: 'forms.sections.variants_info',
 		fields: [
 			{
 				type: 'productVariants',

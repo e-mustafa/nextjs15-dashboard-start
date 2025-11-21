@@ -132,7 +132,14 @@ export function NavMain({ items }: { items: TSidebarItems[] }) {
 							) : (
 								<SidebarMenuButton size='lg' tooltip={item.title[locale]} className='rtl:text-start'>
 									{item.icon && <item.icon className={cn(state == 'collapsed' ? 'size-8!' : 'size-6!')} />}
-									<span className='grow truncate capitalize'>{item.title[locale]}</span>
+
+									{item.url ? (
+										<Link href={item.url} className='grow truncate capitalize'>
+											{item.title[locale]}
+										</Link>
+									) : (
+										<span className='grow truncate capitalize'>{item.title[locale]}</span>
+									)}
 								</SidebarMenuButton>
 							)}
 						</div>
