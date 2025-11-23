@@ -1,4 +1,5 @@
 import UploadImageShaped from '@/components/inputs/upload-image-shaped';
+import { ReusableDNDSortable, SortableDNDWrapper } from '@/components/shard/dnd-kit-sortable';
 import { Button } from '@/components/ui-custom/custom-button';
 import { Checkbox } from '@/components/ui-custom/custom-checkbox';
 import { FormControl, FormField, FormItem, FormLabel, FormMessageTranslated } from '@/components/ui-custom/custom-form';
@@ -10,32 +11,17 @@ import { isDEV } from '@/configs/general';
 import useLocale from '@/hooks/useLocale';
 import { cn } from '@/lib/utils';
 import {
-	closestCenter,
-	DndContext,
-	DragEndEvent,
-	DraggableAttributes,
-	KeyboardSensor,
-	PointerSensor,
-	TouchSensor,
-	useSensor,
-	useSensors,
-} from '@dnd-kit/core';
-import { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
-import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import {
 	CheckIcon,
 	ChevronDownIcon,
 	ChevronUpIcon,
 	GripHorizontalIcon,
 	GripIcon,
-	ImageIcon,
 	NetworkIcon,
 	PlusIcon,
 	Trash2Icon,
 } from 'lucide-react';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-import { Controller, FieldError, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+import { ArrayPath, Controller, FieldError, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import {
 	AttributeBackend,
@@ -51,29 +37,6 @@ import { calculateTotals, generateCombinations, generateId, groupCombinationsBy,
 export const debugMode = isDEV && false; // Set to true to enable debug logs
 
 // =================================
-// SORTABLE WRAPPER
-// =================================
-function SortableWrapper({
-	id,
-	children,
-}: {
-	id: string;
-	children: (props: {
-		setNodeRef: (el: HTMLElement | null) => void;
-		listeners: SyntheticListenerMap | undefined;
-		attributes: DraggableAttributes;
-		style: React.CSSProperties;
-	}) => React.ReactNode;
-}) {
-	const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
-	const style: React.CSSProperties = {
-		transform: CSS.Transform.toString(transform),
-		transition,
-	};
-	return <>{children({ setNodeRef, listeners, attributes, style })}</>;
-}
-
-// =================================
 // VARIANT OPTIONS LIST
 // =================================
 function VariantOptionsList({ controlName, error }: { controlName: string; error?: FieldError }) {
@@ -81,122 +44,95 @@ function VariantOptionsList({ controlName, error }: { controlName: string; error
 	const { control } = useFormContext<ProductVariantsForm>();
 	const { fields, move, append, remove } = useFieldArray({
 		control,
-		name: controlName as any,
+		name: controlName as ArrayPath<ProductVariantsForm>,
 	});
 
 	const [isColors, setIsColors] = useState(fields?.some((option) => (option as VariantOption).colorHex));
 
-	const sensors = useSensors(
-		useSensor(PointerSensor),
-		useSensor(TouchSensor, {
-			activationConstraint: { delay: 150, tolerance: 5 },
-		}),
-		useSensor(KeyboardSensor, {
-			coordinateGetter: sortableKeyboardCoordinates,
-		})
-	);
-
-	const onDragEnd = useCallback(
-		(e: DragEndEvent) => {
-			const { active, over } = e;
-			if (!over || active.id === over.id) return;
-
-			const oldIndex = fields.findIndex((f) => f.id === String(active.id));
-			const newIndex = fields.findIndex((f) => f.id === String(over.id));
-
-			if (oldIndex !== -1 && newIndex !== -1) {
-				move(oldIndex, newIndex);
-			}
-		},
-		[fields, move]
-	);
-
 	return (
-		<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-			<SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
-				<div className='space-y-2'>
-					<div className='flex gap-2 items-center'>
-						<Checkbox id='for-colors' checked={isColors} onCheckedChange={(checked) => setIsColors(!!checked)} />
-						<Label htmlFor='for-colors'>{t('forms.labels.add_color_code')}</Label>
-					</div>
+		<ReusableDNDSortable items={fields} move={move}>
+			<div className='space-y-2'>
+				<div className='flex gap-2 items-center'>
+					<Checkbox id='for-colors' checked={isColors} onCheckedChange={(checked) => setIsColors(!!checked)} />
+					<Label htmlFor='for-colors'>{t('forms.labels.add_color_code')}</Label>
+				</div>
 
-					{fields.map((opt, idx) => (
-						<SortableWrapper key={opt.id} id={opt.id}>
-							{({ setNodeRef, listeners, attributes, style }) => (
-								<div ref={setNodeRef} style={style} className='flex items-center gap-2'>
-									<div
-										{...listeners}
-										{...attributes}
-										className='cursor-move px-2 touch-none h-8 grid place-items-center'
-									>
-										<GripHorizontalIcon className='size-4' />
-									</div>
+				{fields.map((opt, idx) => (
+					<SortableDNDWrapper key={opt.id} id={opt.id}>
+						{({ setNodeRef, listeners, attributes, style }) => (
+							<div ref={setNodeRef} style={style} className='flex items-center gap-2'>
+								<div
+									{...listeners}
+									{...attributes}
+									className='cursor-move px-2 touch-none h-8 grid place-items-center'
+								>
+									<GripHorizontalIcon className='size-4' />
+								</div>
 
-									<div className='flex gap-2 flex-1'>
+								<div className='flex gap-2 flex-1'>
+									<Controller
+										name={`${controlName}.${idx}.value_ar` as any}
+										control={control}
+										render={({ field }) => (
+											<Input
+												{...field}
+												aria-invalid={!!error}
+												autoFocus={!!error}
+												placeholder={t('forms.placeholders.variant_option_ar') || 'Arabic value'}
+												className='flex-1'
+											/>
+										)}
+									/>
+
+									<Controller
+										name={`${controlName}.${idx}.value_en` as any}
+										control={control}
+										render={({ field }) => (
+											<Input
+												{...field}
+												aria-invalid={!!error}
+												autoFocus={!!error}
+												placeholder={t('forms.placeholders.variant_option_en') || 'English value'}
+												className='flex-1'
+											/>
+										)}
+									/>
+
+									{isColors && (
 										<Controller
-											name={`${controlName}.${idx}.value_ar` as any}
+											name={`${controlName}.${idx}.colorHex` as any}
 											control={control}
 											render={({ field }) => (
 												<Input
-													{...field}
-													aria-invalid={!!error}
-													autoFocus={!!error}
-													placeholder={t('forms.placeholders.variant_option_ar') || 'Arabic value'}
-													className='flex-1'
-												/>
-											)}
-										/>
-
-										<Controller
-											name={`${controlName}.${idx}.value_en` as any}
-											control={control}
-											render={({ field }) => (
-												<Input
+													type='color'
 													{...field}
 													aria-invalid={!!error}
 													autoFocus={!!error}
 													placeholder={t('forms.placeholders.variant_option_en') || 'English value'}
-													className='flex-1'
+													className='size-9 p-1'
 												/>
 											)}
 										/>
-
-										{isColors && (
-											<Controller
-												name={`${controlName}.${idx}.colorHex` as any}
-												control={control}
-												render={({ field }) => (
-													<Input
-														type='color'
-														{...field}
-														aria-invalid={!!error}
-														autoFocus={!!error}
-														placeholder={t('forms.placeholders.variant_option_en') || 'English value'}
-														className='size-9 p-1'
-													/>
-												)}
-											/>
-										)}
-									</div>
-
-									<TooltipElement content={t('common.actions.delete_option') || 'Delete option'}>
-										<Button type='button' variant='delete' size='icon' onClick={() => remove(idx)}>
-											<Trash2Icon className='size-4' />
-										</Button>
-									</TooltipElement>
+									)}
 								</div>
-							)}
-						</SortableWrapper>
-					))}
 
-					<TooltipElement content={t('common.actions.add_option') || 'Add option'}>
-						<Button type='button' size='icon' onClick={() => append({ id: generateId(), value_ar: '', value_en: '' })}>
-							<PlusIcon className='size-4' />
-						</Button>
-					</TooltipElement>
-				</div>
-			</SortableContext>
-		</DndContext>
+								<TooltipElement content={t('common.actions.delete_option') || 'Delete option'}>
+									<Button type='button' variant='delete' size='icon' onClick={() => remove(idx)}>
+										<Trash2Icon className='size-4' />
+									</Button>
+								</TooltipElement>
+							</div>
+						)}
+					</SortableDNDWrapper>
+				))}
+
+				<TooltipElement content={t('common.actions.add_option') || 'Add option'}>
+					<Button type='button' size='icon' onClick={() => append({ id: generateId(), value_ar: '', value_en: '' })}>
+						<PlusIcon className='size-4' />
+					</Button>
+				</TooltipElement>
+			</div>
+		</ReusableDNDSortable>
 	);
 }
 
@@ -837,16 +773,6 @@ export default function ProductVariantsComponent({
 	const [isInitialized, setIsInitialized] = useState(false);
 	const [skipGeneration, setSkipGeneration] = useState(false); // ✅ إضافة flag جديد
 
-	const sensors = useSensors(
-		useSensor(PointerSensor),
-		useSensor(TouchSensor, {
-			activationConstraint: { delay: 150, tolerance: 5 },
-		}),
-		useSensor(KeyboardSensor, {
-			coordinateGetter: sortableKeyboardCoordinates,
-		})
-	);
-
 	// Initialize from backend data ONCE
 	useEffect(() => {
 		if (backendVariants && backendVariants.length > 0 && !isInitialized && availableAttributes) {
@@ -991,21 +917,6 @@ export default function ProductVariantsComponent({
 
 	const combinations = watch('combinations') as Combination[] | undefined;
 
-	const onDragEndVariants = useCallback(
-		(e: DragEndEvent) => {
-			const { active, over } = e;
-			if (!over || active.id === over.id) return;
-
-			const oldIndex = variantsArray.fields.findIndex((f) => f.id === String(active.id));
-			const newIndex = variantsArray.fields.findIndex((f) => f.id === String(over.id));
-
-			if (oldIndex !== -1 && newIndex !== -1) {
-				variantsArray.move(oldIndex, newIndex);
-			}
-		},
-		[variantsArray]
-	);
-
 	const addVariant = useCallback(() => {
 		variantsArray.append({
 			id: generateId('v'),
@@ -1041,33 +952,24 @@ export default function ProductVariantsComponent({
 			{variantsArray.fields.length > 0 && (
 				<>
 					<div className='border rounded-lg p-1.5 sm:p-4'>
-						<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEndVariants}>
-							<SortableContext
-								items={variantsArray.fields.map((item) => item.id)}
-								strategy={verticalListSortingStrategy}
-							>
-								{variantsArray.fields.map((v, idx) => (
-									<SortableWrapper key={v.id} id={v.id}>
-										{({ setNodeRef, listeners, attributes, style }) => (
-											<div
-												ref={setNodeRef}
-												style={style}
-												className='bg-muted/50 border rounded-lg p-2 sm:p-3 mb-3 '
-											>
-												<div className='flex gap-3 flex-col sm:flex-row'>
-													<div {...listeners} {...attributes} className='cursor-move touch-none pt-2'>
-														<GripIcon className='size-5 text-muted-foreground' />
-													</div>
-													<div className='flex-1'>
-														<VariantEditor index={idx} onRemove={() => removeVariant(idx)} />
-													</div>
+						<ReusableDNDSortable items={variantsArray.fields} move={variantsArray.move}>
+							{variantsArray.fields.map((v, idx) => (
+								<SortableDNDWrapper key={v.id} id={v.id}>
+									{({ setNodeRef, listeners, attributes, style }) => (
+										<div ref={setNodeRef} style={style} className='bg-muted/50 border rounded-lg p-2 sm:p-3 mb-3 '>
+											<div className='flex gap-3 flex-col sm:flex-row'>
+												<div {...listeners} {...attributes} className='cursor-move touch-none pt-2'>
+													<GripIcon className='size-5 text-muted-foreground' />
+												</div>
+												<div className='flex-1'>
+													<VariantEditor index={idx} onRemove={() => removeVariant(idx)} />
 												</div>
 											</div>
-										)}
-									</SortableWrapper>
-								))}
-							</SortableContext>
-						</DndContext>
+										</div>
+									)}
+								</SortableDNDWrapper>
+							))}
+						</ReusableDNDSortable>
 
 						<div className='flex gap-4 items-center justify-between'>
 							{stats && (
