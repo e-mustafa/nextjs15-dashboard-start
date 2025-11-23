@@ -33,16 +33,18 @@ export default function ShardPostMockupCard({ data, image }: { data?: ShardPostM
 			<div className='p-2 lg:p-3 bg-accent/20 rounded-2xl max-w-80xxx max-w-[90%]'>
 				<Card className='bg-background/50 gap-3 text-white border-0 p-0 shadow-md rounded-2xl overflow-hidden'>
 					<CardContent className='flex flex-col lg:flex-row px-0 overflow-hidden'>
-						<Image
-							src={image || '/assets/images/brand/icon.png'}
-							alt='website preview'
-							width={300}
-							height={100}
-							priority
-							className='w-full h-auto aspect-auto object-contain lg:w-[25%] lg:aspect-squarexxx lg:object-cover'
-						/>
+						<div className='w-full h-auto aspect-auto object-contain lg:w-[25%] lg:aspect-square lg:object-cover'>
+							<Image
+								src={image || '/assets/images/brand/icon.png'}
+								alt='website preview'
+								width={300}
+								height={100}
+								priority
+								className='size-full'
+							/>
+						</div>
 
-						<div className='flex flex-col gap-3 md:gap-2 p-3 justify-between flex-1'>
+						<div className='flex flex-col gap-3 md:gap-2 p-2 justify-between flex-1'>
 							<h5 className='text-sm font-medium line-clamp-2 lg:line-clamp-1'>
 								{infos?.title || data?.[oLang]?.title || t('forms.labels.seo_title')}
 							</h5>

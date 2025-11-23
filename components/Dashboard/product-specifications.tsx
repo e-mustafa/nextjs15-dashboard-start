@@ -1,9 +1,8 @@
-// product-specifications/properties-list.tsx
 'use client';
-
 import { Button } from '@/components/ui-custom/custom-button';
 import TooltipElement from '@/components/ui-custom/tooltip-element';
 import { Input } from '@/components/ui/input';
+import { SpecificationProperty, SpecificationSection } from '@/server/services/product-service';
 import {
 	closestCenter,
 	DndContext,
@@ -34,24 +33,6 @@ import { useTranslation } from 'react-i18next';
 import { FormControl, FormField, FormItem, FormLabel, FormMessageTranslated } from '../ui-custom/custom-form';
 import { Label } from '../ui/label';
 
-// =================================
-// TYPES
-// =================================
-export interface SpecificationProperty {
-	id: string;
-	key_ar: string;
-	key_en: string;
-	value_ar: string;
-	value_en: string;
-}
-
-export interface SpecificationSection {
-	id: string;
-	title_ar: string;
-	title_en: string;
-	properties: SpecificationProperty[];
-}
-
 export interface SpecificationSectionFront extends SpecificationSection {
 	isEditing: boolean;
 }
@@ -73,30 +54,31 @@ export function transformSpecificationsFromBackend(backendSpecs: SpecificationSe
 	}));
 }
 
-// Helper function to transform data to backend
 export function transformSpecificationsToBackend(specifications: SpecificationSectionFront[]): SpecificationSection[] {
 	return specifications
-		.map((section) => ({
-			id: section.id,
-			title_ar: section.title_ar.trim(),
-			title_en: section.title_en.trim(),
-			properties: section.properties
+		.map((section) => {
+			// Clean properties
+			const cleanedProperties = section.properties
 				.filter((prop) => {
-					return (
-						prop.key_ar.trim() !== '' ||
-						prop.key_en.trim() !== '' ||
-						prop.value_ar.trim() !== '' ||
-						prop.value_en.trim() !== ''
-					);
+					const hasKey = prop.key_ar?.trim() || prop.key_en?.trim();
+					const hasValue = prop.value_ar?.trim() || prop.value_en?.trim();
+					return hasKey && hasValue;
 				})
 				.map((prop) => ({
 					id: prop.id,
-					key_ar: prop.key_ar.trim(),
-					key_en: prop.key_en.trim(),
-					value_ar: prop.value_ar.trim(),
-					value_en: prop.value_en.trim(),
-				})),
-		}))
+					key_ar: prop.key_ar?.trim() || '',
+					key_en: prop.key_en?.trim() || '',
+					value_ar: prop.value_ar?.trim() || '',
+					value_en: prop.value_en?.trim() || '',
+				}));
+
+			return {
+				id: section.id,
+				title_ar: section.title_ar?.trim() || '',
+				title_en: section.title_en?.trim() || '',
+				properties: cleanedProperties,
+			};
+		})
 		.filter((section) => section.properties.length > 0);
 }
 
@@ -177,7 +159,7 @@ export function SpecificationPropertiesList<TFieldValues extends FieldValues>({
 			value_ar: '',
 			value_en: '',
 		};
-		append(newProperty as any);
+		append(newProperty as never); // as any
 	};
 
 	return (
@@ -475,7 +457,7 @@ export function SpecificationSectionFrontEditor<TFieldValues extends FieldValues
 							)}
 						/>
 					) : (
-						<div className='space-y-2'>
+						<div className='space-y-2 max-h-[500px] overflow-y-auto pe-1'>
 							{section.properties?.map((prop: SpecificationProperty, i: number) => (
 								// <div key={prop.id || i} className='grid grid-cols-2 gap-4 p-3 rounded-md bg-secondary/30 border'>
 								<div

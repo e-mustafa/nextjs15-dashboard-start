@@ -10,7 +10,6 @@ datasource db {
 /////////////////////////
 // ENUMS
 /////////////////////////
-
 enum UserRole {
   user
   admin
@@ -32,10 +31,16 @@ enum DiscountType {
   BUNDLE
 }
 
+enum ProductType {
+  SIMPLE
+  VARIABLE
+  DIGITAL
+  SERVICE
+}
+
 /////////////////////////
 // USERS & AUTH
 /////////////////////////
-
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -99,7 +104,6 @@ model Authenticator {
 /////////////////////////
 // POSTS (simple CMS)
 /////////////////////////
-
 model Post {
   id        String   @id @default(cuid())
   title     String
@@ -114,7 +118,6 @@ model Post {
 /////////////////////////
 // IMAGES (reusable)
 /////////////////////////
-
 model Image {
   id        String   @id @default(cuid())
   fileId    String
@@ -138,23 +141,23 @@ model Image {
   collectionsSeo   Collection[]      @relation("CollectionSeoImage")
   productsDirect   Product[]         @relation("ProductDirectImage") // not used typically but kept for clarity
   productsSeo      Product[]         @relation("ProductSeoImage")
+  variantImagesNew VariantImage[]    @relation("VariantImages")
 }
 
 /////////////////////////
 // BRANDS
 /////////////////////////
-
 model Brand {
-  id         String   @id @default(cuid())
-  imageId    String?
-  seoImageId String?
-  image      Image?   @relation("BrandMainImage", fields: [imageId], references: [id], onDelete: SetNull)
-  seoImage   Image?   @relation("BrandSeoImage", fields: [seoImageId], references: [id], onDelete: SetNull)
-  isActive   Boolean  @default(true)
-  sortOrder  Int      @default(0)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
+  id           String             @id @default(cuid())
+  imageId      String?
+  seoImageId   String?
+  image        Image?             @relation("BrandMainImage", fields: [imageId], references: [id], onDelete: SetNull)
+  seoImage     Image?             @relation("BrandSeoImage", fields: [seoImageId], references: [id], onDelete: SetNull)
+  isActive     Boolean            @default(true)
+  sortOrder    Int                @default(0)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  // relations
   translations BrandTranslation[]
   products     Product[]
   images       BrandImage[]
@@ -173,6 +176,7 @@ model BrandTranslation {
   seoTitle       String?
   seoDescription String?
   seoKeywords    String?
+  // relations
   brand          Brand   @relation(fields: [brandId], references: [id], onDelete: Cascade)
 
   @@unique([brandId, lang])
@@ -186,9 +190,9 @@ model BrandImage {
   imageId   String
   sortOrder Int     @default(0)
   isPrimary Boolean @default(false)
-
-  brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
-  image Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  // relations
+  brand     Brand   @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  image     Image   @relation(fields: [imageId], references: [id], onDelete: Cascade)
 
   @@unique([brandId, imageId])
   @@index([brandId, sortOrder])
@@ -199,19 +203,19 @@ model BrandImage {
 /////////////////////////
 
 model Category {
-  id         String     @id @default(cuid())
-  parentId   String?
-  parent     Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
-  children   Category[] @relation("CategoryHierarchy")
-  imageId    String?
-  seoImageId String?
-  image      Image?     @relation("CategoryMainImage", fields: [imageId], references: [id], onDelete: SetNull)
-  seoImage   Image?     @relation("CategorySeoImage", fields: [seoImageId], references: [id], onDelete: SetNull)
-  isActive   Boolean    @default(true)
-  sortOrder  Int        @default(0)
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-
+  id           String                @id @default(cuid())
+  parentId     String?
+  parent       Category?             @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children     Category[]            @relation("CategoryHierarchy")
+  imageId      String?
+  seoImageId   String?
+  image        Image?                @relation("CategoryMainImage", fields: [imageId], references: [id], onDelete: SetNull)
+  seoImage     Image?                @relation("CategorySeoImage", fields: [seoImageId], references: [id], onDelete: SetNull)
+  isActive     Boolean               @default(true)
+  sortOrder    Int                   @default(0)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  // relations
   translations CategoryTranslation[]
   products     Product[]
   images       CategoryImage[]
@@ -255,7 +259,6 @@ model CategoryImage {
 /////////////////////////
 // COLLECTIONS
 /////////////////////////
-
 model Collection {
   id         String   @id @default(cuid())
   imageId    String?
@@ -322,7 +325,6 @@ model CollectionProduct {
 /////////////////////////
 // TAGS
 /////////////////////////
-
 model Tag {
   id        String       @id @default(cuid())
   name      String       @unique
@@ -350,46 +352,55 @@ model ProductTag {
 /////////////////////////
 
 model Product {
-  id         String    @id @default(cuid())
-  sku        String    @unique
-  brandId    String?
-  categoryId String?
-  imageId    String? // main image
-  seoImageId String? // seo image
-  brand      Brand?    @relation(fields: [brandId], references: [id], onDelete: SetNull)
-  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-
-  image    Image? @relation("ProductDirectImage", fields: [imageId], references: [id], onDelete: SetNull)
-  seoImage Image? @relation("ProductSeoImage", fields: [seoImageId], references: [id], onDelete: SetNull)
-
+  id             String                 @id @default(cuid())
+  sku            String                 @unique
+  brandId        String?
+  categoryId     String?
+  imageId        String? // main image
+  seoImageId     String? // seo image
+  brand          Brand?                 @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  category       Category?              @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  // images
+  image          Image?                 @relation("ProductDirectImage", fields: [imageId], references: [id], onDelete: SetNull)
+  seoImage       Image?                 @relation("ProductSeoImage", fields: [seoImageId], references: [id], onDelete: SetNull)
+  // prices
   basePrice      Float
   compareAtPrice Float?
   cost           Float?
-
-  trackInventory Boolean @default(true)
-  stockQuantity  Int     @default(0)
+  // Inventory
+  trackInventory Boolean                @default(true)
+  stockQuantity  Int                    @default(0)
   lowStockAlert  Int?
+  // status
+  isActive       Boolean                @default(true)
+  isFeatured     Boolean                @default(false)
+  publishedAt    DateTime?
+  // SEO
+  // metaTitle       String?
+  // metaDescription String?
+  // metaKeywords    String?
+  // dates
+  sortOrder      Int                    @default(0)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  // relations
+  translations   ProductTranslation[]
+  images         ProductImage[]
+  variants       ProductVariant[]
+  attributes     ProductAttribute[]
+  tags           ProductTag[]
+  discounts      ProductDiscount[]
+  collections    CollectionProduct[]
+  specifications ProductSpecification[]
+  // types
+  type           String?
+  // dimensions
+  weight         Float?
+  length         Float?
+  width          Float?
+  height         Float?
 
-  isActive    Boolean   @default(true)
-  isFeatured  Boolean   @default(false)
-  publishedAt DateTime?
-
-  metaTitle       String?
-  metaDescription String?
-  metaKeywords    String?
-
-  sortOrder Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  translations ProductTranslation[]
-  images       ProductImage[]
-  variants     ProductVariant[]
-  attributes   ProductAttribute[]
-  tags         ProductTag[]
-  discounts    ProductDiscount[]
-  collections  CollectionProduct[]
-
+  // indexes
   @@index([sku])
   @@index([brandId])
   @@index([categoryId])
@@ -407,6 +418,11 @@ model ProductTranslation {
   slug             String
   description      String? @db.Text
   shortDescription String?
+  // SEO
+  seoTitle         String?
+  seoDescription   String?
+  seoKeywords      String?
+  // relations
   product          Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([productId, lang])
@@ -420,9 +436,9 @@ model ProductImage {
   imageId   String
   isPrimary Boolean @default(false)
   sortOrder Int     @default(0)
-
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  image   Image   @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  // relations
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  image     Image   @relation(fields: [imageId], references: [id], onDelete: Cascade)
 
   @@unique([productId, imageId])
   @@index([productId, sortOrder])
@@ -432,25 +448,24 @@ model ProductImage {
 /////////////////////////
 // VARIANTS & ATTRIBUTES
 /////////////////////////
-
 model ProductVariant {
-  id        String  @id @default(cuid())
-  productId String
-  sku       String  @unique
-  imageId   String?
-  image     Image?  @relation(fields: [imageId], references: [id], onDelete: SetNull)
-
+  id             String          @id @default(cuid())
+  productId      String
+  sku            String          @unique
+  imageId        String?
+  image          Image?          @relation(fields: [imageId], references: [id], onDelete: SetNull)
   price          Float?
   compareAtPrice Float?
   cost           Float?
-  stockQuantity  Int      @default(0)
-  isActive       Boolean  @default(true)
-  sortOrder      Int      @default(0)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @default(now()) @updatedAt
-
-  product Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
-  options VariantOption[]
+  stockQuantity  Int             @default(0)
+  isActive       Boolean         @default(true)
+  sortOrder      Int             @default(0)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @default(now()) @updatedAt
+  // relations
+  product        Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  options        VariantOption[]
+  images         VariantImage[]
 
   @@index([productId])
   @@index([sku])
@@ -532,15 +547,64 @@ model VariantOption {
   attribute        Attribute      @relation(fields: [attributeId], references: [id])
   attributeValue   AttributeValue @relation(fields: [attributeValueId], references: [id])
 
+  // unique per variant
   @@unique([variantId, attributeId])
   @@index([variantId])
   @@index([attributeId])
 }
 
+model VariantImage {
+  id        String         @id @default(cuid())
+  variantId String
+  imageId   String
+  isPrimary Boolean        @default(false)
+  sortOrder Int            @default(0)
+  // relations
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  image     Image          @relation("VariantImages", fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@unique([variantId, imageId])
+  @@index([variantId, sortOrder])
+  @@index([variantId, isPrimary])
+}
+
+// table for product specification sections (e.g., Technical Specifications, Dimensions, etc.)
+model ProductSpecification {
+  id         String                         @id @default(cuid())
+  productId  String
+  title_ar   String
+  title_en   String
+  sortOrder  Int                            @default(0)
+  createdAt  DateTime                       @default(now())
+  updatedAt  DateTime                       @updatedAt
+  // relations
+  product    Product                        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  properties ProductSpecificationProperty[]
+
+  @@index([productId])
+  @@index([sortOrder])
+}
+
+model ProductSpecificationProperty {
+  id              String               @id @default(cuid())
+  specificationId String
+  key_ar          String
+  key_en          String
+  value_ar        String               @db.Text
+  value_en        String               @db.Text
+  sortOrder       Int                  @default(0)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  // relations
+  specification   ProductSpecification @relation(fields: [specificationId], references: [id], onDelete: Cascade)
+
+  @@index([specificationId])
+  @@index([sortOrder])
+}
+
 /////////////////////////
 // DISCOUNTS
 /////////////////////////
-
 model ProductDiscount {
   id          String       @id @default(cuid())
   productId   String
@@ -565,5 +629,4 @@ model ProductDiscount {
 /////////////////////////
 // MISC
 /////////////////////////
-
 // Keep Prisma migrations healthy: run prisma format before migrate

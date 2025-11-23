@@ -9,10 +9,12 @@ export default function SubmitButton({
 	isPending,
 	backLink,
 	formId,
+	resetForm,
 }: {
 	isPending?: boolean;
 	backLink?: string;
 	formId?: string;
+	resetForm?: () => void;
 }) {
 	const pathname = usePathname();
 	const { t } = useTranslation();
@@ -20,7 +22,7 @@ export default function SubmitButton({
 	backLink = backLink || getBackLink(pathname);
 
 	return (
-		<div className='flex flex-col sm:flex-row items-center justify-end gap-4'>
+		<div className='flex-1 flex flex-col sm:flex-row items-center sm:justify-end gap-4'>
 			<Button type='submit' form={formId} disabled={isPending} size='lg' className='min-w-full sm:min-w-32'>
 				{isPending ? (
 					<>
@@ -35,11 +37,26 @@ export default function SubmitButton({
 				)}
 			</Button>
 
-			<Button type='reset' asChild disabled={isPending} variant='outline' size='lg' className='w-full sm:w-32 min-w-fit'>
-				<Link href={backLink}>
-					<span className='grow text-center'>{t('common.actions.cancel')}</span>
-				</Link>
-			</Button>
+			{resetForm && (
+				<div className='w-full sm:w-auto flex gap-4 items-center *:flex-1'>
+					<Button type='reset' variant='outline' onClick={resetForm}>
+						{t('common.actions.reset_form')}
+					</Button>
+
+					<Button
+						type='reset'
+						asChild
+						disabled={isPending}
+						variant='outline'
+						size='lg'
+						className='w-auto sm:w-32 min-w-fit'
+					>
+						<Link href={backLink}>
+							<span className='grow text-center'>{t('common.actions.cancel')}</span>
+						</Link>
+					</Button>
+				</div>
+			)}
 		</div>
 	);
 }

@@ -3,8 +3,8 @@
 import { isDEV } from '@/configs/general';
 import { handleServerResponse } from '@/hooks/use-server-response';
 import { ActionResult } from '@/types/api';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useRef } from 'react';
 import { DefaultValues, FieldValues, Path, UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -36,17 +36,64 @@ export function useFormResponse<T extends FieldValues>(
 		storageKey?: string;
 	}
 ) {
-	const { redirectUrl, reset_on_success, storageKey } = (options = options || {});
+	const { redirectUrl, reset_on_success, storageKey } = options || {};
 	const { t } = useTranslation();
 	const router = useRouter();
+	const pathname = usePathname();
 
+	const isInitialLoad = useRef(true);
+	const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
+	// -------------------------------------------
+	// 1) LOAD LOCALSTORAGE ONCE
+	// -------------------------------------------
 	useEffect(() => {
 		if (!storageKey) return;
+		if (!pathname.endsWith('create')) return;
 
-		const formData = form.watch();
-		localStorage.setItem(storageKey, JSON.stringify(formData));
-	}, [storageKey, form.watch()]);
+		const saved = localStorage.getItem(storageKey);
+		if (saved) {
+			try {
+				form.reset(JSON.parse(saved));
+			} catch (e) {
+				isDEV && console.error('Invalid localStorage JSON:', e);
+			}
+		}
 
+		isInitialLoad.current = false; // allow saving afterward
+	}, [storageKey, pathname]);
+
+	// -------------------------------------------
+	// 2) SAVE ONLY WHEN USER INPUT CHANGES
+	// -------------------------------------------
+	useEffect(() => {
+		if (!storageKey) return;
+		if (!pathname.endsWith('create')) return;
+
+		const subscription = form.watch((values) => {
+			// block saving during mount
+			if (isInitialLoad.current) return;
+
+			// block saving until user edits something
+			if (!form.formState.isDirty) return;
+
+			// debounce save
+			if (debounceTimer.current) clearTimeout(debounceTimer.current);
+
+			debounceTimer.current = setTimeout(() => {
+				localStorage.setItem(storageKey, JSON.stringify(values));
+			}, 400);
+		});
+
+		return () => {
+			subscription.unsubscribe();
+			if (debounceTimer.current) clearTimeout(debounceTimer.current);
+		};
+	}, [storageKey, pathname, form]);
+
+	// -------------------------------------------
+	// 3) HANDLE SERVER RESPONSE
+	// -------------------------------------------
 	useEffect(() => {
 		if (!res) return;
 
@@ -54,25 +101,28 @@ export function useFormResponse<T extends FieldValues>(
 
 		if (!res.success && res.form_errors) {
 			try {
-				const formErrors = JSON.parse(res.form_errors) as Record<keyof T, string>;
-				Object.entries(formErrors).forEach(([field, message], index) => {
-					form.setError(field as Path<T>, { type: 'server', message }, { shouldFocus: index === 0 });
+				const errors = JSON.parse(res.form_errors) as Record<keyof T, string>;
+				Object.entries(errors).forEach(([field, msg], index) => {
+					form.setError(field as Path<T>, { type: 'server', message: msg }, { shouldFocus: index === 0 });
 				});
 			} catch (err) {
 				isDEV && console.error('Invalid form_errors JSON:', err);
 			}
+
 			if (res.error) toast.error(renderErrorMessage(res.error, t));
 			return;
 		}
 
 		if (res.success && res.message) {
-			if (reset_on_success) form.reset(reset_on_success === true ? undefined : reset_on_success);
+			if (reset_on_success) {
+				form.reset(reset_on_success === true ? undefined : reset_on_success);
+			}
 
-			if (redirectUrl || res.redirect_to) router.push(redirectUrl || res.redirect_to!);
+			if (storageKey) localStorage.removeItem(storageKey);
 
-			if (options?.storageKey) {
-				localStorage.removeItem(options?.storageKey);
+			if (redirectUrl || res.redirect_to) {
+				router.push(redirectUrl || res.redirect_to!);
 			}
 		}
-	}, [res, form, reset_on_success, redirectUrl, t, router]);
+	}, [res, form, redirectUrl, reset_on_success, t, router, storageKey]);
 }

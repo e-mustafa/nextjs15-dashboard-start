@@ -13,7 +13,7 @@ export const SEODefaultValues = {
 	seoDescription_en: '',
 	slug_ar: '',
 	slug_en: '',
-	seoKeywords_Ar: '',
+	seoKeywords_ar: '',
 	seoKeywords_en: '',
 	seoImage: [],
 };

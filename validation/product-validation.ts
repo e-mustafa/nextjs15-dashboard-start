@@ -1,6 +1,9 @@
 import { msg } from '@/lib/utils';
+// import z from 'zod';
 import z from 'zod';
-import { imagesField } from './fields-validation';
+import { imagesField, intNotNegativeField, preprocessNumber } from './fields-validation';
+import { specificationSectionSchema } from './product-specification-validation';
+import { combinationSchema, variantFormSchema } from './product-variant-validation';
 import { SEODefaultValues, SEOFormSchema } from './seo-validation';
 
 // export type TProductFormValues = z.output<typeof formSchemaProduct> & { id?: string };
@@ -191,92 +194,6 @@ export type TProductFormValues = z.infer<typeof formSchemaProduct> & { id?: stri
 /** ✅ Unified fields using camelCase naming */
 export const fields = ['name', 'description', 'shortDescription', 'slug', 'seoTitle', 'seoDescription', 'seoKeywords'];
 
-// ✅ Image schema
-// const imageSchema = z.object({
-// 	id: z.string().optional(),
-// 	url: z.url(),
-// 	fileId: z.string(),
-// });
-
-export const preprocessNumber = (ctx: z.ZodNumber) =>
-	z.preprocess((val) => {
-		if (val === '' || val === null || val === undefined) return 0;
-		if (typeof val === 'number') return val;
-		if (typeof val === 'string') {
-			const n = val.trim() === '' ? NaN : Number(val);
-			return Number.isNaN(n) ? val : n;
-		}
-		return val;
-	}, ctx) as unknown as z.ZodNumber;
-
-// ✅ Variant option schema
-const variantOptionSchema = z.object({
-	id: z.string(),
-	value_ar: z.string().min(1),
-	value_en: z.string().min(1),
-	attributeValueId: z.string().optional(),
-	colorHex: z.string().optional(),
-});
-
-// ✅ Variant schema
-const variantFormSchema = z.object({
-	id: z.string(),
-	attributeId: z.string().optional(),
-	title_ar: z.string().min(1),
-	title_en: z.string().min(1),
-	options: z.array(variantOptionSchema).min(1),
-	isEditing: z.boolean().optional(),
-});
-
-// ✅ Combination schema
-const combinationSchema = z.object({
-	id: z.string(),
-	variantId: z.string().optional(),
-	sku: z.string().optional(),
-	attributes: z.array(
-		z.object({
-			attributeId: z.string(),
-			attributeValueId: z.string(),
-			name_ar: z.string(),
-			name_en: z.string(),
-			value_ar: z.string(),
-			value_en: z.string(),
-			colorHex: z.string().optional(),
-		})
-	),
-	price: z.union([z.string(), z.number()]),
-	compareAtPrice: z.union([z.string(), z.number()]).optional(),
-	cost: z.union([z.string(), z.number()]).optional(),
-	qty: preprocessNumber(z.int({ message: msg('forms.validation.integer') })).optional(),
-	images: imagesField.optional(),
-	imageId: z.string().optional(),
-	checked: z.boolean(),
-	// isActive: z.boolean(),
-});
-
-
-
-export const intNotNegativeField = preprocessNumber(
-	z.int({ message: msg('forms.validation.integer') }).nonnegative({ message: msg('forms.validation.price_nonnegative') })
-);
-
-export const specificationPropertySchema = z.object({
-	id: z.string(),
-	key_ar: z.string().min(1, 'forms.validation.required'),
-	key_en: z.string().min(1, 'forms.validation.required'),
-	value_ar: z.string().min(1, 'forms.validation.required'),
-	value_en: z.string().min(1, 'forms.validation.required'),
-});
-
-export const specificationSectionSchema = z.object({
-	id: z.string(),
-	title_ar: z.string().min(1, 'forms.validation.required'),
-	title_en: z.string().min(1, 'forms.validation.required'),
-	properties: z.array(specificationPropertySchema).min(1, 'forms.validation.at_least_one_property'),
-	isEditing: z.boolean(),
-});
-
-
 export const formSchemaProduct = z
 	.object({
 		name_ar: z
@@ -356,10 +273,10 @@ export const formSchemaProduct = z
 		height: preprocessNumber(z.number().nonnegative()).optional(),
 	})
 	.extend(SEOFormSchema.shape);
-	// .refine((data) => !data.compareAtPrice || data.compareAtPrice >= data.basePrice, {
-	// 	message: msg('forms.validation.discount_less_than_base_price'),
-	// 	path: ['compareAtPrice'],
-	// });
+// .refine((data) => !data.compareAtPrice || data.compareAtPrice >= data.basePrice, {
+// 	message: msg('forms.validation.discount_less_than_base_price'),
+// 	path: ['compareAtPrice'],
+// });
 
 export const defaultValuesProduct: TProductFormValues = {
 	name_ar: '',

@@ -11,6 +11,8 @@
 			"remove": "ازالة",
 			"remove_image": "ازالة الصورة",
 			"save": "حفظ",
+			"reset": "إعادة تعيين",
+			"reset_form": "تفريغ الحقول",
 			"cancel": "إلغاء",
 			"view": "عرض",
 			"download": "تحميل",
@@ -435,8 +437,11 @@
 			"variant_name_required": "اسم الخيار مطلوب.",
 			"at_least_one_option": "يجب اضافة خيار واحد على الاقل.",
 			"option_name_required": "اسم الخيار مطلوب.",
-
-			"at_least_one_property": "يجب اضافة خاصية واحدة على الاقل."
+			
+			"at_least_one_section_title": "يجب اضافة اسم قسم واحد على الاقل.",
+			"at_least_one_property": "يجب اضافة خاصية واحدة على الاقل.",
+			"at_least_one_spec_key": "يجب اضافة اسم خاصية واحدة على الاقل.",
+			"at_least_one_spec_value": "يجب اضافة قيمة خاصية واحدة على الاقل."
 		},
 		"descriptions": {
 			"slug": "المعرّف النصي هو نص يجب ان يكون فريدًا ويمكن فقط ان يحتوي على حروف انجليزية، ارقام و شرطه.",

@@ -2,6 +2,21 @@ import { TLocalesData } from '@/configs/general';
 import { msg } from '@/lib/utils';
 import z from 'zod';
 
+export const preprocessNumber = (ctx: z.ZodNumber) =>
+	z.preprocess((val) => {
+		if (val === '' || val === null || val === undefined) return 0;
+		if (typeof val === 'number') return val;
+		if (typeof val === 'string') {
+			const n = val.trim() === '' ? NaN : Number(val);
+			return Number.isNaN(n) ? val : n;
+		}
+		return val;
+	}, ctx) as unknown as z.ZodNumber;
+
+export const intNotNegativeField = preprocessNumber(
+	z.int({ message: msg('forms.validation.integer') }).nonnegative({ message: msg('forms.validation.price_nonnegative') })
+);
+
 // slug ----------------------------------------------
 const regExp_slugAr = /^[\u0600-\u06FFA-Za-z0-9-]+$/; // allow arabic, latin characters and numbers
 const regExp_slugEn = /^[A-Za-z0-9-]+$/; // allow latin characters and numbers
@@ -11,7 +26,7 @@ export const slugSchema = (locale: TLocalesData = 'ar') =>
 		.string()
 		.trim()
 		.min(1, 'forms.validation.slug_required')
-		.max(200, 'forms.validation.slug_max')
+		.max(255, msg('forms.validation.slug_max', { max: 255 }))
 		.refine(
 			(val) => {
 				if (locale === 'ar') {
@@ -44,14 +59,13 @@ export const otpField = z
 	.nonempty({ message: 'validation.otp_required' })
 	.min(4, { message: 'validation.otp_required' });
 
-export const imagesField = z
-	.array(
-		z.object({
-			url: z.url({ message: msg('forms.validation.invalid_url') }),
-			fileId: z.string(),
-		})
-	)
-	// .optional();
+export const imagesField = z.array(
+	z.object({
+		url: z.url({ message: msg('forms.validation.invalid_url') }),
+		fileId: z.string(),
+	})
+);
+// .optional();
 
 export const nameArField = z
 	.string()

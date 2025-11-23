@@ -40,15 +40,15 @@ export const formSections_product: SectionConfig<TFormValues>[] = [
 			{
 				type: 'textarea',
 				name: 'shortDescription_ar',
-				label: 'forms.labels.description_ar',
-				placeholder: 'forms.placeholders.description_ar',
+				label: 'forms.labels.short_description_ar',
+				placeholder: 'forms.placeholders.short_description_ar',
 				// parentClass: 'col-span-full xl:col-span-1',
 			},
 			{
 				type: 'textarea',
 				name: 'shortDescription_en',
-				label: 'forms.labels.description_en',
-				placeholder: 'forms.placeholders.description_en',
+				label: 'forms.labels.short_description_en',
+				placeholder: 'forms.placeholders.short_description_en',
 				// parentClass: 'col-span-full xl:col-span-1',
 			},
 			{
@@ -308,6 +308,11 @@ export default function ProductForm({
 		});
 	}
 
+	const resetForm = () => {
+		form.reset(defaultValues);
+		localStorage.removeItem(type == 'create' ? 'create-product' : 'update-product-' + (defaultValues.id || ''));
+	};
+
 	return (
 		<Form {...form}>
 			<form id='product-form' onSubmit={form.handleSubmit(onSubmit)} method='post' className='grid xl:grid-cols-3 gap-6'>
@@ -346,8 +351,12 @@ export default function ProductForm({
 				</div>
 
 				{/* submit & cancel buttons */}
-				<div className='xl:col-span-2 flex justify-end'>
-					<SubmitButton isPending={form.formState.isSubmitting || isPending} formId='product-form' />
+				<div className='xl:col-span-2 flex sm:justify-end'>
+					<SubmitButton
+						isPending={form.formState.isSubmitting || isPending}
+						formId='product-form'
+						resetForm={resetForm}
+					/>
 				</div>
 			</form>
 		</Form>

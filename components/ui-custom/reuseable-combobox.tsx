@@ -388,7 +388,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 						aria-expanded={open}
 						disabled={disabled}
 						className={cn(
-							'w-full justify-between px-3',
+							'w-full justify-between px-3 min-h-max',
 							!selectedOptions.length && 'text-muted-foreground',
 							className
 						)}
