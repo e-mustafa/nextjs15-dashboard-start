@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { config_env } from '@/configs/general';
+import { config_env, defaultLocale, localesData } from '@/configs/general';
 import { SEODataKey } from '@/configs/SEOData';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
@@ -25,7 +25,7 @@ export default function ShardPostMockupCard({ data, image }: { data?: ShardPostM
 	} = useTranslation();
 
 	const infos = data && data[language as SEODataKey];
-	console.log('image', image);
+	const oLang = (Object.keys(localesData)?.find((lng) => lng !== language) || defaultLocale.short) as SEODataKey;
 
 	return (
 		<div className='w-full h-full grid xl:place-content-center space-y-4 bg-background bg-accent/20xxx p-2 rounded-2xl'>
@@ -39,21 +39,21 @@ export default function ShardPostMockupCard({ data, image }: { data?: ShardPostM
 							width={300}
 							height={100}
 							priority
-							className='w-full h-auto aspect-auto object-contain lg:w-[40%] lg:aspect-squarexxx lg:object-cover'
+							className='w-full h-auto aspect-auto object-contain lg:w-[25%] lg:aspect-squarexxx lg:object-cover'
 						/>
 
-						<div className='flex flex-col gap-3 p-3 justify-between flex-1'>
-							<h5 className='font-medium line-clamp-2 lg:line-clamp-1'>
-								{infos?.title || t('forms.labels.seo_title')}
+						<div className='flex flex-col gap-3 md:gap-2 p-3 justify-between flex-1'>
+							<h5 className='text-sm font-medium line-clamp-2 lg:line-clamp-1'>
+								{infos?.title || data?.[oLang]?.title || t('forms.labels.seo_title')}
 							</h5>
-							{infos?.description ? (
-								<p className='text-sm text-foreground line-clamp-3 lg:line-clamp-1 xl:line-clamp-2'>
-									{infos?.description}
+							{infos?.description || data?.[oLang]?.description ? (
+								<p className='text-xs text-foreground line-clamp-3 lg:line-clamp-1 xl:line-clamp-2xxx'>
+									{infos?.description || data?.[oLang]?.description}
 								</p>
 							) : (
 								<div className='space-y-1'>
 									<Skeleton className='h-4 w-full bg-muted-foreground' />
-									<Skeleton className='h-4 w-3/4 bg-muted-foreground lg:hidden xl:block' />
+									<Skeleton className='h-4 w-3/4 bg-muted-foreground lg:hidden xl:blockxxx' />
 									<Skeleton className='h-4 w-1/2 bg-muted-foreground lg:hidden' />
 								</div>
 							)}
@@ -69,7 +69,7 @@ export default function ShardPostMockupCard({ data, image }: { data?: ShardPostM
 					</CardContent>
 				</Card>
 				<a href='#' className='flex text-sm text-blue-400 font-medium hover:underline pt-2'>
-					{`${config_env.domain || 'www.example.com'}/.../${infos?.slug || ''}`}
+					{`${config_env.domain || 'www.example.com'}/.../${infos?.slug || data?.[oLang]?.slug || ''}`}
 				</a>
 			</div>
 		</div>

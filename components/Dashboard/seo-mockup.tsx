@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { config_env } from '@/configs/general';
+import { config_env, defaultLocale, localesData } from '@/configs/general';
 import { seoData, SEODataKey } from '@/configs/SEOData';
 import { SearchIcon } from 'lucide-react';
 import Image from 'next/image';
@@ -26,6 +26,7 @@ export default function SEOMockupCard({ data, image }: { data?: SEOMockupCardDat
 	} = useTranslation();
 
 	const infos = data && data[language as SEODataKey];
+	const oLang = (Object.keys(localesData)?.find((lng) => lng !== language) || defaultLocale.short) as SEODataKey;
 
 	return (
 		<div className='w-full mx-auto space-y-4 bg-accent/20 p-4 rounded-2xl'>
@@ -33,10 +34,12 @@ export default function SEOMockupCard({ data, image }: { data?: SEOMockupCardDat
 			<div className='relative flex items-center gap-2 bg-background/50 rounded-2xl px-4 py-2 shadow-md'>
 				<SearchIcon className='w-5 h-5 text-muted-foreground shrink-0' />
 				{/* <Skeleton className='h-4 w-full bg-zinc-700' /> */}
-				<div dir='ltr' className='grow flex items-center gap-0 text-foreground text-sm  truncate whitespace-pre overflow-hidden'>
+				<div
+					dir='ltr'
+					className='grow flex items-center gap-0 text-foreground text-sm  truncate whitespace-pre overflow-hidden'
+				>
 					{/* {`${config_env.domain || 'www.example.com'}/.../${infos?.slug || ''}`} */}
 					{`${config_env.domain || 'www.example.com'}/...`}
-					
 				</div>
 				<span className='text-white font-bold text-lg shrink-0'>
 					<svg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'>
@@ -88,10 +91,10 @@ export default function SEOMockupCard({ data, image }: { data?: SEOMockupCardDat
 						</div>
 					</div>
 					<h2 className='text-blue-400 font-medium hover:underline cursor-pointer'>
-						{infos?.title || t('forms.labels.seo_title')}
+						{infos?.title || data?.[oLang]?.title || t('forms.labels.seo_title')}
 					</h2>
-					{infos?.description ? (
-						<p className='text-sm text-foreground line-clamp-3'>{infos?.description}</p>
+					{infos?.description || data?.[oLang]?.description ? (
+						<p className='text-sm text-foreground line-clamp-3'>{infos?.description || data?.[oLang]?.description}</p>
 					) : (
 						<div className='space-y-1'>
 							<Skeleton className='h-4 w-full bg-muted-foreground' />
