@@ -4,7 +4,8 @@ import { FieldTypeMap, RenderFieldProps } from '@/lib/create-forms/types-create-
 import { JSX } from 'react';
 import { FieldValues, Path } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import SpecificationsList from '../Dashboard/product-specifications';
+// import SpecificationsList from '../Dashboard/product-specifications';
+import SpecificationsList from '../Dashboard/product-specifications-input';
 import { FormDescription, FormField, FormItem, FormLabel, FormMessageTranslated } from '../ui-custom/custom-form';
 
 /**
