@@ -155,14 +155,15 @@ interface ProductVariant {
  */
 async function formatProduct(
 	product: ProductWithRelations,
-	acceptLanguage?: string
+	acceptLanguage?: string,
+	forEdit: boolean = acceptLanguage == '*'
 ): Promise<TProductFormValues | TProduct> {
 	const { translations, images, seoImage, brand, category, variants, collections, tags, specifications, ...rest } = product;
 
 	const translationData = await mapTranslations(translations, {
 		accept_language: acceptLanguage,
 		fields,
-		enableFallback: true, // ← enable fallback
+		enableFallback: !forEdit, // ← enable fallback
 	});
 
 	const locale = await getCurrentLocale();
@@ -1058,7 +1059,7 @@ export async function createProduct(data: TProductFormValues): Promise<ActionRes
 			for (const combination of data.combinations) {
 				if (!combination.checked) continue;
 
-				// ✅ تأكد من إنشاء/جلب الـ Attributes و Values
+				// ✅ sure to create/obtain Attributes and Values
 				const processedAttributes: Array<{
 					attributeId: string;
 					attributeValueId: string;
@@ -1131,7 +1132,7 @@ export async function createProduct(data: TProductFormValues): Promise<ActionRes
 							  }
 							: undefined,
 
-						// ✅ استخدم processedAttributes (IDs حقيقية من DB)
+						// ✅ use processedAttributes (Real IDs from DB)
 						options: {
 							create: processedAttributes,
 						},
