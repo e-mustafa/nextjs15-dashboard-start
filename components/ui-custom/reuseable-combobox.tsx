@@ -3,7 +3,7 @@
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn, renderErrorMessage } from '@/lib/utils';
-import { CheckIcon, ChevronsUpDown, Loader2, Trash2Icon, XIcon } from 'lucide-react';
+import { CheckIcon, ChevronsUpDown, CircleSlash2Icon, Loader2, Trash2Icon, XIcon } from 'lucide-react';
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 
 import { imagesPlaceholder } from '@/configs/general';
@@ -46,6 +46,8 @@ interface ComboboxProps<T extends ComboboxOption> {
 	isTags?: boolean;
 	deleteTag?: (id: string) => Promise<void>;
 
+	linkHref?: string;
+	customColumn?: (option: T) => ReactNode;
 	// القيمة يمكن أن تكون: string | string[] | T | T[]
 	value?: string | string[] | T | T[];
 	onChange?: (value: string | string[] | T | T[]) => void;
@@ -86,6 +88,8 @@ interface ComboboxProps<T extends ComboboxOption> {
  *
  * `deleteTag`?: (id: string) => Promise<void> - Function to delete a tag by ID.
  *
+ * `linkHref`?: string - Link href for each option.
+ *
  * `multiple`?: boolean - Whether multiple selections are allowed.
  *
  * @returns {JSX.Element}
@@ -97,6 +101,8 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 	isProducts = false,
 	isTags = false,
 	deleteTag,
+	linkHref,
+	customColumn,
 	value,
 	onChange,
 	multiple = false,
@@ -379,7 +385,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 	const isLoading = isPending || isSearching;
 
 	return (
-		<div className='flex flex-col gap-3'>
+		<div className='flex flex-col gap-5'>
 			<Popover open={open} onOpenChange={setOpen}>
 				<PopoverTrigger asChild>
 					<Button
@@ -399,7 +405,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 						</div>
 					</Button>
 				</PopoverTrigger>
-				<PopoverContent className='w-[var(--radix-popover-trigger-width)] p-0' align='start'>
+				<PopoverContent className='w-(--radix-popover-trigger-width) p-0' align='start'>
 					<Command shouldFilter={!fetchOptions}>
 						<div className='relative'>
 							<CommandInput
@@ -453,9 +459,12 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 													onSelect={() => handleSelect(option.id)}
 													className='cursor-pointer items-center'
 												>
-													<CheckIcon
-														className={cn('size-5 text-primary', isSelected ? 'opacity-100' : 'opacity-0')}
-													/>
+													{isSelected ? (
+														<CheckIcon className='size-5 text-primary' />
+													) : (
+														<div className='size-5'></div>
+													)}
+
 													<div className='flex items-center gap-2 flex-1'>
 														{hasImage && (
 															<Image
@@ -520,11 +529,14 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 			</Popover>
 
 			{isProducts && (
-				<div className='grid gap-1'>
+				<div className='grid gap-2'>
 					<Label>{t('common.sections.selected_Products')}:</Label>
-					<div className='flex flex-col gap-2 rounded-md border bg-input/30 inset-shadow p-3 text-muted-foreground max-h-96 overflow-y-auto'>
+					<div className='flex flex-col gap-2 rounded-md border bg-background/80 inset-shadow p-3 text-muted-foreground max-h-96 overflow-y-auto'>
 						{!selectedOptions.length ? (
-							<span className='text-center'>{t('common.sections.no_selected_Products')}</span>
+							<span className='flex items-center gap-2 justify-center text-center opacity-50'>
+								<CircleSlash2Icon />
+								{t('common.sections.no_selected_Products')}
+							</span>
 						) : (
 							selectedOptions.map((option) => {
 								const isSelected = selectedIds.includes(option.id);
@@ -549,9 +561,13 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 													className='size-10 object-cover aspect-square rounded'
 												/>
 											)}
-											<Link href={`/dashboard/brands/${option.id}`} className='line-clamp-1 grow'>
-												{renderOption ? renderOption(option) : option.name}
-											</Link>
+											<div className='flex gap-x-2 gap-y-1 flex-col md:flex-row w-full'>
+												<Link href={`${linkHref}/${option.id}`} className='line-clamp-1 grow'>
+													{renderOption ? renderOption(option) : option.name}
+												</Link>
+
+												{customColumn && customColumn(option)}
+											</div>
 
 											<Tooltip>
 												<TooltipTrigger asChild>

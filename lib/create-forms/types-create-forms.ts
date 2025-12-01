@@ -127,6 +127,8 @@ export interface FieldConfig<T extends FieldValues = FieldValues, K extends Fiel
 	isTags?: boolean;
 	isProducts?: boolean;
 	deleteTag?: (id: string) => Promise<void>;
+	linkHref?: string;
+	customColumn?: (option: T extends ComboboxOption ? T : ComboboxOption) => ReactNode;
 	returnObject?: boolean;
 	// getOptionFn;
 
