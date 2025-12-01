@@ -137,7 +137,9 @@ export default function BrandForm({
 	async function onSubmit(data: TFormValues) {
 		startTransition(async () => {
 			const result =
-				type == 'create' ? await createBrandAction(data) : await updateBrandAction(defaultValues.id || '', data);
+				type === EnumFormTypes.CREATE
+					? await createBrandAction(data)
+					: await updateBrandAction(defaultValues.id || '', data);
 
 			setResult(result as ActionResult<TFormValues>);
 		});

@@ -297,13 +297,15 @@ export default function ProductForm({
 	useFormResponse<TFormValues>(result!, form, {
 		redirectUrl: `/${url_segment}`,
 		reset_on_success: (result?.data as TFormValues) || true,
-		storageKey: type == 'create' ? 'create-product' : 'update-product-' + (defaultValues.id || ''),
+		storageKey: type === EnumFormTypes.CREATE ? 'create-product' : 'update-product-' + (defaultValues.id || ''),
 	});
 
 	async function onSubmit(data: TFormValues) {
 		startTransition(async () => {
 			const result =
-				type == 'create' ? await createProductAction(data) : await updateProductAction(defaultValues.id || '', data);
+				type === EnumFormTypes.CREATE
+					? await createProductAction(data)
+					: await updateProductAction(defaultValues.id || '', data);
 
 			setResult(result as ActionResult<TFormValues>);
 		});
@@ -311,7 +313,9 @@ export default function ProductForm({
 
 	const resetForm = () => {
 		form.reset(defaultValues);
-		localStorage.removeItem(type == 'create' ? 'create-product' : 'update-product-' + (defaultValues.id || ''));
+		localStorage.removeItem(
+			type === EnumFormTypes.CREATE ? 'create-product' : 'update-product-' + (defaultValues.id || '')
+		);
 	};
 
 	return (

@@ -129,7 +129,9 @@ export default function CategoryForm({
 	async function onSubmit(data: TFormValues) {
 		startTransition(async () => {
 			const result =
-				type == 'create' ? await createCategoryAction(data) : await updateCategoryAction(defaultValues.id || '', data);
+				type === EnumFormTypes.CREATE
+					? await createCategoryAction(data)
+					: await updateCategoryAction(defaultValues.id || '', data);
 
 			setResult(result as ActionResult<TFormValues>);
 		});

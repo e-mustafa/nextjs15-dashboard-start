@@ -138,7 +138,7 @@ export default function CollectionForm({
 	async function onSubmit(data: TFormValues) {
 		startTransition(async () => {
 			const result =
-				type == 'create'
+				type === EnumFormTypes.CREATE
 					? await createCollectionAction(data)
 					: await updateCollectionAction(defaultValues.id || '', data);
 
