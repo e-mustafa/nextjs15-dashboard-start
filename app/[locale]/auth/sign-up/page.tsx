@@ -1,6 +1,6 @@
 'use client';
 import AuthForm from '@/components/auth/auth-form';
-import { AuthFormType } from '@/constant/enums';
+import { AuthFormType } from '@/constant/enums-development';
 import { signupAction } from '@/server/actions/auth';
 import { signUpSchema } from '@/validation/auth-validation';
 

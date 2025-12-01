@@ -1,4 +1,4 @@
-import { Environments } from '@/constant/enums';
+import { Environments } from '@/constant/enums-development';
 import { SaudiRiyalIcon } from 'lucide-react';
 
 export const localesData = {
@@ -28,8 +28,8 @@ export const currenciesData = {
 	},
 	sar: {
 		label_ar: 'ريال سعودي',
-		label_en: SaudiRiyalIcon,
-		symbol: 'SAR',
+		label_en:'Saudi Arabian Riyal',
+		symbol: SaudiRiyalIcon ,
 		short: 'SAR',
 	},
 	usd: {

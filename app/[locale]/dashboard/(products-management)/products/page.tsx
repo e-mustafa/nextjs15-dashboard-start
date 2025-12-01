@@ -4,7 +4,7 @@ import BreadcrumbDashboard from '@/components/Dashboard/breadcrumb-dashboard';
 import LoaderTableSkeleton from '@/components/shard/loaders/loader-table-skeleton';
 import { Button } from '@/components/ui-custom/custom-button';
 import { getDataInPage } from '@/lib/utils.server/api.server';
-import { Product } from '@/server/services/product-service copy';
+import { Product } from '@prisma/client';
 // import { Product } from '@/server/services/product-service';
 import { FilePlusIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';

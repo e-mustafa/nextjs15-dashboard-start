@@ -3,6 +3,7 @@ import BreadcrumbDashboard from '@/components/Dashboard/breadcrumb-dashboard';
 import LoaderBlock from '@/components/shard/loaders/loader-block';
 import { Button } from '@/components/ui-custom/custom-button';
 import { TLocalesData } from '@/configs/general';
+import { EnumFormTypes } from '@/constant/enums-development';
 import { getDataInPage } from '@/lib/utils.server/api.server';
 import { TProductFormValues } from '@/validation/product-validation';
 import { ArrowRightIcon } from 'lucide-react';
@@ -41,7 +42,7 @@ export default async function UpdateProductsPage({ params }: TDRouteProps) {
 			</div>
 
 			<Suspense fallback={<LoaderBlock />}>
-				<ProductForm type='update' response={result} />
+				<ProductForm type={EnumFormTypes.UPDATE} response={result} />
 			</Suspense>
 		</div>
 	);

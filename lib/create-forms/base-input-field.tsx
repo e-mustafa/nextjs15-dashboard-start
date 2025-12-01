@@ -73,13 +73,13 @@ export default function BaseInputField<T extends FieldValues, K extends FieldTyp
 						</FormControl>
 
 						{fieldConfig.IconStart && (
-							<div className='absolute top-1/2 -translate-y-1/2 start-2 me-2 w-6 h-auto text-muted-foreground [&_svg]:size-4 text-sm'>
+							<div className='absolute top-1/2 -translate-y-1/2 start-2 w-6 h-auto text-muted-foreground [&_svg]:size-4 text-sm text-center'>
 								{typeof fieldConfig.IconStart === 'string' ? t(fieldConfig.IconStart) : <fieldConfig.IconStart />}
 							</div>
 						)}
 
 						{fieldConfig.IconEnd && (
-							<div className='absolute top-1/2 -translate-y-1/2 end-2 ms-2 w-7 text-muted-foreground [&_svg]:size-4 text-sm'>
+							<div className='absolute top-1/2 -translate-y-1/2 end-2 w-7 text-muted-foreground [&_svg]:size-4 text-sm text-center'>
 								{typeof fieldConfig.IconEnd === 'string' ? t(fieldConfig.IconEnd) : <fieldConfig.IconEnd />}
 							</div>
 						)}

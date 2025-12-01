@@ -10,6 +10,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { ReactNode, Suspense } from 'react';
 import { url_segment } from '../page';
+import { EnumFormTypes } from '@/constant/enums-development';
 
 const BrandForm = dynamic(() => import('@/components/Dashboard/forms/brand-form'), {
 	// ssr: false,
@@ -41,7 +42,7 @@ export default async function UpdateBrandsPage({ params }: TDRouteProps) {
 			</div>
 
 			<Suspense fallback={<LoaderBlock />}>
-				<BrandForm type='update' response={result} />
+				<BrandForm type={EnumFormTypes.UPDATE} response={result} />
 			</Suspense>
 		</div>
 	);

@@ -1,4 +1,5 @@
 // hooks/useLocale.ts
+import { TLocalesData } from '@/configs/general';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -14,7 +15,7 @@ export default function useLocale() {
 	}, [i18n.language]);
 
 	return {
-		locale: i18n.language,
+		locale: i18n.language as TLocalesData,
 		dir,
 		t: i18n.t,
 		i18n,

@@ -3,6 +3,7 @@ import BreadcrumbDashboard from '@/components/Dashboard/breadcrumb-dashboard';
 import LoaderBlock from '@/components/shard/loaders/loader-block';
 import { Button } from '@/components/ui-custom/custom-button';
 import { TLocalesData } from '@/configs/general';
+import { EnumFormTypes } from '@/constant/enums-development';
 import { getDataInPage } from '@/lib/utils.server/api.server';
 import { TCategoryFormValues } from '@/validation/category-validation';
 import { ArrowRightIcon } from 'lucide-react';
@@ -42,7 +43,7 @@ export default async function UpdateCategoryPage({ params }: TDRouteProps) {
 			</div>
 
 			<Suspense fallback={<LoaderBlock />}>
-				<CategoryForm type='update' response={result} />
+				<CategoryForm type={EnumFormTypes.UPDATE} response={result} />
 			</Suspense>
 		</div>
 	);

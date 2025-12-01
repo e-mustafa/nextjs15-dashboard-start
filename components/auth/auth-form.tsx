@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { seoData } from '@/configs/SEOData';
 import { defaultLocale } from '@/configs/general';
-import { AuthFormType, GeneralLinks } from '@/constant/enums';
+import { AuthFormType, GeneralLinks } from '@/constant/enums-development';
 import { FIELD_DATA } from '@/constant/inputs-constants';
 import { cn, renderErrorMessage } from '@/lib/utils';
 import { FigmaIcon, GithubIcon, InstagramIcon, Loader2Icon, TwitchIcon, TwitterIcon } from 'lucide-react';

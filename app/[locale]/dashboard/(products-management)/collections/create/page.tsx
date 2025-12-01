@@ -3,6 +3,7 @@ import initTranslations from '@/app/i18n';
 import BreadcrumbDashboard from '@/components/Dashboard/breadcrumb-dashboard';
 import LoaderBlock from '@/components/shard/loaders/loader-block';
 import { Button } from '@/components/ui-custom/custom-button';
+import { EnumFormTypes } from '@/constant/enums-development';
 import { ArrowRightIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -32,7 +33,7 @@ export default async function CreateCollectionPage({ params }: TLayoutProps) {
 			</div>
 
 			<Suspense fallback={<LoaderBlock />}>
-				<CollectionForm type='create' />
+				<CollectionForm type={EnumFormTypes.CREATE} />
 			</Suspense>
 		</div>
 	);

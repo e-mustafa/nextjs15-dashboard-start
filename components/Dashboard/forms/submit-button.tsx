@@ -37,7 +37,7 @@ export default function SubmitButton({
 				)}
 			</Button>
 
-			{resetForm && (
+			{resetForm ? (
 				<div className='w-full sm:w-auto flex gap-4 items-center *:flex-1'>
 					<Button type='reset' variant='outline' onClick={resetForm}>
 						{t('common.actions.reset_form')}
@@ -56,6 +56,19 @@ export default function SubmitButton({
 						</Link>
 					</Button>
 				</div>
+			) : (
+				<Button
+					type='reset'
+					asChild
+					disabled={isPending}
+					variant='outline'
+					size='lg'
+					className='w-auto sm:w-32 min-w-fit'
+				>
+					<Link href={backLink}>
+						<span className='grow text-center'>{t('common.actions.cancel')}</span>
+					</Link>
+				</Button>
 			)}
 		</div>
 	);

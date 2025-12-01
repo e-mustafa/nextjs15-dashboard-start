@@ -4,6 +4,7 @@ import { url_segment } from '@/app/[locale]/dashboard/(products-management)/bran
 import LoaderInstElement from '@/components/shard/loaders/loader-inst-element';
 import { Form } from '@/components/ui-custom/custom-form';
 import { config_env } from '@/configs/general';
+import { EnumFormTypes } from '@/constant/enums-development';
 import { useFormResponse } from '@/hooks/use-form-response';
 import { useServerResponse } from '@/hooks/use-server-response';
 import { formSectionSEO } from '@/lib/create-forms/form-section-seo';
@@ -101,11 +102,11 @@ export const formSections_brand: SectionConfig<TFormValues>[] = [
 ];
 
 export default function BrandForm({
-	type = 'create',
+	type = EnumFormTypes.CREATE,
 	response,
 	defaultValues = (response?.data as TFormValues) || defaultValuesBrand,
 }: {
-	type?: 'create' | 'update';
+	type?: EnumFormTypes;
 	response?: ActionResult<TFormValues>;
 	defaultValues?: TFormValues & { id?: string };
 }) {

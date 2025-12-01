@@ -1,5 +1,5 @@
 import { isDEV, isPROD } from '@/configs/general';
-import { GeneralLinks } from '@/constant/enums';
+import { GeneralLinks } from '@/constant/enums-development';
 import { prisma_DB } from '@/prisma/prisma.db';
 import { signInSchema } from '@/validation/auth-validation';
 import { PrismaAdapter } from '@auth/prisma-adapter';
