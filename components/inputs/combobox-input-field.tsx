@@ -29,6 +29,8 @@ import InfoIconTooltip from './info-icon-tooltip';
  * 
  * `deleteTag`?: (id: string) => Promise<void> - Function to delete a tag by ID.
  * 
+ * `linkHref`?: string - Link href for each option.
+ * 
  * `multiple`?: boolean - Whether multiple selections are allowed.
  * 
  * @returns {JSX.Element}
@@ -50,6 +52,7 @@ export function ComboboxInputField<T extends FieldValues, K extends FieldTypeMap
 		isTags,
 		multiple = isTags,
 		returnObject = false,
+		linkHref,
 	} = fieldConfig;
 	const {
 		t,
@@ -130,6 +133,9 @@ export function ComboboxInputField<T extends FieldValues, K extends FieldTypeMap
 								isTags={fieldConfig.isTags}
 								deleteTag={fieldConfig.deleteTag}
 								returnFullObject={returnObject}
+								linkHref={linkHref}
+								customColumn={fieldConfig.customColumn}
+								// ={fieldConfig.customColumn}
 								// onChange={(val) => setBrandsValue(val as string[])}
 								// onChange={field.onChange}
 								{...field}

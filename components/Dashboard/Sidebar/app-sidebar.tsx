@@ -86,17 +86,22 @@ const data = {
 					url: '/dashboard/products',
 				},
 				{
-					title: { ar: 'التصنيفات', en: 'categories' },
-					url: '/dashboard/categories',
+					title: { ar: 'الخصومات', en: 'discounts' },
+					url: '/dashboard/discounts',
+				},
+				{
+					title: { ar: 'الكوبونات', en: 'coupons' },
+					url: '/dashboard/coupons',
 				},
 				{
 					title: { ar: 'المجموعات', en: 'collections' },
 					url: '/dashboard/collections',
 				},
 				{
-					title: { ar: 'الكوبونات', en: 'coupons' },
-					url: '/dashboard/coupons',
+					title: { ar: 'التصنيفات', en: 'categories' },
+					url: '/dashboard/categories',
 				},
+
 				{
 					title: { ar: 'الماركات', en: 'brands' },
 					url: '/dashboard/brands',
@@ -226,7 +231,6 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-	
 	return (
 		<Sidebar collapsible='icon' side={dir() === 'rtl' ? 'right' : 'left'} {...props} className='font-medium border-0'>
 			<SidebarHeader className='min-h-[72px]'>

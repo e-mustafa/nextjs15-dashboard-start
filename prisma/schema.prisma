@@ -24,11 +24,18 @@ enum AttributeType {
   CUSTOM
 }
 
-enum DiscountType {
-  PERCENTAGE
-  FIXED_AMOUNT
+enum CouponType {
+  // PERCENTAGE
+  // FIXED_AMOUNT
   BUY_X_GET_Y
   BUNDLE
+  SHIPPING
+  // SPECIFIC_PRODUCTS
+}
+
+enum DiscountType {
+  FIXED
+  PERCENTAGE
 }
 
 enum ProductType {
@@ -606,19 +613,21 @@ model ProductSpecificationProperty {
 // DISCOUNTS
 /////////////////////////
 model ProductDiscount {
-  id          String       @id @default(cuid())
-  productId   String
-  product     Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
-  type        DiscountType
-  value       Float
-  startDate   DateTime
-  endDate     DateTime?
-  isActive    Boolean      @default(true)
-  priority    Int          @default(0)
-  minQuantity Int?
-  maxQuantity Int?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @default(now()) @updatedAt
+  id               String       @id @default(cuid())
+  name_ar          String
+  name_en          String
+  productId        String
+  product          Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  type             DiscountType
+  value            Float
+  startDate        DateTime
+  endDate          DateTime?
+  isActive         Boolean      @default(true)
+  priority         Int          @default(0)
+  minDiscountValue Int?
+  maxDiscountValue Int?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @default(now()) @updatedAt
 
   @@index([productId])
   @@index([startDate, endDate])

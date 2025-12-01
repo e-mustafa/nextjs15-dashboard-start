@@ -24,6 +24,7 @@
 			"refresh": "تحديث",
 			"close": "اغلاق",
 			"choose_": " اختر {{item}}",
+			"select_item": "اختر عنصر",
 			"add_variant": "اضافة متغير",
 			"delete_variant": "حذف المتغير",
 			"edit_variant": "تعديل المتغير",
@@ -36,7 +37,9 @@
 			"add_specifications": "اضافة مواصفات",
 			"add_property": "اضافة خاصية",
 			"delete_property": "حذف الخاصية",
-			"add_more": "اضافة المزيد"
+			"add_more": "اضافة المزيد",
+			"today": "اليوم",
+			"clear": "مسح"
 		},
 		"status": {
 			"active": "نشط",
@@ -74,7 +77,17 @@
 			"edit_product": "تعديل المنتج",
 			"tags": "التاغات",
 			"combinations_selected": "المتغيرات المحددة",
-			"total_quantity": "الكمية الكلية"
+			"total_quantity": "الكمية الكلية",
+			"discounts": "الخصومات",
+			"the_discount": "الخصم",
+			"create_discount": "اضافة خصم",
+			"edit_discount": "تعديل الخصم",
+			"coupons": "الكوبونات",
+			"the_coupon": "الكوبون",
+			"create_coupon": "اضافة كوبون",
+			"edit_coupon": "تعديل الكوبون",
+			"gregorian": "التقويم الميلادي",
+			"hijri": "التقويم الهجري"
 		},
 		"messages": {
 			"processing": "جارٍ المعالجة...",
@@ -186,9 +199,11 @@
 			"inventory_info": "معلومات المخزون",
 			"variants_info": "معلومات المتغيرات",
 			"specifications_info": "معلومات المواصفات",
+			"coupon_info": "معلومات القسيمة",
 			"discount_info": "معلومات الخصم",
 			"supplier_info": "معلومات المورد",
-			"warehouse_info": "معلومات المخزن"
+			"warehouse_info": "معلومات المخزن",
+			"choose_products_to_discount": "المنتجات التي سيتم تطبيق الخصم عليها"
 		},
 		"labels": {
 			"name": "الاسم",
@@ -288,7 +303,14 @@
 			"spec_key_en": " اسم الخاصية (إنجليزي)",
 			"specs_value": "قيمة الخاصية",
 			"specs_value_ar": "قيمة الخاصية (عربي)",
-			"specs_value_en": "قيمة الخاصية (إنجليزي)"
+			"specs_value_en": "قيمة الخاصية (إنجليزي)",
+
+			"discount_value_type": "نوع قيمة الخصم",
+			"discount_value": "قيمة الخصم",
+			"discount_start_date": "تاريخ بدء الخصم",
+			"discount_end_date": "تاريخ انتهاء الخصم",
+			"min_discount_value": "الحد الأدنى للخصم",
+			"max_discount_value": "الحد الأقصى للخصم"
 		},
 		"placeholders": {
 			"name": "اكتب الاسم",
@@ -351,6 +373,7 @@
 			"choose_brands_products": "حدد المنتجات تحت هذا البراند",
 			"choose_categorys_products": "حدد المنتجات تحت هذا التصنيف",
 			"choose_collections_products": "حدد المنتجات تحت هذه المجموعه",
+			"choose_products_to_discount": "حدد المنتجات التي سيتم تطبيق الخصم عليها",
 			"choose_products_brand": "حدد البراند لهذا المنتج",
 			"choose_products_category": "حدد التصنيف لهذا المنتج",
 			"choose_products_collection": "حدد المجموعة لهذا المنتج",
@@ -393,7 +416,17 @@
 			"spec_key_ar": "الخامة , مثلا...",
 			"spec_key_en": "Material , مثلا...",
 			"spec_value_ar": "قطن 100% , مثلا...",
-			"spec_value_en": "100% Cotton , مثلا..."
+			"spec_value_en": "100% Cotton , مثلا...",
+
+			"date": "ادخل التاريخ",
+			"discount_value_type": "حدد نوع الخصم",
+			"discount_value": "ادخل قيمة الخصم",
+			"discount_start_date": "اختر تاريخ بدء الخصم",
+			"discount_end_date": "اختر تاريخ انتهاء الخصم",
+			"min_discount_value": "ادخل قيمة الخصم الادنى",
+			"max_discount_value": "ادخل قيمة الخصم الاقصى",
+			"discount_limit": "ادخل حد الخصم",
+			"discount_limit_per_user": "ادخل حد الخصم لكل مستخدم"
 		},
 		"validation": {
 			"required": "هذا الحقل مطلوب",
@@ -437,11 +470,15 @@
 			"variant_name_required": "اسم الخيار مطلوب.",
 			"at_least_one_option": "يجب اضافة خيار واحد على الاقل.",
 			"option_name_required": "اسم الخيار مطلوب.",
-			
+
 			"at_least_one_section_title": "يجب اضافة اسم قسم واحد على الاقل.",
 			"at_least_one_property": "يجب اضافة خاصية واحدة على الاقل.",
 			"at_least_one_spec_key": "يجب اضافة اسم خاصية واحدة على الاقل.",
-			"at_least_one_spec_value": "يجب اضافة قيمة خاصية واحدة على الاقل."
+			"at_least_one_spec_value": "يجب اضافة قيمة خاصية واحدة على الاقل.",
+			"at_least_one_product": "يجب اضافة منتج واحد على الاقل.",
+			"invalid_percentage_value": "قيمة النسبة المئوية غير صحيحة.",
+			"max_less_than_min": "الحد الاقصى يجب ان يكون اقل من الحد الادنى.",
+			"end_date_before_start_date": "تاريخ الانتهاء يجب ان يكون قبل تاريخ البدء."
 		},
 		"descriptions": {
 			"slug": "المعرّف النصي هو نص يجب ان يكون فريدًا ويمكن فقط ان يحتوي على حروف انجليزية، ارقام و شرطه.",
@@ -478,6 +515,10 @@
 			"search_searching": "جارٍ البحث...",
 			"search_error": "حدث خطاء في البحث",
 			"search_images_placeholder": "ابحث في الصور..."
+		},
+		"select": {
+			"fixed": "قيمة ثابتة",
+			"percentage": "نسبة مئوية"
 		}
 	},
 	"general": {
@@ -591,6 +632,9 @@
 		"tags": "التاغات",
 		"create_tag": "إضافة تاغ",
 		"edit_tag": "تعديل تاغ",
+		"discounts": "الخصومات",
+		"create_discount": "إضافة خصم",
+		"edit_discount": "تعديل خصم",
 		"coupons": "الكوبونات",
 		"create_coupon": "إضافة كوبون",
 		"edit_coupon": "تعديل كوبون"
@@ -704,6 +748,22 @@
 				"delete": "فشل حذف المنتج",
 				"not_found": "المنتج غير موجود",
 				"exists": "المنتج موجود بالفعل"
+			}
+		},
+		"discounts": {
+			"success": {
+				"create": "تم انشاء الخصم بنجاح",
+				"update": "تم تحديث الخصم بنجاح",
+				"delete": "تم حذف الخصم بنجاح",
+				"delete_many": "تم حذف الخصومات بنجاح"
+			},
+			"errors": {
+				"create": "فشل انشاء الخصم",
+				"update": "فشل تحديث الخصم",
+				"delete": "فشل حذف الخصم",
+				"not_found": "الخصم غير موجود",
+				"exists": "الخصم موجود بالفعل",
+				"overlapping_discount": "الخصم متداخل مع خصم اخر"
 			}
 		},
 		"customers": "العملاء"

@@ -24,6 +24,7 @@
 			"refresh": "Refresh",
 			"close": "Close",
 			"choose_": "Choose {{item}}",
+			"select_item": "Select item",
 			"add_variant": "Add variant",
 			"delete_variant": "Delete variant",
 			"edit_variant": "Edit variant",
@@ -36,7 +37,9 @@
 			"add_specifications": "Add specifications",
 			"add_property": "Add property",
 			"delete_property": "Delete property",
-			"add_more": "Add more"
+			"add_more": "Add more",
+			"today": "Today",
+			"clear": "Clear"
 		},
 		"status": {
 			"active": "Active",
@@ -74,7 +77,17 @@
 			"edit_product": "Edit product",
 			"tags": "Tags",
 			"combinations_selected": "Selected variants",
-			"total_quantity": "Total quantity"
+			"total_quantity": "Total quantity",
+			"discounts": "Discounts",
+			"the_discount": "The discount",
+			"create_discount": "Add discount",
+			"edit_discount": "Edit discount",
+			"coupons": "Coupons",
+			"the_coupon": "The coupon",
+			"create_coupon": "Add coupon",
+			"edit_coupon": "Edit coupon",
+			"gregorian": "Gregorian",
+			"hijri": "Hijri"
 		},
 		"messages": {
 			"processing": "Processing...",
@@ -186,9 +199,11 @@
 			"inventory_info": "Inventory Information",
 			"variants_info": "Variants Information",
 			"specifications_info": "Specifications Information",
+			"coupon_info": "Coupon Information",
 			"discount_info": "Discount Information",
 			"supplier_info": "Supplier Information",
-			"warehouse_info": "Warehouse Information"
+			"warehouse_info": "Warehouse Information",
+			"choose_products_to_discount": "Choose products to discount"
 		},
 		"labels": {
 			"name": "Name",
@@ -288,7 +303,14 @@
 			"spec_key_en": "Property Name (English)",
 			"specs_value": "Property Value",
 			"specs_value_ar": "Property Value (Arabic)",
-			"specs_value_en": "Property Value (English)"
+			"specs_value_en": "Property Value (English)",
+
+			"discount_value_type": "Discount Type",
+			"discount_value": "Discount Value",
+			"discount_start_date": "Discount Start Date",
+			"discount_end_date": "Discount End Date",
+			"min_discount_value": "Minimum Discount Value",
+			"max_discount_value": "Maximum Discount Value"
 		},
 		"placeholders": {
 			"name": "Enter name",
@@ -351,6 +373,7 @@
 			"choose_brands_products": "Select products under this brand",
 			"choose_categorys_products": "Select products under this category",
 			"choose_collections_products": "Select products under this collection",
+			"choose_products_to_discount": "Select products to discount",
 			"choose_products_brand": "Select brand for this product",
 			"choose_products_category": "Select category for this product",
 			"choose_products_collection": "Select collection for this product",
@@ -393,7 +416,17 @@
 			"spec_key_ar": "e.g., Material...",
 			"spec_key_en": "e.g., Material...",
 			"spec_value_ar": "e.g., 100% Cotton...",
-			"spec_value_en": "e.g., 100% Cotton..."
+			"spec_value_en": "e.g., 100% Cotton...",
+
+			"date": "Enter date",
+			"discount_value_type": "Select discount value type",
+			"discount_value": "Enter discount value",
+			"discount_start_date": "Select discount start date",
+			"discount_end_date": "Select discount end date",
+			"min_discount_value": "Enter minimum discount value",
+			"max_discount_value": "Enter maximum discount value",
+			"discount_limit": "Enter discount limit",
+			"discount_priority": "Enter discount priority"
 		},
 		"validation": {
 			"required": "This field is required",
@@ -441,7 +474,11 @@
 			"at_least_one_section_title": "At least one section title must be added.",
 			"at_least_one_property": "At least one property must be added.",
 			"at_least_one_spec_key": "At least one specification key must be added.",
-			"at_least_one_spec_value": "At least one specification value must be added."
+			"at_least_one_spec_value": "At least one specification value must be added.",
+			"at_least_one_product": "At least one product must be added.",
+			"invalid_percentage_value": "Invalid percentage value.",
+			"max_less_than_min": "Maximum value must be less than minimum value.",
+			"end_date_before_start_date": "End date must be before start date."
 		},
 		"descriptions": {
 			"slug": "Slug is a text that must be unique and can only contain English letters, numbers and dash.",
@@ -478,6 +515,10 @@
 			"search_searching": "Searching...",
 			"search_error": "Search error occurred",
 			"search_images_placeholder": "Search in images..."
+		},
+		"select": {
+			"fixed": "Fixed",
+			"percentage": "Percentage"
 		}
 	},
 	"general": {
@@ -591,6 +632,9 @@
 		"tags": "Tags",
 		"create_tag": "Add Tag",
 		"edit_tag": "Edit Tag",
+		"discounts": "Discounts",
+		"create_discount": "Add Discount",
+		"edit_discount": "Edit Discount",
 		"coupons": "Coupons",
 		"create_coupon": "Add Coupon",
 		"edit_coupon": "Edit Coupon"
@@ -704,6 +748,22 @@
 				"delete": "Failed to delete product",
 				"not_found": "Product not found",
 				"exists": "Product already exists"
+			}
+		},
+		"discounts": {
+			"success": {
+				"create": "Discount created successfully",
+				"update": "Discount updated successfully",
+				"delete": "Discount deleted successfully",
+				"delete_many": "Discounts deleted successfully"
+			},
+			"errors": {
+				"create": "Failed to create discount",
+				"update": "Failed to update discount",
+				"delete": "Failed to delete discount",
+				"not_found": "Discount not found",
+				"exists": "Discount already exists",
+				"overlapping_discount": "Discount is overlapping with another discount"
 			}
 		},
 		"customers": "Customers"

@@ -263,7 +263,7 @@ export const formSchemaProduct = z
 		// ✅ Variants & Combinations
 		variants: z.array(variantFormSchema).optional(),
 		combinations: z.array(combinationSchema).optional(),
-		specifications: z.array(specificationSectionSchema),
+		specifications: z.array(specificationSectionSchema).optional(),
 
 		type: z.string().optional(),
 
