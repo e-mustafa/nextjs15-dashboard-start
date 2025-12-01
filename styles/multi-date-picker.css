@@ -1,0 +1,405 @@
+/* 
+ * Shadcn Multi Date Picker Styles
+ * For Tailwind CSS v4
+ * 
+ * Import this AFTER the library's default styles to override them
+ */
+
+/* Reset library styles first */
+.shadcn-datepicker * {
+	box-sizing: border-box;
+}
+
+/* Wrapper - Higher specificity */
+.shadcn-datepicker .rmdp-wrapper {
+	/* background-color: var(--color-popover); */
+	background-color: transparent;
+	/* border: 1px solid var(--color-border); */
+	border: none;
+	border-radius: var(--radius-lg);
+	/* box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); */
+}
+
+/* Header */
+.shadcn-datepicker .rmdp-header,
+.shadcn-datepicker .rmdp-header-values {
+	background-color: transparent;
+	color: var(--color-foreground);
+	font-weight: 500;
+}
+
+/* Navigation Arrows */
+.shadcn-datepicker .rmdp-arrow {
+	border-color: var(--color-foreground);
+	border-width: 0 2px 2px 0;
+	margin-top: 0;
+}
+
+.shadcn-datepicker .rmdp-arrow-container {
+	background-color: transparent;
+	transition-property: all;
+	transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	transition-duration: 200ms;
+	display: grid;
+	place-items: center;
+}
+
+.shadcn-datepicker .rmdp-arrow-container:hover {
+	background-color: var(--color-accent);
+	border-radius: var(--radius-sm);
+}
+
+/* Week Days */
+.shadcn-datepicker .rmdp-week-day {
+	color: var(--color-muted-foreground);
+	font-weight: 500;
+	font-size: 0.875rem;
+	line-height: 1.25rem;
+}
+
+@media (min-height: 320px) {
+	.shadcn-datepicker .rmdp-day,
+	.shadcn-datepicker .rmdp-week-day {
+		width: 40px;
+		height: 40px;
+		font-weight: 500;
+		font-size: 0.875rem;
+		line-height: 1.25rem;
+		user-select: none;
+	}
+}
+
+/* Days */
+
+.shadcn-datepicker .rmdp-day {
+	color: var(--color-foreground);
+	font-size: 0.875rem;
+	line-height: 1.25rem;
+}
+
+.shadcn-datepicker .rmdp-day.rmdp-deactive,
+.shadcn-datepicker .rmdp-day.rmdp-deactive span {
+	color: var(--color-muted-foreground);
+	opacity: 0.5;
+}
+
+.shadcn-datepicker .rmdp-day.rmdp-disabled,
+.shadcn-datepicker .rmdp-day.rmdp-disabled span {
+	color: var(--color-muted-foreground);
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.shadcn-datepicker .rmdp-day span {
+	border-radius: var(--radius-md);
+	transition-property: all;
+	transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	transition-duration: 200ms;
+}
+
+/* Hover State - Higher specificity to override library */
+.shadcn-datepicker .rmdp-day:not(.rmdp-disabled):not(.rmdp-day-hidden) span:hover,
+.shadcn-datepicker .rmdp-day:not(.rmdp-disabled):not(.rmdp-day-hidden):hover span {
+	background-color: var(--color-accent);
+	color: var(--color-foreground);
+}
+
+/* Today */
+.shadcn-datepicker .rmdp-day.rmdp-today span {
+	background-color: var(--color-card);
+	/* background-color: var(--color-popover); */
+	color: var(--color-foreground);
+	font-weight: 500;
+	/* opacity: 0.7; */
+}
+
+/* Selected Day - Higher specificity */
+.shadcn-datepicker .rmdp-day.rmdp-selected span:not(.highlight),
+.shadcn-datepicker .rmdp-day.rmdp-selected:not(.rmdp-range) span {
+	background-color: var(--color-primary);
+	color: var(--color-primary-foreground);
+	box-shadow: 0 0 0 2px var(--color-ring);
+}
+
+/* Range Selection */
+.shadcn-datepicker .rmdp-range,
+.shadcn-datepicker .rmdp-day.rmdp-range {
+	background-color: var(--color-primary);
+	box-shadow: none;
+}
+
+/* .shadcn-datepicker .rmdp-range, */
+.shadcn-datepicker .rmdp-range:not(.start):not(.end) {
+	background-color: var(--color-accent);
+	/* opacity: 0.75; */
+}
+
+.shadcn-datepicker .rmdp-rtl .rmdp-range-hover.start:not(.force),
+.shadcn-datepicker .rmdp-rtl .rmdp-range.start:not(.force) {
+	border-bottom-left-radius: unset;
+	border-bottom-right-radius: var(--radius-md);
+	border-top-left-radius: unset;
+	border-top-right-radius: var(--radius-md);
+}
+
+.shadcn-datepicker .rmdp-rtl .rmdp-range-hover.end:not(.force),
+.shadcn-datepicker .rmdp-rtl .rmdp-range.end:not(.force) {
+	border-bottom-left-radius: var(--radius-md);
+	border-bottom-right-radius: unset;
+	border-top-left-radius: var(--radius-md);
+	border-top-right-radius: unset;
+}
+
+/* Input Field - Higher specificity */
+.shadcn-datepicker .rmdp-input,
+.shadcn-datepicker input.rmdp-input {
+	background-color: var(--color-background);
+	border: 1px solid var(--color-input);
+	border-radius: var(--radius-md);
+	color: var(--color-foreground);
+	padding: 0.5rem 0.75rem;
+	font-size: 0.875rem;
+	line-height: 1.25rem;
+	width: 100%;
+	transition-property: all;
+	transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	transition-duration: 200ms;
+}
+
+.shadcn-datepicker .rmdp-input:focus,
+.shadcn-datepicker input.rmdp-input:focus {
+	outline: none;
+	border-color: var(--color-ring);
+	box-shadow: 0 0 0 3px var(--color-ring) / 0.2;
+}
+
+.shadcn-datepicker .rmdp-input::placeholder {
+	color: var(--color-muted-foreground);
+}
+
+/* Buttons - Higher specificity */
+.shadcn-datepicker .rmdp-button:not(.rmdp-action-button),
+.shadcn-datepicker button.rmdp-button:not(.rmdp-action-button) {
+	background-color: var(--color-primary);
+	color: var(--color-primary-foreground);
+	border-radius: var(--radius-md);
+	padding: 0.5rem 1rem;
+	font-size: 0.875rem;
+	line-height: 1.25rem;
+	font-weight: 500;
+	transition-property: all;
+	transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	transition-duration: 200ms;
+}
+
+.shadcn-datepicker .rmdp-button:not(.rmdp-action-button):hover {
+	opacity: 0.9;
+}
+
+.shadcn-datepicker .rmdp-action-button,
+.shadcn-datepicker button.rmdp-action-button {
+	background-color: transparent;
+	color: var(--color-primary);
+	border: 1px solid var(--color-border);
+}
+
+.shadcn-datepicker .rmdp-action-button:hover {
+	background-color: var(--color-accent);
+}
+
+/* Panel (for year/month selection) */
+.shadcn-datepicker .rmdp-panel {
+	background-color: var(--color-card);
+	border-left: 1px solid var(--color-border);
+}
+
+.shadcn-datepicker .rmdp-panel-body li {
+	background-color: var(--color-background);
+	color: var(--color-foreground);
+	border-radius: var(--radius-md);
+	margin: 0.25rem;
+	transition-property: all;
+	transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	transition-duration: 200ms;
+}
+
+.shadcn-datepicker .rmdp-panel-body li:hover {
+	background-color: var(--color-accent);
+}
+
+/* RTL Support */
+.shadcn-datepicker.rmdp-rtl .rmdp-panel,
+.rmdp-rtl.shadcn-datepicker .rmdp-panel {
+	border-left: none;
+	border-right: 1px solid var(--color-border);
+}
+
+/* Time Picker Plugin Styles */
+.shadcn-datepicker .rmdp-time-picker {
+	/* background-color: var(--color-card);
+	border-top: 1px solid var(--color-border); */
+}
+
+.shadcn-datepicker .rmdp-border-bottom {
+	border-bottom: 1px solid var(--color-border);
+}
+
+.shadcn-datepicker .rmdp-time-picker input {
+	background-color: var(--color-input);
+	border: 1px solid var(--color-border);
+	color: var(--color-foreground);
+	border-radius: var(--radius-md);
+	padding: 0.25rem 0.5rem;
+	font-size: 0.875rem;
+	line-height: 1.25rem;
+	width: 40px;
+}
+
+.shadcn-datepicker .rmdp-time-picker div .rmdp-am {
+	color: var(--color-foreground);
+}
+
+.shadcn-datepicker .rmdp-time-picker input:focus {
+	outline: none;
+	border-color: var(--color-ring);
+	box-shadow: 0 0 0 2px var(--color-ring) / 0.2;
+}
+
+.shadcn-datepicker .rmdp-time-picker div {
+	color: var(--color-foreground);
+}
+
+/* Scrollbar Styling */
+.shadcn-datepicker .rmdp-panel-body::-webkit-scrollbar {
+	width: 0.5rem;
+}
+
+.shadcn-datepicker .rmdp-panel-body::-webkit-scrollbar-track {
+	background-color: var(--color-muted);
+	border-radius: 9999px;
+}
+
+.shadcn-datepicker .rmdp-panel-body::-webkit-scrollbar-thumb {
+	background-color: var(--color-primary);
+	border-radius: 9999px;
+}
+
+.shadcn-datepicker .rmdp-panel-body::-webkit-scrollbar-thumb:hover {
+	background-color: var(--color-primary) / 0.8;
+}
+
+/* Month/Year Picker */
+.shadcn-datepicker .rmdp-month-picker,
+.shadcn-datepicker .rmdp-year-picker {
+	background-color: var(--color-muted);
+	/* background-color: var(--color-popover); */
+}
+
+.shadcn-datepicker .rmdp-ym {
+	color: var(--color-foreground);
+	border-radius: var(--radius-md);
+	transition-property: all;
+	transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	transition-duration: 200ms;
+}
+
+/* .shadcn-datepicker .rmdp-ym:hover {
+	background-color: var(--color-accent);
+} */
+
+.shadcn-datepicker .rmdp-ym.rmdp-selected {
+	background-color: var(--color-primary);
+	color: var(--color-primary-foreground);
+}
+
+/* Multiple Selection Indicators */
+.shadcn-datepicker .rmdp-day.rmdp-range-start span,
+.shadcn-datepicker .rmdp-day.rmdp-range-end span {
+	background-color: var(--color-primary);
+	color: var(--color-primary-foreground);
+}
+
+.shadcn-datepicker .rmdp-day.rmdp-range-start span {
+	border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.shadcn-datepicker .rmdp-day.rmdp-range-end span {
+	border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+/* Popper Arrow */
+.shadcn-datepicker .rmdp-arrow[data-popper-arrow] {
+	display: none;
+}
+
+/* Container */
+.shadcn-datepicker .rmdp-container {
+	font-family: var(--font-sans, sans-serif);
+}
+
+/* Footer */
+.shadcn-datepicker .rmdp-action-buttons {
+	display: flex;
+	gap: 0.5rem;
+	justify-content: center;
+	padding: 0 0.5rem 0.5rem;
+	border-top: 1px solid var(--color-border);
+}
+
+.shadcn-datepicker .rmdp-action-button {
+	margin: 0;
+}
+
+/* Animation for dropdown */
+.shadcn-datepicker .rmdp-wrapper {
+	animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Focus Visible States */
+.shadcn-datepicker .rmdp-day:focus-visible span {
+	box-shadow: 0 0 0 2px var(--color-ring), 0 0 0 4px var(--color-background);
+	outline: none;
+}
+
+.shadcn-datepicker .rmdp-arrow-container:focus-visible {
+	box-shadow: 0 0 0 2px var(--color-ring), 0 0 0 4px var(--color-background);
+	outline: none;
+	border-radius: var(--radius-sm);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+	/* .shadcn-datepicker .rmdp-wrapper {
+		font-size: 0.75rem;
+		line-height: 1rem;
+	}
+
+	.shadcn-datepicker .rmdp-day {
+		font-size: 0.75rem;
+		line-height: 1rem;
+	} */
+}
+
+/* Dark mode shadow enhancement */
+.dark .shadcn-datepicker .rmdp-wrapper {
+	box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.3), 0 8px 10px -6px rgb(0 0 0 / 0.3);
+}
+
+.shadcn-datepicker .rmdp-ep-arrow[direction='top'] {
+	border-bottom: 1px solid var(--color-popover);
+}
+
+.shadcn-datepicker .rmdp-ep-arrow:after {
+	background-color: var(--color-popover);
+}
