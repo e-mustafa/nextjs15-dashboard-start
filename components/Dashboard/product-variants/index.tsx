@@ -259,6 +259,9 @@ export default function ProductVariantsComponent({
 											value={groupBy}
 											onChange={setGroupBy}
 											placeholder='common.actions.select_variant'
+											sectorProperty_1='title_ar'
+											sectorProperty_2='title_en'
+											className='w-[200px]'
 										/>
 									</div>
 								)}
