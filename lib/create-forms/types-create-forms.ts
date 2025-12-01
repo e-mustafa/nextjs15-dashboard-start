@@ -1,3 +1,4 @@
+import { EnumDatePickerMode } from '@/components/inputs/multi-date-picker';
 import { ComboboxOption, PaginatedResponse } from '@/components/ui-custom/reuseable-combobox';
 import { ChangeEvent, ElementType, ReactNode } from 'react';
 import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
@@ -25,11 +26,13 @@ export type FieldTypeMap =
 	| 'otp'
 	| 'uploadFile'
 	| 'slug'
+	| 'selectFiled'
 	| 'productVariants'
 	| 'SpecificationsList'
 	| 'attributes'
 	| 'imageManager'
 	| 'imageUpload'
+	| 'multiDatePicker'
 	| 'seoMockupCard'
 	| 'shardPostMockupCard';
 
@@ -106,8 +109,13 @@ export interface FieldConfig<T extends FieldValues = FieldValues, K extends Fiel
 	folder?: string; // for ImageManager upload folder name
 
 	// only for special field types that need additional data
-	options?: { label: string; value: string }[];
+	options?: { id?: string; label: string; value: string }[];
 	fetchItems?: () => Promise<{ label: string; value: string }[]>;
+
+	// select field
+	noneItem?: string | boolean;
+	sectorProperty_1?: string;
+	sectorProperty_2?: string;
 
 	// combobox component
 	fetchOptions?: (
@@ -128,6 +136,18 @@ export interface FieldConfig<T extends FieldValues = FieldValues, K extends Fiel
 
 	searchPlaceholder?: string;
 	emptyMessage?: string | ReactNode;
+
+	// multi date picker
+	// DateMode?: 'date' | 'datetime' | 'time';
+	datePickerMode?: EnumDatePickerMode;
+	inputClass?: string;
+	timePicker?: boolean;
+	dateOptions?: {
+		minDate?: string;
+		maxDate?: string;
+		disabledDates?: string[];
+		onlyAllowedDates?: string[];
+	};
 }
 
 export interface RenderFieldProps<T extends FieldValues, K extends FieldTypeMap> {

@@ -4,17 +4,19 @@ import CheckboxInputField from '@/components/inputs/checkbox-input-field';
 import { ComboboxInputField } from '@/components/inputs/combobox-input-field';
 import { FileInputField } from '@/components/inputs/file-input-field';
 import ImageUploadField from '@/components/inputs/image-upload-field';
+import { MultiDatePickerField } from '@/components/inputs/multi-date-picker-field';
 import PasswordInput from '@/components/inputs/password-input';
 import ProductVariantsField from '@/components/inputs/product-variants-field';
 import RichTextField from '@/components/inputs/rich-text-field';
+import SelectField from '@/components/inputs/select-field';
 import SlugInputField from '@/components/inputs/slug-input-field';
+import SpecificationsListField from '@/components/inputs/specifications-list-field';
 import SwitchInputField from '@/components/inputs/switch-input-field';
 import TextareaInputField from '@/components/inputs/textarea-input-field';
 import { JSX } from 'react';
 import { FieldValues, Path } from 'react-hook-form';
 import BaseInputField from './base-input-field';
 import { FieldTypeMap, RenderFieldProps } from './types-create-forms';
-import SpecificationsListField from '@/components/inputs/specifications-list-field';
 
 /**
  * A registry mapping input field types to their corresponding render functions.
@@ -47,12 +49,16 @@ export const inputRegistry: InputRegistry = {
 	uploadFile: ({ fieldConfig, form }) => <FileInputField fieldConfig={fieldConfig} form={form} />,
 	imageUpload: ({ fieldConfig, form }) => <ImageUploadField fieldConfig={fieldConfig} form={form} />,
 
+	selectFiled: ({ fieldConfig, form }) => <SelectField fieldConfig={fieldConfig} form={form} />,
+
 	richtext: ({ fieldConfig, form }) => <RichTextField fieldConfig={fieldConfig} form={form} />,
 
 	combobox: ({ fieldConfig, form }) => <ComboboxInputField fieldConfig={fieldConfig} form={form} />,
 
+	multiDatePicker: ({ fieldConfig, form }) => <MultiDatePickerField fieldConfig={fieldConfig} form={form} />,
+
 	productVariants: ({ fieldConfig, form }) => <ProductVariantsField fieldConfig={fieldConfig} form={form} />,
-	
+
 	SpecificationsList: ({ fieldConfig, form }) => <SpecificationsListField fieldConfig={fieldConfig} form={form} />,
 
 	seoMockupCard: <T extends FieldValues>({ form }: RenderFieldProps<T, 'seoMockupCard'>) => {
