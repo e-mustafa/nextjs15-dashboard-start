@@ -54,22 +54,22 @@ export const formSchemaDiscount = z
 		}
 
 		/** 2) PERCENTAGE requires min/max, FIXED allows null */
-		// if (data.type === DiscountType.PERCENTAGE) {
-		// 	if (data.minDiscountValue == null) {
-		// 		ctx.addIssue({
-		// 			path: ['minDiscountValue'],
-		// 			code: 'custom',
-		// 			message: msg('forms.validation.required'),
-		// 		});
-		// 	}
-		// 	if (data.maxDiscountValue == null) {
-		// 		ctx.addIssue({
-		// 			path: ['maxDiscountValue'],
-		// 			code: 'custom',
-		// 			message: msg('forms.validation.required'),
-		// 		});
-		// 	}
-		// }
+		if (data.type === DiscountType.PERCENTAGE) {
+			if (data.minDiscountValue == null) {
+				ctx.addIssue({
+					path: ['minDiscountValue'],
+					code: 'custom',
+					message: msg('forms.validation.required'),
+				});
+			}
+			if (data.maxDiscountValue == null) {
+				ctx.addIssue({
+					path: ['maxDiscountValue'],
+					code: 'custom',
+					message: msg('forms.validation.required'),
+				});
+			}
+		}
 
 		/** 3) Additional recommended rules */
 

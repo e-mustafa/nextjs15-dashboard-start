@@ -562,7 +562,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 												/>
 											)}
 											<div className='flex gap-x-2 gap-y-1 flex-col md:flex-row w-full'>
-												<Link href={`${linkHref}/${option.id}`} className='line-clamp-1 grow'>
+												<Link href={`${linkHref}/${option.id}`} className='line-clamp-1 grow hover:underline'>
 													{renderOption ? renderOption(option) : option.name}
 												</Link>
 

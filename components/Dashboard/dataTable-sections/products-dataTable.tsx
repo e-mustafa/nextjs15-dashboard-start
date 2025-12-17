@@ -109,7 +109,7 @@ export default function ProductsDataTable({ result, locale }: { result: ActionRe
 					src={(row.original.images?.[0] as TImage)?.url ?? imagesPlaceholder.imgMedium}
 					width={40}
 					height={40}
-					alt={row.original.name}
+					alt={row.original.name!}
 					className='rounded-md aspect-square object-cover'
 				/>
 			),
@@ -134,6 +134,11 @@ export default function ProductsDataTable({ result, locale }: { result: ActionRe
 
 		{ accessorKey: 'basePrice', header: 'columns.price' },
 		{ accessorKey: 'compareAtPrice', header: 'columns.compareAtPrice' },
+		{
+			accessorKey: 'finalPrice',
+			header: 'columns.finalPrice',
+			cell: ({ row }) => <span>{row.original.finalPrice?.toString()}</span>,
+		},
 		{ accessorKey: 'stockQuantity', header: 'columns.quantity' },
 		{
 			accessorKey: 'isActive',

@@ -3,7 +3,7 @@ import { getToken } from 'next-auth/jwt';
 import { withAuth } from 'next-auth/middleware';
 import { i18nRouter } from 'next-i18n-router';
 import { NextRequest, NextResponse } from 'next/server';
-import { GeneralLinks, UserRole } from './constant/enums';
+import { GeneralLinks, UserRole } from './constant/enums-development';
 import i18nConfig from './i18n.Config';
 
 // ✅ Use NextAuth middleware wrapper

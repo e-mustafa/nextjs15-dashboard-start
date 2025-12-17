@@ -1,5 +1,5 @@
 'use client';
-import { url_segment } from '@/app/[locale]/dashboard/(products-management)/brands/page';
+import { url_segment } from '@/app/[locale]/dashboard/(products-management)/discounts/page';
 import { TLocalesData } from '@/configs/general';
 import { useServerResponse } from '@/hooks/use-server-response';
 import { formDate } from '@/lib/utils';
@@ -9,19 +9,21 @@ import {
 	deleteManyDiscountsAction,
 	toggleStateDiscountAction,
 } from '@/server/actions/discount-actions';
-import { Discount } from '@/server/services/discount-service';
+import { FormattedDiscount } from '@/server/services/discount-service';
 import { ActionResult, ApiMeta, TQueryParams } from '@/types/api';
 import { DiscountType } from '@prisma/client';
 import { ColumnDef } from '@tanstack/react-table';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useOptimistic, useState, useTransition } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Switch } from '../../ui/switch';
 import ReusableDataTable from '../dataTable/reusable-data-table';
 
-type TFormValues = Discount;
+type TFormValues = FormattedDiscount;
 
 export default function DiscountDataTable({ result, locale }: { result: ActionResult<TFormValues>; locale: TLocalesData }) {
+	const { t } = useTranslation();
 	const router = useRouter();
 	const searchParams = useSearchParams();
 
@@ -64,7 +66,7 @@ export default function DiscountDataTable({ result, locale }: { result: ActionRe
 		async ({ page, limit, search, sortBy, sortOrder }: TQueryParams) => {
 			const res: ActionResult<TFormValues> = await getDataInPage<TFormValues>({
 				url_segment: url_segment,
-				tags: ['brands'],
+				tags: ['discounts'],
 				locale,
 				query: { page, limit, search, sortBy, sortOrder },
 			});
@@ -114,18 +116,18 @@ export default function DiscountDataTable({ result, locale }: { result: ActionRe
 			header: 'columns.name',
 			cell: ({ row }) => (
 				<Link
-					href={`/dashboard/brands/${row.original.id}`}
+					href={`/${url_segment}/${row.original.id}`}
 					className='font-medium hover:underline text-primary'
 					onClick={(e) => e.stopPropagation()}
 				>
-					{row.original?.name}
+					{row.original?.name || row.original?.name_ar || row.original?.name_en}
 				</Link>
 			),
 		},
-		{ accessorKey: 'type', header: 'columns.type' },
+		{ accessorKey: 'type', header: 'columns.discount_type' },
 		{
 			accessorKey: 'value',
-			header: 'columns.value',
+			header: 'columns.discount_value',
 			cell: ({ row }) => (
 				<div className='flex gap-1.5 items-center justify-center'>
 					<span>{row.original.value}</span>
@@ -154,12 +156,24 @@ export default function DiscountDataTable({ result, locale }: { result: ActionRe
 			},
 		},
 		{
+			accessorKey: 'totalProducts',
+			header: 'columns.applies_to',
+			cell: ({ row }) => (
+				<div className='flex gap-1.5 items-center justify-center'>
+					<span>{row.original.totalProducts ?? '-'}</span>
+					<span>
+						{row.original.totalProducts === 1 ? t('datatable.products_single') : t('datatable.products_plural')}
+					</span>
+				</div>
+			),
+		}, //'مطبق على'
+		{
 			accessorKey: 'startDate',
 			header: 'columns.startDate',
 			cell: ({ row }) => (
 				<div>
 					{/* <span className='text-lg leading-none'>{dayjs(row.original.startDate).format('hh:mm A - DD MMM,YYYY')}</span> */}
-					<span className='text-lg leading-none'>{formDate(row.original.startDate)}</span>
+					<span className='text-xs unicode'>{formDate(row.original.startDate, 'YYYY MMM DD hh:mm A')}</span>
 				</div>
 			),
 		},
@@ -169,7 +183,9 @@ export default function DiscountDataTable({ result, locale }: { result: ActionRe
 			cell: ({ row }) => (
 				<div>
 					{/* <span className='text-lg leading-none'>{dayjs(row.original.endDate).format('hh:mm A - DD MMM,YYYY')}</span> */}
-					<span className='text-lg leading-none'> {row.original.endDate ? formDate(row.original.endDate) : '-'}</span>
+					<span className='text-xs unicode'>
+						{row.original.endDate ? formDate(row.original.endDate, 'YYYY MMM DD hh:mm A') : '-'}
+					</span>
 				</div>
 			),
 		},

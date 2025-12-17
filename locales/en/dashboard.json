@@ -380,6 +380,7 @@
 			"choose_products_tags": "Select tags for this product",
 			"choose_items": "Select items...",
 			"is_active": "Activate to show on website",
+			"is_active_discount": "Activate to apply discount on products and sales",
 			"is_featured": "Activate to set as featured collection",
 			"tag": "Enter tag",
 			"tag_slug": "Enter tag slug",
@@ -562,7 +563,9 @@
 		"info": "Showing _START_ to _END_ of _TOTAL_ entries",
 		"info_empty": "No entries available",
 		"info_filtered": "(filtered from _MAX_ total entries)",
-		"empty_table": "No data available in table"
+		"empty_table": "No data available in table",
+		"products_single": "product",
+		"products_plural": "products"
 	},
 	"columns": {
 		"slug": "Slug",
@@ -579,7 +582,13 @@
 		"quantity": "Quantity",
 		"price": "Price",
 		"compareAtPrice": "Price Before Discount",
-		"cost": "Cost"
+		"cost": "Cost",
+		"discount_type": "Discount Type",
+		"discount_value": "Discount Value",
+		"startDate": "Start Date",
+		"endDate": "End Date",
+		"applies_to": "Applies To",
+		"priority": "Priority"
 	},
 	"charts": {
 		"sales_over_time": "Sales Over Time",

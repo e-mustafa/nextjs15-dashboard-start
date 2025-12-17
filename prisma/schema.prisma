@@ -359,44 +359,45 @@ model ProductTag {
 /////////////////////////
 
 model Product {
-  id             String                 @id @default(cuid())
-  sku            String                 @unique
+  id             String                    @id @default(cuid())
+  sku            String                    @unique
   brandId        String?
   categoryId     String?
   imageId        String? // main image
   seoImageId     String? // seo image
-  brand          Brand?                 @relation(fields: [brandId], references: [id], onDelete: SetNull)
-  category       Category?              @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  brand          Brand?                    @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  category       Category?                 @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   // images
-  image          Image?                 @relation("ProductDirectImage", fields: [imageId], references: [id], onDelete: SetNull)
-  seoImage       Image?                 @relation("ProductSeoImage", fields: [seoImageId], references: [id], onDelete: SetNull)
+  image          Image?                    @relation("ProductDirectImage", fields: [imageId], references: [id], onDelete: SetNull)
+  seoImage       Image?                    @relation("ProductSeoImage", fields: [seoImageId], references: [id], onDelete: SetNull)
   // prices
   basePrice      Float
   compareAtPrice Float?
   cost           Float?
   // Inventory
-  trackInventory Boolean                @default(true)
-  stockQuantity  Int                    @default(0)
+  trackInventory Boolean                   @default(true)
+  stockQuantity  Int                       @default(0)
   lowStockAlert  Int?
   // status
-  isActive       Boolean                @default(true)
-  isFeatured     Boolean                @default(false)
+  isActive       Boolean                   @default(true)
+  isFeatured     Boolean                   @default(false)
   publishedAt    DateTime?
   // SEO
   // metaTitle       String?
   // metaDescription String?
   // metaKeywords    String?
   // dates
-  sortOrder      Int                    @default(0)
-  createdAt      DateTime               @default(now())
-  updatedAt      DateTime               @updatedAt
+  sortOrder      Int                       @default(0)
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
   // relations
   translations   ProductTranslation[]
   images         ProductImage[]
   variants       ProductVariant[]
   attributes     ProductAttribute[]
   tags           ProductTag[]
-  discounts      ProductDiscount[]
+  // discounts      ProductDiscount[]
+  discounts      ProductDiscountRelation[]
   collections    CollectionProduct[]
   specifications ProductSpecification[]
   // types
@@ -612,27 +613,66 @@ model ProductSpecificationProperty {
 /////////////////////////
 // DISCOUNTS
 /////////////////////////
+// model ProductDiscount {
+//   id               String       @id @default(cuid())
+//   name_ar          String
+//   name_en          String
+//   productId        String
+//   product          Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+//   type             DiscountType
+//   value            Float
+//   startDate        DateTime
+//   endDate          DateTime?
+//   isActive         Boolean      @default(true)
+//   priority         Int          @default(0)
+//   minDiscountValue Int?
+//   maxDiscountValue Int?
+//   createdAt        DateTime     @default(now())
+//   updatedAt        DateTime     @default(now()) @updatedAt
+
+//   @@index([productId])
+//   @@index([startDate, endDate])
+//   @@index([isActive])
+//   @@index([priority])
+// }
+
 model ProductDiscount {
   id               String       @id @default(cuid())
   name_ar          String
   name_en          String
-  productId        String
-  product          Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
   type             DiscountType
   value            Float
   startDate        DateTime
   endDate          DateTime?
   isActive         Boolean      @default(true)
   priority         Int          @default(0)
-  minDiscountValue Int?
-  maxDiscountValue Int?
+  minDiscountValue Float?
+  maxDiscountValue Float?
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @default(now()) @updatedAt
 
-  @@index([productId])
+  // Many-to-many relation with products
+  products ProductDiscountRelation[]
+
   @@index([startDate, endDate])
   @@index([isActive])
   @@index([priority])
+  @@index([type])
+}
+
+// Junction table for many-to-many relation
+model ProductDiscountRelation {
+  id         String   @id @default(cuid())
+  productId  String
+  discountId String
+  createdAt  DateTime @default(now())
+
+  product  Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  discount ProductDiscount @relation(fields: [discountId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, discountId])
+  @@index([productId])
+  @@index([discountId])
 }
 
 /////////////////////////

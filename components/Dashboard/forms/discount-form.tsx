@@ -1,5 +1,5 @@
 'use client';
-import { url_segment } from '@/app/[locale]/dashboard/(products-management)/brands/page';
+import { url_segment } from '@/app/[locale]/dashboard/(products-management)/discounts/page';
 import LoaderInstElement from '@/components/shard/loaders/loader-inst-element';
 import { Form } from '@/components/ui-custom/custom-form';
 import { config_env, currenciesData } from '@/configs/general';
@@ -13,7 +13,7 @@ import { SectionConfig } from '@/lib/create-forms/types-create-forms';
 import { formatMoney } from '@/lib/format-money';
 import { cn, msg } from '@/lib/utils';
 import { createDiscountAction, updateDiscountAction } from '@/server/actions/discount-actions';
-import { Discount } from '@/server/services/discount-service';
+import { FormattedDiscount } from '@/server/services/discount-service';
 import { TProduct } from '@/server/services/product-service';
 import { useGProgressBarStore } from '@/stores/global-progress-bar.store';
 import { ActionResult } from '@/types/api';
@@ -24,7 +24,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import SubmitButton from './submit-button';
 
-type TFormValues = TDiscountFormValues;
+type TFormValues = TDiscountFormValues; // & { type: DiscountType };
 
 export default function DiscountForm({
 	type = EnumFormTypes.CREATE,
@@ -32,7 +32,7 @@ export default function DiscountForm({
 	defaultValues = (response?.data as TFormValues) || defaultValuesDiscount,
 }: {
 	type?: EnumFormTypes;
-	response?: ActionResult<TFormValues>;
+	response?: ActionResult<TFormValues | FormattedDiscount>;
 	defaultValues?: TFormValues & { id?: string };
 }) {
 	const { t, locale } = useLocale();
@@ -40,6 +40,7 @@ export default function DiscountForm({
 
 	// for handling server response errors & messages
 	useServerResponse(response);
+	console.log('response?.data', response);
 
 	const form = useForm<TFormValues>({
 		resolver: zodResolver(formSchemaDiscount),
@@ -73,7 +74,7 @@ export default function DiscountForm({
 							type: 'switch',
 							name: 'isActive',
 							label: 'forms.labels.is_active',
-							placeholder: 'forms.placeholders.is_active',
+							placeholder: 'forms.placeholders.is_active_discount',
 							required: true,
 							variants: 'input', // 'switch',
 						},
@@ -191,13 +192,18 @@ export default function DiscountForm({
 								const min = form.watch('minDiscountValue');
 								const max = form.watch('maxDiscountValue');
 
-								const { finalPrice, discountApplied } = calculateDiscountedPrice({
+								const { finalPrice: countedPrice, discountApplied } = calculateDiscountedPrice({
 									basePrice: product.basePrice,
 									type,
 									value,
 									minDiscountValue: min,
 									maxDiscountValue: max,
 								});
+
+								const isDirty = form.formState.isDirty;
+								console.log('isDirty', isDirty);
+								// form.formState.dirtyFields['minDiscountValue'] ||
+								// form.formState.dirtyFields['maxDiscountValue'];
 
 								return (
 									<div className='flex items-center justify-between gap-4 px-3'>
@@ -206,7 +212,9 @@ export default function DiscountForm({
 										</span>
 										<span className='text-xs text-destructive whitespace-nowrap'>{`(-${discountApplied})`}</span>
 										<span className='text-sm text-foreground whitespace-nowrap [&_svg]:size-5' dir='ltr'>
-											{value > 0 ? formatMoney(finalPrice, 'EGP') : '-'}
+											{value > 0
+												? formatMoney(!isDirty ? product.finalPrice || countedPrice : countedPrice, 'EGP')
+												: '-'}
 										</span>
 									</div>
 								);
@@ -218,13 +226,18 @@ export default function DiscountForm({
 		[discountType]
 	);
 
-	const [result, setResult] = useState<ActionResult<Discount> | null>(null);
+	const [result, setResult] = useState<ActionResult<FormattedDiscount> | null>(null);
 	const [isPending, startTransition] = useTransition();
 
 	useFormResponse<TFormValues>(result!, form, {
 		redirectUrl: `/${url_segment}`,
-		reset_on_success: (result?.data as Discount) || true,
+		reset_on_success: (result?.data as FormattedDiscount) || true,
 	});
+
+	const errors = form.formState.errors;
+	const formValues = form.getValues();
+	console.log('errors', errors);
+	console.log('formValues', formValues);
 
 	useEffect(() => {
 		setProcessing(isPending);

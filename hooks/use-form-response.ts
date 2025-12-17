@@ -32,7 +32,7 @@ export function useFormResponse<T extends FieldValues>(
 	form: UseFormReturn<T>,
 	options: {
 		redirectUrl?: string;
-		reset_on_success?: boolean | DefaultValues<T>;
+		reset_on_success?: boolean | DefaultValues<T>; // T | T[];
 		storageKey?: string;
 	}
 ) {

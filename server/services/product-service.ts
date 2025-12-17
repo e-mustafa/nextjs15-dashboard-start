@@ -9,8 +9,9 @@ import { ValidateFormAction } from '@/lib/utils.server/validate-data-server';
 import { prisma_DB } from '@/prisma/prisma.db';
 import { ActionResult, TImage } from '@/types/api';
 import { fields, formSchemaProduct, TProductFormValues } from '@/validation/product-validation';
-import { AttributeType, Prisma } from '@prisma/client';
+import { $Enums, AttributeType, DiscountType, Prisma } from '@prisma/client';
 import { revalidatePath, revalidateTag } from 'next/cache';
+import { calculateDiscountedPrice } from './discount-service';
 
 /////////////////////////
 // TYPES
@@ -18,11 +19,10 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 
 type ProductWithRelations = Prisma.ProductGetPayload<{
 	include: {
+		discounts: { include: { discount: true } };
 		translations: true;
-		specifications: { include: { properties: true } };
 		brand: { include: { translations: true; images: { include: { image: true } } } };
 		category: { include: { translations: true; images: { include: { image: true } } } };
-		// image: true;
 		seoImage: true;
 		images: { include: { image: true } };
 		variants: {
@@ -45,7 +45,8 @@ type ProductWithRelations = Prisma.ProductGetPayload<{
 		};
 		tags: { include: { tag: true } };
 		collections: { include: { collection: { include: { translations: true; images: { include: { image: true } } } } } };
-		discounts: true;
+		specifications: { include: { properties: true } };
+		// discounts: { include: { discount: true } };
 	};
 }>;
 
@@ -63,6 +64,22 @@ export interface SpecificationSection {
 	title_en: string;
 	properties: SpecificationProperty[];
 	// isEditing?: boolean;
+}
+
+export interface TDiscount {
+	id: string;
+	isActive: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+	type: $Enums.DiscountType;
+	name_ar: string;
+	name_en: string;
+	value: number;
+	startDate: Date;
+	endDate: Date | null;
+	priority: number;
+	minDiscountValue: number | null;
+	maxDiscountValue: number | null;
 }
 export interface TProduct {
 	id: string;
@@ -100,6 +117,22 @@ export interface TProduct {
 	specifications?: SpecificationSection[];
 	collections?: Array<{ id: string; name: string; image?: TImage }>;
 	tags?: Array<{ id: string; name: string }>;
+
+	discounts?: TDiscount[];
+
+	finalPrice?: number;
+	discountAmount?: number;
+	discountPercentage?: number;
+	hasDiscount?: boolean;
+	activeDiscount?: {
+		id: string;
+		type: DiscountType;
+		value: number;
+		name_ar: string;
+		name_en: string;
+		startDate: string;
+		endDate: string | null;
+	} | null;
 }
 
 interface ProductVariant {
@@ -156,14 +189,26 @@ interface ProductVariant {
 async function formatProduct(
 	product: ProductWithRelations,
 	acceptLanguage?: string,
-	forEdit: boolean = acceptLanguage == '*'
+	forEdit: boolean = acceptLanguage === '*'
 ): Promise<TProductFormValues | TProduct> {
-	const { translations, images, seoImage, brand, category, variants, collections, tags, specifications, ...rest } = product;
+	const {
+		translations,
+		images,
+		seoImage,
+		brand,
+		category,
+		variants,
+		collections,
+		tags,
+		specifications,
+		discounts, // ← العلاقة الجديدة
+		...rest
+	} = product;
 
 	const translationData = await mapTranslations(translations, {
 		accept_language: acceptLanguage,
 		fields,
-		enableFallback: !forEdit, // ← enable fallback
+		enableFallback: !forEdit,
 	});
 
 	const locale = await getCurrentLocale();
@@ -178,55 +223,54 @@ async function formatProduct(
 		brandData = {
 			id: brand.id,
 			name: (brandTranslation as { name: string }).name || '',
-			...(brand?.images?.length > 0 && {
+			...(brand?.images?.length && {
 				images: [
 					{
-						url: brand?.images?.[0]?.image.url,
-						fileId: brand?.images?.[0]?.image.fileId,
+						url: brand.images[0].image.url,
+						fileId: brand.images[0].image.fileId,
 					},
 				],
 			}),
 		};
 	}
 
-	// Format category with translation and fallback
-	let categoryData: { id: string; name: string; image?: TImage } | undefined;
+	// Format category with translation
+	let categoryData: { id: string; name: string; images?: TImage[] } | undefined;
 	if (category) {
 		const categoryTranslation = await mapTranslations(category.translations, {
 			accept_language: acceptLanguage !== '*' ? acceptLanguage : locale,
 			fields: ['name'],
-			// enableFallback: true, // ← enable fallback
 		});
 		categoryData = {
 			id: category.id,
 			name: (categoryTranslation as { name: string }).name || '',
-			...(category.images?.length > 0 && {
+			...(category.images?.length && {
 				images: [
 					{
-						url: category.images?.[0]?.image?.url,
-						fileId: category.images?.[0]?.image?.fileId,
+						url: category.images[0].image?.url || '',
+						fileId: category.images[0].image?.fileId || '',
 					},
 				],
 			}),
 		};
 	}
 
-	// Format collections with translation and fallback
+	// Format collections with translation
 	const formattedCollections = await Promise.all(
 		collections.map(async (c) => {
 			const collectionTranslation = await mapTranslations(c.collection.translations, {
 				accept_language: acceptLanguage !== '*' ? acceptLanguage : locale,
 				fields: ['name'],
-				enableFallback: true, // ← enable fallback
+				enableFallback: true,
 			});
 			return {
 				id: c.collection.id,
 				name: (collectionTranslation as { name: string }).name || '',
-				...(c.collection.images?.length > 0 && {
+				...(c.collection.images?.length && {
 					images: [
 						{
-							url: c.collection.images?.[0]?.image?.url,
-							fileId: c.collection.images?.[0]?.image?.fileId,
+							url: c.collection.images[0].image?.url || '',
+							fileId: c.collection.images[0].image?.fileId || '',
 						},
 					],
 				}),
@@ -234,7 +278,7 @@ async function formatProduct(
 		})
 	);
 
-	// Format tags (no translations)
+	// Format tags
 	const formattedTags = tags.map((t) => ({
 		id: t.tag.id,
 		name: t.tag.name || '',
@@ -244,15 +288,12 @@ async function formatProduct(
 	const formattedSpecifications: SpecificationSection[] = specifications
 		? specifications.map((spec) => ({
 				id: spec.id,
-				// Apply fallback: if one language is empty, use the other
 				title_ar: spec.title_ar || '',
 				title_en: spec.title_en || '',
 				properties: spec.properties.map((prop) => ({
 					id: prop.id,
-					// Apply fallback for keys
 					key_ar: prop.key_ar || '',
 					key_en: prop.key_en || '',
-					// Apply fallback for values
 					value_ar: prop.value_ar || '',
 					value_en: prop.value_en || '',
 				})),
@@ -267,21 +308,19 @@ async function formatProduct(
 					const attrTranslation = await mapTranslations(option.attribute.translations, {
 						accept_language: acceptLanguage,
 						fields: ['name'],
-						enableFallback: true, // ← enable fallback
+						enableFallback: true,
 					});
 					const valueTranslation = await mapTranslations(option.attributeValue.translations, {
 						accept_language: acceptLanguage,
 						fields: ['name'],
-						enableFallback: true, // ← enable fallback
+						enableFallback: true,
 					});
 
-					// Normalize attribute translation
 					const attribute: { name_ar: string; name_en: string } = {
 						name_ar: attrTranslation.name_ar ?? '',
 						name_en: attrTranslation.name_en ?? '',
 					};
 
-					// Normalize attribute value translation
 					const attributeValue: { value_ar: string; value_en: string; colorHex?: string } = {
 						value_ar: valueTranslation.name_ar ?? '',
 						value_en: valueTranslation.name_en ?? '',
@@ -315,7 +354,28 @@ async function formatProduct(
 		})
 	);
 
-	return {
+	// ✨ Calculate discount if exists
+	const activeDiscountRelation = discounts?.[0]; // ProductDiscountRelation
+	const activeDiscount = activeDiscountRelation?.discount; // ProductDiscount
+	let finalPrice = rest.basePrice;
+	let discountAmount = 0;
+	let discountPercentage = 0;
+	let hasDiscount = false;
+
+	if (activeDiscount && !forEdit) {
+		finalPrice = calculateDiscountedPrice(rest.basePrice, {
+			type: activeDiscount.type,
+			value: activeDiscount.value,
+			minDiscountValue: activeDiscount.minDiscountValue,
+			maxDiscountValue: activeDiscount.maxDiscountValue,
+		});
+
+		discountAmount = rest.basePrice - finalPrice;
+		discountPercentage = Math.round((discountAmount / rest.basePrice) * 100);
+		hasDiscount = true;
+	}
+
+	const baseProduct = {
 		...rest,
 		seoImage: seoImage ? [{ url: seoImage.url, fileId: seoImage.fileId }] : [],
 		brand: brandData,
@@ -334,182 +394,34 @@ async function formatProduct(
 				  }))
 				: [],
 	};
+
+	// If editing mode, return without discount calculations
+	if (forEdit) {
+		return baseProduct;
+	}
+
+	// Return with discount information for display
+	return {
+		...baseProduct,
+		finalPrice,
+		discountAmount,
+		discountPercentage,
+		hasDiscount,
+		// Set compareAtPrice to basePrice when discount exists
+		compareAtPrice: hasDiscount ? rest.basePrice : rest.compareAtPrice,
+		activeDiscount: hasDiscount
+			? {
+					id: activeDiscount.id,
+					type: activeDiscount.type,
+					value: activeDiscount.value,
+					name_ar: activeDiscount.name_ar,
+					name_en: activeDiscount.name_en,
+					startDate: activeDiscount.startDate.toISOString(),
+					endDate: activeDiscount.endDate?.toISOString() || null,
+			  }
+			: null,
+	};
 }
-// async function formatProduct(
-// 	product: ProductWithRelations,
-// 	acceptLanguage?: string
-// ): Promise<TProductFormValues | TProduct> {
-// 	const { translations, images, seoImage, brand, category, variants, collections, tags, specifications, ...rest } = product;
-
-// 	const translationData = await mapTranslations(translations, {
-// 		accept_language: acceptLanguage,
-// 		fields,
-// 	});
-
-// 	const locale = await getCurrentLocale();
-
-// 	// Format brand with translation
-// 	let brandData: { id: string; name: string; images?: TImage[] } | undefined;
-// 	if (brand) {
-// 		const brandTranslation = await mapTranslations(brand.translations, {
-// 			accept_language: acceptLanguage !== '*' ? acceptLanguage : locale,
-// 			fields: ['name'],
-// 		});
-// 		brandData = {
-// 			id: brand.id,
-// 			name: (brandTranslation as { name: string }).name || '',
-// 			...(brand?.images?.length > 0 && {
-// 				images: [
-// 					{
-// 						url: brand?.images?.[0]?.image.url,
-// 						fileId: brand?.images?.[0]?.image.fileId,
-// 					},
-// 				],
-// 			}),
-// 		};
-// 	}
-
-// 	// Format category with translation
-// 	let categoryData: { id: string; name: string; image?: TImage } | undefined;
-// 	if (category) {
-// 		const categoryTranslation = await mapTranslations(category.translations, {
-// 			accept_language: acceptLanguage !== '*' ? acceptLanguage : locale,
-// 			fields: ['name'],
-// 		});
-// 		categoryData = {
-// 			id: category.id,
-// 			name: (categoryTranslation as { name: string }).name || '',
-// 			...(category.images?.length > 0 && {
-// 				images: [
-// 					{
-// 						url: category.images?.[0]?.image?.url,
-// 						fileId: category.images?.[0]?.image?.fileId,
-// 					},
-// 				],
-// 			}),
-// 		};
-// 	}
-
-// 	// Format collections with translation
-// 	const formattedCollections = await Promise.all(
-// 		collections.map(async (c) => {
-// 			const collectionTranslation = await mapTranslations(c.collection.translations, {
-// 				accept_language: acceptLanguage !== '*' ? acceptLanguage : locale,
-// 				fields: ['name'],
-// 			});
-// 			return {
-// 				id: c.collection.id,
-// 				name: (collectionTranslation as { name: string }).name || '',
-
-// 				...(c.collection.images?.length > 0 && {
-// 					images: [
-// 						{
-// 							url: c.collection.images?.[0]?.image?.url,
-// 							fileId: c.collection.images?.[0]?.image?.fileId,
-// 						},
-// 					],
-// 				}),
-// 			};
-// 		})
-// 	);
-
-// 	// Format tags (no translations)
-// 	const formattedTags = tags.map((t) => ({
-// 		id: t.tag.id,
-// 		name: t.tag.name || '',
-// 	}));
-
-// 	// Format specifications (no translations needed - already bilingual)
-// 	const formattedSpecifications: SpecificationSection[] = specifications
-// 		? specifications.map((spec) => ({
-// 				id: spec.id,
-// 				title_ar: spec.title_ar,
-// 				title_en: spec.title_en,
-// 				properties: spec.properties.map((prop) => ({
-// 					id: prop.id,
-// 					key_ar: prop.key_ar,
-// 					key_en: prop.key_en,
-// 					value_ar: prop.value_ar,
-// 					value_en: prop.value_en,
-// 				})),
-// 		  }))
-// 		: [];
-
-// 	// Format variants with translations
-// 	const formattedVariants = await Promise.all(
-// 		variants.map(async (variant) => {
-// 			const formattedOptions = await Promise.all(
-// 				variant.options.map(async (option) => {
-// 					const attrTranslation = await mapTranslations(option.attribute.translations, {
-// 						accept_language: acceptLanguage,
-// 						fields: ['name'],
-// 					});
-// 					const valueTranslation = await mapTranslations(option.attributeValue.translations, {
-// 						accept_language: acceptLanguage,
-// 						fields: ['name'],
-// 					});
-
-// 					// Normalize attribute translation to always contain name_ar and name_en
-// 					const attribute: { name_ar: string; name_en: string } = {
-// 						name_ar: attrTranslation.name_ar ?? attrTranslation.name ?? '',
-// 						name_en: attrTranslation.name_en ?? attrTranslation.name ?? '',
-// 					};
-
-// 					// Normalize attribute value translation to always contain value_ar and value_en
-// 					const attributeValue: { value_ar: string; value_en: string; colorHex?: string } = {
-// 						value_ar: valueTranslation.name_ar ?? valueTranslation.name ?? '',
-// 						value_en: valueTranslation.name_en ?? valueTranslation.name ?? '',
-// 						colorHex: option.attributeValue.colorHex ?? undefined,
-// 					};
-
-// 					return {
-// 						attributeId: option.attributeId,
-// 						attributeValueId: option.attributeValueId,
-// 						attribute,
-// 						attributeValue,
-// 					};
-// 				})
-// 			);
-
-// 			return {
-// 				id: variant.id,
-// 				sku: variant.sku,
-// 				price: variant.price,
-// 				compareAtPrice: variant.compareAtPrice,
-// 				cost: variant.cost,
-// 				stockQuantity: variant.stockQuantity,
-// 				isActive: variant.isActive,
-// 				imageId: variant.imageId,
-// 				images: variant.images?.map((img) => ({
-// 					url: img.image?.url ?? '',
-// 					fileId: img.image?.fileId ?? '',
-// 				})),
-// 				options: formattedOptions,
-// 			};
-// 		})
-// 	);
-
-// 	return {
-// 		...rest,
-// 		seoImage: seoImage ? [{ url: seoImage.url, fileId: seoImage.fileId }] : [],
-// 		brand: brandData,
-// 		category: categoryData,
-// 		collections: formattedCollections,
-// 		tags: formattedTags,
-// 		variants: formattedVariants,
-// 		specifications: formattedSpecifications,
-// 		...translationData,
-// 		// ensure required `name` exists for TProduct
-// 		name: (translationData as { name?: string }).name || '',
-// 		images:
-// 			images?.length > 0
-// 				? images.map((img) => ({
-// 						url: img.image?.url ?? '',
-// 						fileId: img.image?.fileId ?? '',
-// 				  }))
-// 				: [],
-// 	};
-// }
 
 /**
  * Build where clause for product filters
@@ -773,14 +685,28 @@ export async function getAllProducts(
 				collections: {
 					include: { collection: { include: { translations: true, images: { include: { image: true } } } } },
 				},
-				specifications: { include: { properties: { orderBy: { sortOrder: 'asc' } } }, orderBy: { sortOrder: 'asc' } },
+				specifications: {
+					include: { properties: { orderBy: { sortOrder: 'asc' } } },
+					orderBy: { sortOrder: 'asc' },
+				},
+				// ✅ تحديث العلاقة مع الخصومات (many-to-many)
 				discounts: {
 					where: {
-						isActive: true,
-						startDate: { lte: new Date() },
-						OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
+						discount: {
+							isActive: true,
+							startDate: { lte: new Date() },
+							OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
+						},
 					},
-					orderBy: { priority: 'desc' },
+					include: {
+						discount: true,
+					},
+					orderBy: {
+						discount: {
+							priority: 'desc',
+						},
+					},
+					take: 1,
 				},
 			},
 			orderBy,
@@ -804,72 +730,79 @@ export async function getAllProducts(
 /**
  * 🔹 Get Single Product by ID, SKU, or Slug (Unified Search)
  */
-export async function getProduct(
-	identifier: string,
-	locale?: TLocalesData
-): Promise<ActionResult<TProduct | TProductFormValues>> {
+export async function getProduct(identifier: string, locale?: TLocalesData) {
 	if (!identifier) throw new AppError('api.errors.invalid_identifier', 404);
 
 	let product: ProductWithRelations | null = null;
 
-	// Find product by ID, SKU, or Slug (check both languages)
-	if (!product) {
-		product = await prisma_DB.product.findFirst({
-			where: {
-				OR: [
-					{ id: identifier },
-					{ sku: identifier },
-					{
-						translations: {
-							some: {
-								slug: identifier,
-							},
+	product = await prisma_DB.product.findFirst({
+		where: {
+			OR: [
+				{ id: identifier },
+				{ sku: identifier },
+				{
+					translations: {
+						some: {
+							slug: identifier,
 						},
 					},
-				],
+				},
+			],
+		},
+		include: {
+			translations: true,
+			brand: { include: { translations: true, images: { include: { image: true } } } },
+			category: { include: { translations: true, images: { include: { image: true } } } },
+			seoImage: true,
+			images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
+			variants: {
+				include: {
+					image: true,
+					images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
+					options: {
+						include: {
+							attribute: { include: { translations: true } },
+							attributeValue: { include: { translations: true } },
+						},
+					},
+				},
+				orderBy: { sortOrder: 'asc' },
 			},
-			include: {
-				translations: true,
-				brand: { include: { translations: true, images: { include: { image: true } } } },
-				category: { include: { translations: true, images: { include: { image: true } } } },
-				// image: true,
-				seoImage: true,
-				images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
-				variants: {
-					include: {
-						image: true,
-						images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
-						options: {
-							include: {
-								attribute: { include: { translations: true } },
-								attributeValue: { include: { translations: true } },
-							},
-						},
-					},
-					orderBy: { sortOrder: 'asc' },
+			attributes: {
+				include: {
+					attribute: { include: { translations: true } },
+					attributeValue: { include: { translations: true } },
 				},
-				attributes: {
-					include: {
-						attribute: { include: { translations: true } },
-						attributeValue: { include: { translations: true } },
-					},
-				},
-				tags: { include: { tag: true } },
-				collections: {
-					include: { collection: { include: { translations: true, images: { include: { image: true } } } } },
-				},
-				specifications: { include: { properties: { orderBy: { sortOrder: 'asc' } } }, orderBy: { sortOrder: 'asc' } },
-				discounts: {
-					where: {
+			},
+			tags: { include: { tag: true } },
+			collections: {
+				include: { collection: { include: { translations: true, images: { include: { image: true } } } } },
+			},
+			specifications: {
+				include: { properties: { orderBy: { sortOrder: 'asc' } } },
+				orderBy: { sortOrder: 'asc' },
+			},
+			// ✅ تحديث العلاقة مع الخصومات
+			discounts: {
+				where: {
+					discount: {
 						isActive: true,
 						startDate: { lte: new Date() },
 						OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
 					},
-					orderBy: { priority: 'desc' },
 				},
+				include: {
+					discount: true,
+				},
+				orderBy: {
+					discount: {
+						priority: 'desc',
+					},
+				},
+				take: 1,
 			},
-		});
-	}
+		},
+	});
 
 	if (!product) throw new AppError('api.errors.not_found', 404);
 
@@ -881,6 +814,84 @@ export async function getProduct(
 		data: data as TProduct | TProductFormValues,
 	};
 }
+
+// export async function getProduct(
+// 	identifier: string,
+// 	locale?: TLocalesData
+// ): Promise<ActionResult<TProduct | TProductFormValues>> {
+// 	if (!identifier) throw new AppError('api.errors.invalid_identifier', 404);
+
+// 	let product: ProductWithRelations | null = null;
+
+// 	// Find product by ID, SKU, or Slug (check both languages)
+// 	if (!product) {
+// 		product = await prisma_DB.product.findFirst({
+// 			where: {
+// 				OR: [
+// 					{ id: identifier },
+// 					{ sku: identifier },
+// 					{
+// 						translations: {
+// 							some: {
+// 								slug: identifier,
+// 							},
+// 						},
+// 					},
+// 				],
+// 			},
+// 			include: {
+// 				translations: true,
+// 				brand: { include: { translations: true, images: { include: { image: true } } } },
+// 				category: { include: { translations: true, images: { include: { image: true } } } },
+// 				// image: true,
+// 				seoImage: true,
+// 				images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
+// 				variants: {
+// 					include: {
+// 						image: true,
+// 						images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
+// 						options: {
+// 							include: {
+// 								attribute: { include: { translations: true } },
+// 								attributeValue: { include: { translations: true } },
+// 							},
+// 						},
+// 					},
+// 					orderBy: { sortOrder: 'asc' },
+// 				},
+// 				attributes: {
+// 					include: {
+// 						attribute: { include: { translations: true } },
+// 						attributeValue: { include: { translations: true } },
+// 					},
+// 				},
+// 				tags: { include: { tag: true } },
+// 				collections: {
+// 					include: { collection: { include: { translations: true, images: { include: { image: true } } } } },
+// 				},
+// 				specifications: { include: { properties: { orderBy: { sortOrder: 'asc' } } }, orderBy: { sortOrder: 'asc' } },
+// 				discounts: {
+// 					where: {
+// 						isActive: true,
+// 						startDate: { lte: new Date() },
+// 						OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
+// 					},
+// 					orderBy: { priority: 'desc' },
+// 				},
+// 			},
+// 		});
+// 	}
+
+// 	if (!product) throw new AppError('api.errors.not_found', 404);
+
+// 	const data = await formatProduct(product, locale);
+
+// 	return {
+// 		success: true,
+// 		status: 200,
+// 		data: data as TProduct | TProductFormValues,
+// 	};
+// }
 
 /**
  * 🟢 Create Product
@@ -1144,8 +1155,60 @@ export async function createProduct(data: TProductFormValues): Promise<ActionRes
 		return created;
 	});
 
+	// Fetch the complete product with proper discount relations
+	const completeProduct = await prisma_DB.product.findUnique({
+		where: { id: product.id },
+		include: {
+			translations: true,
+			brand: { include: { translations: true, images: { include: { image: true } } } },
+			category: { include: { translations: true, images: { include: { image: true } } } },
+			seoImage: true,
+			images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
+			variants: {
+				include: {
+					image: true,
+					images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
+					options: {
+						include: {
+							attribute: { include: { translations: true } },
+							attributeValue: { include: { translations: true } },
+						},
+					},
+				},
+				orderBy: { sortOrder: 'asc' },
+			},
+			attributes: {
+				include: {
+					attribute: { include: { translations: true } },
+					attributeValue: { include: { translations: true } },
+				},
+			},
+			tags: { include: { tag: true } },
+			collections: { include: { collection: { include: { translations: true, images: { include: { image: true } } } } } },
+			specifications: { include: { properties: { orderBy: { sortOrder: 'asc' } } }, orderBy: { sortOrder: 'asc' } },
+			discounts: {
+				where: {
+					discount: {
+						isActive: true,
+						startDate: { lte: new Date() },
+						OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
+					},
+				},
+				include: {
+					discount: true,
+				},
+				orderBy: {
+					discount: {
+						priority: 'desc',
+					},
+				},
+				take: 1,
+			},
+		},
+	});
+
 	revalidatePath('/dashboard/products');
-	const formattedData = await formatProduct(product as ProductWithRelations);
+	const formattedData = await formatProduct(completeProduct as ProductWithRelations);
 	logger.info(`✅ Product created: ${product.id}`, { context: 'ProductService' });
 
 	return {
@@ -1482,9 +1545,8 @@ export async function updateProduct(id: string, data: TProductFormValues): Promi
 		where: { id },
 		include: {
 			translations: true,
-			brand: { include: { translations: true, image: true } },
-			category: { include: { translations: true, image: true } },
-			image: true,
+			brand: { include: { translations: true, images: { include: { image: true } } } },
+			category: { include: { translations: true, images: { include: { image: true } } } },
 			seoImage: true,
 			images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
 			variants: {
@@ -1507,9 +1569,20 @@ export async function updateProduct(id: string, data: TProductFormValues): Promi
 				},
 			},
 			tags: { include: { tag: true } },
-			collections: { include: { collection: { include: { translations: true, image: true } } } },
+			collections: { include: { collection: { include: { translations: true, images: { include: { image: true } } } } } },
 			specifications: { include: { properties: { orderBy: { sortOrder: 'asc' } } }, orderBy: { sortOrder: 'asc' } },
-			discounts: true,
+			discounts: {
+				where: {
+					discount: {
+						isActive: true,
+						startDate: { lte: new Date() },
+						OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
+					},
+				},
+				include: { discount: true },
+				orderBy: { discount: { priority: 'desc' } },
+				take: 1,
+			},
 		},
 	});
 
@@ -1719,13 +1792,27 @@ export async function getFeaturedProducts(limit = 10, locale?: TLocalesData): Pr
 			tags: { include: { tag: true } },
 			collections: { include: { collection: { include: { translations: true, images: { include: { image: true } } } } } },
 			specifications: { include: { properties: { orderBy: { sortOrder: 'asc' } } }, orderBy: { sortOrder: 'asc' } },
+			// discounts: {
+			// 	where: {
+			// 		discount: {
+			// 			isActive: true,
+			// 			startDate: { lte: new Date() },
+			// 			OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
+			// 		},
+			// 	},
+			// 	orderBy: { discount: { priority: 'desc' } },
+			// },
 			discounts: {
 				where: {
-					isActive: true,
-					startDate: { lte: new Date() },
-					OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
+					discount: {
+						isActive: true,
+						startDate: { lte: new Date() },
+						OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
+					},
 				},
-				orderBy: { priority: 'desc' },
+				include: { discount: true },
+				orderBy: { discount: { priority: 'desc' } },
+				take: 1,
 			},
 		},
 		orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
@@ -1791,13 +1878,28 @@ export async function getRelatedProducts(
 			tags: { include: { tag: true } },
 			collections: { include: { collection: { include: { translations: true, images: { include: { image: true } } } } } },
 			specifications: { include: { properties: { orderBy: { sortOrder: 'asc' } } }, orderBy: { sortOrder: 'asc' } },
+			// discounts: {
+			// 	where: {
+			// 		discount: {
+			// 			isActive: true,
+			// 			startDate: { lte: new Date() },
+			// 			OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
+			// 		},
+			// 	},
+			// 	orderBy: { discount: { priority: 'desc' } },
+			// },
+
 			discounts: {
 				where: {
-					isActive: true,
-					startDate: { lte: new Date() },
-					OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
+					discount: {
+						isActive: true,
+						startDate: { lte: new Date() },
+						OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
+					},
 				},
-				orderBy: { priority: 'desc' },
+				include: { discount: true },
+				orderBy: { discount: { priority: 'desc' } },
+				take: 1,
 			},
 		},
 	});

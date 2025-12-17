@@ -30,14 +30,14 @@ export default async function UpdateDiscountsPage({ params }: TDRouteProps) {
 
 	return (
 		<div className='page-component flex-col'>
-			<BreadcrumbDashboard lastPath={t('breadcrumbs.edit_brand')} />
+			<BreadcrumbDashboard lastPath={t('breadcrumbs.edit_discount')} />
 			<div className='flex gap-2 items-center'>
 				<Button asChild variant='ghost' size='icon'>
 					<Link href={`/${url_segment}`}>
 						<ArrowRightIcon className='size-6 text-muted-foreground' />
 					</Link>
 				</Button>
-				{t('common.sections.edit_brand') + ' : '}
+				{t('common.sections.edit_discount') + ' : '}
 				<span className='capitalize font-semibold'>{(result.data as TDiscountFormValues)?.[`name_${locale}`]}</span>
 			</div>
 

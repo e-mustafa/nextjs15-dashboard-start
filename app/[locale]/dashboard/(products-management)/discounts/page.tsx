@@ -4,7 +4,7 @@ import BreadcrumbDashboard from '@/components/Dashboard/breadcrumb-dashboard';
 import LoaderTableSkeleton from '@/components/shard/loaders/loader-table-skeleton';
 import { Button } from '@/components/ui-custom/custom-button';
 import { getDataInPage } from '@/lib/utils.server/api.server';
-import { Discount } from '@/server/services/discount-service';
+import { FormattedDiscount } from '@/server/services/discount-service';
 import { FilePlusIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -21,7 +21,7 @@ const i18nNamespaces = ['dashboard'];
 
 export default async function DiscountsPage({ params }: TLayoutProps) {
 	const { locale } = await params;
-	const result = await getDataInPage<Discount>({ url_segment, locale, tags });
+	const result = await getDataInPage<FormattedDiscount>({ url_segment, locale, tags });
 
 	const { t } = await initTranslations(i18nNamespaces, locale);
 
