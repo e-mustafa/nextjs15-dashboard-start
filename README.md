@@ -1,36 +1,168 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📊 E-commerce Dashboard – Next.js 15 (Enterprise Starter)
 
-## Getting Started
+A scalable, production-ready **admin dashboard system** built with Next.js App Router, designed to handle real-world application requirements such as authentication, role-based access, internationalization, and complex data management.
 
-First, run the development server:
+This project demonstrates how to structure and build **enterprise-level frontend systems** with modern tools and clean architecture.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Live Demo
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Under devlopment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🧩 Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+- **Framework:** Next.js (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS + shadcn/ui
+- **Authentication:** NextAuth (JWT + session handling)
+- **Database:** Prisma ORM
+- **State Management:** Zustand + React Context
+- **Forms & Validation:** React Hook Form + Zod
+- **Tables:** TanStack Table
+- **Drag & Drop:** @dnd-kit
+- **Image Handling:** ImageKit
+- **i18n:** react-i18next + next-i18n-router
+- **Logging:** Winston + Sentry
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## ✨ Features
 
-## Deploy on Vercel
+### 🔐 Authentication & Authorization
+- Secure authentication using **NextAuth**
+- Role-based access control (Admin / User)
+- Protected routes via middleware
+- Automatic redirect flows based on user state
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 🌍 Internationalization (i18n)
+- Multi-language support (e.g., English / Arabic)
+- Locale-based routing (`/en`, `/ar`)
+- Automatic language detection
+- RTL / LTR support
+
+---
+
+### 📊 Dashboard System
+- Admin panel for managing application data
+- Structured modules for scalability
+- Reusable UI components across the system
+
+---
+
+### 📋 Data Tables
+- Fully customizable tables using **TanStack Table**
+- Sorting, filtering, and pagination support
+- Typed column definitions with TypeScript
+
+---
+
+### 🧠 Forms & Validation
+- Dynamic and reusable form system
+- Schema-based validation using **Zod**
+- Integrated with React Hook Form for performance
+
+---
+
+### 🧩 Drag & Drop
+- Interactive drag-and-drop interfaces using **@dnd-kit**
+- Reorderable lists and flexible UI layouts
+
+---
+
+### 🖼️ Image Management
+- Upload and manage images via **ImageKit**
+- Drag-and-drop upload support
+- Optimized image delivery
+
+---
+
+### 📝 Rich Text Editing
+- Advanced editor powered by **Lexical**
+- Supports formatting, lists, and custom plugins
+
+---
+
+### 🗂️ State Management
+- Lightweight global state using **Zustand**
+- Context API for UI-level state (theme, layout)
+
+---
+
+### 📋 Logging & Monitoring
+- Structured logging using **Winston**
+- Error tracking with **Sentry**
+- Environment-based configuration
+
+---
+
+## 🧠 Architecture & Decisions
+
+- **App Router** for modern routing and server/client separation
+- **Server-first approach** using React Server Components
+- **Modular architecture** for scalability and maintainability
+- **Separation of concerns** between UI, logic, and data layers
+- **Reusable components and hooks** across the application
+
+---
+
+## 📁 Project Structure
+src/
+├── app/ # Routes, layouts, and server components
+├── components/ # Reusable UI components
+├── configs/ # App configurations
+├── contexts/ # React Context providers
+├── hooks/ # Custom hooks
+├── lib/ # Utilities and helpers
+├── server/ # Server actions and services
+├── stores/ # Zustand state management
+├── validation/ # Zod schemas
+├── prisma/ # Database schema and migrations
+├── locales/ # Translation files
+└── middleware.ts # Auth + i18n middleware
+
+
+---
+
+## ⚙️ Middleware Logic
+
+The middleware handles:
+
+- Locale routing (i18n)
+- Authentication protection
+- Role-based redirection
+
+
+
+---
+
+## 🧪 Code Quality & Best Practices
+
+- Strong TypeScript usage across the project
+- Clean and modular folder structure
+- Reusable and scalable components
+- Separation between UI, logic, and data layers
+- Production-ready architecture
+
+---
+
+## 🎯 What This Project Demonstrates
+
+- Building enterprise-level dashboard systems
+- Implementing authentication and RBAC
+- Structuring scalable Next.js applications
+- Managing complex UI interactions and state
+- Integrating multiple systems into a cohesive architecture
+
+---
+
+## 👨‍💻 Author
+
+Mustafa Abutabl  
+Frontend Engineer (React / Next.js)
+
+GitHub: https://github.com/e-mustafa
