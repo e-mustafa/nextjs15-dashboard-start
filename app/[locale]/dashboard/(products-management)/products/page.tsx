@@ -32,7 +32,7 @@ export default async function ProductsPage({ params }: TLayoutProps) {
 					{t('common.sections.list')} {t('common.sections.products')}
 				</h1>
 
-				<Button asChild className='ms-auto'>
+				<Button asChild className='ms-auto' variant='lagoon'>
 					<Link href={`/${url_segment}/create`}>
 						<FilePlusIcon />
 						{t('common.sections.create_product')}

@@ -1202,7 +1202,7 @@ export function TableComponent<T>({
 				{/* Header */}
 				<TableHeader>
 					{table.getHeaderGroups().map((headerGroup) => (
-						<TableRow key={headerGroup.id} className='bg-accent/70 hover:bg-accent/70'>
+						<TableRow key={headerGroup.id} className='bg-primary/10 hover:bg-primary/10'>
 							{getOrderedHeaders(headerGroup)
 								.filter((h) => shouldShowColumn(h.column.id, visibleCols, collapsedCols, columnVisibility))
 								.map((h) => (

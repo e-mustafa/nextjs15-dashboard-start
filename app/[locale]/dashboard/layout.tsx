@@ -18,8 +18,8 @@ export default async function DashboardLayout({ children, params }: TLayoutProps
 		<TranslationsProvider namespaces={i18nNamespaces} locale={locale} resources={resources}>
 			<SidebarProvider>
 				<AppSidebar />
-				<SidebarInset className='bg-sidebar overflow-hidden'>
-					<header className='relative bg-sidebar min-h-[72px] flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12'>
+				<SidebarInset className='bg-transparent overflow-hidden'>
+					<header className='sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border/60 bg-background/70 px-4 backdrop-blur-xl min-h-[72px] flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12'>
 						<div className='flex items-center gap-2 py-2 px-4'>
 							<SidebarTrigger className='-ms-1 size-10 ' />
 							<Separator orientation='vertical' className='me-2 h-4' />
@@ -30,7 +30,7 @@ export default async function DashboardLayout({ children, params }: TLayoutProps
 
 					{/* <main className='bg-background rounded-t-2xl sm:ms-3 py-4 px-1 sm:px-4 flex flex-1 flex-col gap-4 min-[901px]:rounded-ss-xlxxx p-4 lg:ps-[1.875rem] lg:pe-12 lg:py-6 min-[901px]:rtl:shadow-[2px_-2px_4.3px_0_rgba(0,0,0,0.1)] min-[901px]:ltr:shadow-[-2px_-2px_4.3px_0_rgba(0,0,0,0.1)] basis-full'></main> */}
 
-					<main className='bg-background rounded-t-2xlxxx sm:ms-3 flex flex-1 flex-col gap-4 shadow-lg basis-full'>
+					<main className='rounded-t-2xlxxx sm:ms-3 flex flex-1 flex-col gap-4 shadow-lg basis-full'>
 						<ScrollArea className='max-h-[calc(100dvh-72px)] overflow-y-auto py-4xxx px-1 sm:px-4 p-4xxx md:px-6'>
 							{children}
 						</ScrollArea>
