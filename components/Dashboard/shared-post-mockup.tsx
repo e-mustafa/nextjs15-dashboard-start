@@ -35,7 +35,7 @@ export default function ShardPostMockupCard({ data, image }: { data?: ShardPostM
 					<CardContent className='flex flex-col lg:flex-row px-0 overflow-hidden'>
 						<div className='w-full h-auto aspect-auto object-contain lg:w-[25%] lg:aspect-square lg:object-cover'>
 							<Image
-								src={image || '/assets/images/brand/icon.png'}
+								src={image || '/assets/images/brand/icon.webp'}
 								alt='website preview'
 								width={300}
 								height={100}
@@ -65,7 +65,7 @@ export default function ShardPostMockupCard({ data, image }: { data?: ShardPostM
 									{config_env.domain || 'www.example.com'}
 								</a>
 
-								<Image src='/assets/images/brand/icon.png' alt='website logo' width={32} height={32} priority />
+								<Image src='/assets/images/brand/icon.webp' alt='website logo' width={32} height={32} priority />
 							</div>
 						</div>
 					</CardContent>

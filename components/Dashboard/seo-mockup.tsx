@@ -76,7 +76,7 @@ export default function SEOMockupCard({ data, image }: { data?: SEOMockupCardDat
 				<CardContent className='space-y-2 px-0'>
 					<div className='flex items-center gap-2 mb-4'>
 						<Image
-							src={image || '/assets/images/brand/icon.png'}
+							src={image || '/assets/images/brand/icon.webp'}
 							alt='website logo'
 							height={46}
 							width={46}

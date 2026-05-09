@@ -1,7 +1,8 @@
 import { clsx, type ClassValue } from 'clsx';
 import { TFunction } from 'i18next';
+import { DateObject } from 'react-multi-date-picker';
 import { twMerge } from 'tailwind-merge';
-import z, { ZodTypeAny } from 'zod/v3';
+import z, { ZodTypeAny } from 'zod';
 // import z, { ZodSchema, ZodTypeAny } from 'zod';
 
 export function cn(...inputs: ClassValue[]) {
@@ -154,3 +155,22 @@ export function getBackLink(pathname: string): string {
 	parts.pop(); // remove the last part
 	return '/' + parts.join('/');
 }
+
+/**
+ * Generate unique ID
+ */
+export const generateId = (prefix?: string): string => {
+	try {
+		if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+			const uuid = crypto.randomUUID();
+			return prefix ? `${prefix}-${uuid}` : uuid;
+		}
+	} catch (e) {
+		// Fallback
+	}
+	const randomPart = Math.random().toString(36).substr(2, 9);
+	return prefix ? `${prefix}-${randomPart}` : `${Date.now()}-${randomPart}`;
+};
+
+// export const formDate = (date: string, format: string = 'YYYY MMM DD') => dayjs(new Date(date)).format(format);
+export const formDate = (date: string, format: string = 'YYYY MMM DD') => new DateObject(date).format(format);

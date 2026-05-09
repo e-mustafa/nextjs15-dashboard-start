@@ -10,8 +10,8 @@ export default function SidebarLogo() {
 			<Link href='/' data-open={open} className='w-full flex items-center justify-center'>
 				{open ? (
 					<Image
-						src='/assets/images/sllm-identity/sllm-logo.svg'
-						alt='sllm logo'
+						src='/assets/images/brand/icon.webp'
+						alt='ellm logo'
 						className='h-10 starting:scale-0 scale-100 transition-all duration-300 w-auto'
 						width={104}
 						height={36}
@@ -19,8 +19,8 @@ export default function SidebarLogo() {
 					/>
 				) : (
 					<Image
-						src='/assets/images/sllm-identity/icon.svg'
-						alt='sllm logo'
+						src='/assets/images/brand/icon.webp'
+						alt='ellm logo'
 						className='h-10 starting:scale-0 scale-100 transition-all duration-300'
 						width={36}
 						height={36}

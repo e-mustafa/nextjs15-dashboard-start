@@ -1,7 +1,7 @@
 import { isDEV } from '@/configs/general';
 import { msg } from '@/lib/utils';
 import { ActionResult } from '@/types/api';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+// import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 import { logger } from '../logs/logger';
 import { translateServerMessage } from '../utils.server/translate-logs.server';
 
