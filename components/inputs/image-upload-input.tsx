@@ -204,7 +204,7 @@ export default function ImageUploadInput({
 						<Button
 							type='button'
 							onClick={() => setOpen(true)}
-							variant='ghost'
+							variant='outline'
 							className='bg-accent/10 text-muted-foreground h-16'
 						>
 							<div className='flex items-center gap-2'>

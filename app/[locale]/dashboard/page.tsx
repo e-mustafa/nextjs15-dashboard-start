@@ -7,7 +7,7 @@ import { TLayoutProps } from '../layout';
 const i18nNamespaces = ['dashboard'];
 
 export default async function DashboardPage({ children, params }: TLayoutProps) {
-	const products = await prisma_DB.product.findMany();
+	// const products = await prisma_DB.product.findMany();
 	// console.log('Products:', products);
 
 	const { locale } = await params;

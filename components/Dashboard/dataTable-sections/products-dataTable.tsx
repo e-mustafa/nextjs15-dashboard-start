@@ -133,7 +133,7 @@ export default function ProductsDataTable({ result, locale }: { result: ActionRe
 		{ accessorKey: 'shortDescription', header: 'columns.description' },
 
 		{ accessorKey: 'basePrice', header: 'columns.price' },
-		{ accessorKey: 'compareAtPrice', header: 'columns.compareAtPrice' },
+		// { accessorKey: 'compareAtPrice', header: 'columns.compareAtPrice' },
 		{
 			accessorKey: 'finalPrice',
 			header: 'columns.finalPrice',

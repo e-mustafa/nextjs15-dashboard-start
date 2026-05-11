@@ -389,7 +389,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 			<Popover open={open} onOpenChange={setOpen}>
 				<PopoverTrigger asChild>
 					<Button
-						variant='outline'
+						variant='input'
 						role='combobox'
 						aria-expanded={open}
 						disabled={disabled}
