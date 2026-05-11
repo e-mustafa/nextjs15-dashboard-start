@@ -23,7 +23,7 @@ let user: { id: string; name: string } | null = null;
 import getCurrentLocale from '@/lib/utils.server/getCurrentLocale.server';
 import { TImage } from '@/types/api';
 
-// ✅ Type للخصم مع العلاقات (many-to-many)
+// ✅ Type discount with relations
 type DiscountWithRelations = Prisma.ProductDiscountGetPayload<{
 	include: {
 		products: {
@@ -37,7 +37,7 @@ type DiscountWithRelations = Prisma.ProductDiscountGetPayload<{
 	};
 }>;
 
-// ✅ Type للمنتج المرتبط بالخصم
+// ✅ Type product for discount
 export interface DiscountProduct {
 	id: string;
 	name: string;
@@ -48,7 +48,7 @@ export interface DiscountProduct {
 	images?: TImage[];
 }
 
-// ✅ Type للخصم المنسق (بعد formatDiscount)
+// ✅ Type formatted discount
 export interface FormattedDiscount {
 	id: string;
 	name?: string;
@@ -68,7 +68,7 @@ export interface FormattedDiscount {
 	totalProducts: number;
 }
 
-// ✅ Type للمنتج مع معلومات الخصم (للعرض في Frontend)
+// ✅ Type product with discount info for frontend
 export interface ProductWithDiscount {
 	id: string;
 	name: string;
@@ -83,7 +83,7 @@ export interface ProductWithDiscount {
 	activeDiscount: ActiveDiscountInfo | null;
 }
 
-// ✅ Type لمعلومات الخصم النشط
+// ✅ Type active discount info
 export interface ActiveDiscountInfo {
 	id: string;
 	type: DiscountType;
@@ -95,7 +95,7 @@ export interface ActiveDiscountInfo {
 	priority: number;
 }
 
-// ✅ Type لـ Discount Calculation
+// ✅ Type Discount Calculation
 export interface DiscountCalculation {
 	basePrice: number;
 	finalPrice: number;
@@ -176,7 +176,7 @@ async function formatDiscountProduct(
 	discountValue: number,
 	minDiscountValue: number | null,
 	maxDiscountValue: number | null,
-	acceptLanguage?: string
+	acceptLanguage?: string,
 ): Promise<DiscountProduct> {
 	const { product } = productRelation;
 	const locale = await getCurrentLocale();
@@ -212,7 +212,7 @@ async function formatDiscountProduct(
 			? {
 					url: product.images[0].image?.url || '',
 					fileId: product.images[0].image?.fileId || '',
-			  }
+				}
 			: undefined;
 
 	return {
@@ -239,9 +239,9 @@ async function formatDiscount(discount: DiscountWithRelations, acceptLanguage?: 
 				discount.value,
 				discount.minDiscountValue,
 				discount.maxDiscountValue,
-				acceptLanguage
-			)
-		)
+				acceptLanguage,
+			),
+		),
 	);
 
 	return {
@@ -272,7 +272,7 @@ export async function getAllDiscounts(
 		isActive?: boolean;
 		type?: DiscountType;
 	},
-	locale?: TLocalesData
+	locale?: TLocalesData,
 ): Promise<ActionResult<FormattedDiscount>> {
 	// try {
 	const cookiesStore = await cookies();
@@ -437,7 +437,7 @@ export async function calculateDiscountedPrice(
 		value: number;
 		minDiscountValue?: number | null;
 		maxDiscountValue?: number | null;
-	}
+	},
 ): Promise<number> {
 	if (basePrice <= 0 || discount.value <= 0) return basePrice;
 
@@ -491,7 +491,7 @@ async function checkOverlappingDiscounts(
 	startDate: Date,
 	endDate: Date | null,
 	priority: number,
-	excludeDiscountId?: string
+	excludeDiscountId?: string,
 ): Promise<{ hasOverlap: boolean; overlappingProducts: string[] }> {
 	const whereCondition: Prisma.ProductDiscountWhereInput = {
 		...(excludeDiscountId && { id: { not: excludeDiscountId } }),
@@ -511,7 +511,7 @@ async function checkOverlappingDiscounts(
 						{
 							AND: [{ startDate: { lte: endDate } }, { OR: [{ endDate: null }, { endDate: { gte: endDate } }] }],
 						},
-				  ]
+					]
 				: []),
 		],
 	};
@@ -611,7 +611,7 @@ export async function createDiscount(data: DiscountFormData): Promise<ActionResu
 			products: {
 				include: {
 					product: {
-						select: { id: true, basePrice: true },
+						// select: { id: true, basePrice: true },
 						include: {
 							translations: { select: { lang: true, name: true } },
 							images: { include: { image: true }, orderBy: { sortOrder: 'asc' }, take: 1 },
@@ -771,7 +771,7 @@ export async function updateDiscount(id: string, data: Partial<DiscountFormData>
 /** 🟢 Toggle Active */
 export async function toggleStateDiscount(
 	id: string,
-	isActive: boolean
+	isActive: boolean,
 ): Promise<ActionResult<{ id: string; isActive: boolean }>> {
 	if (!id) throw new AppError('api.errors.invalid_id', 400);
 
@@ -909,7 +909,7 @@ export async function getProductsWithDiscounts(productIds?: string[], locale?: s
 /** 🔹 Get Discounts By Product IDs */
 export async function getDiscountsByProducts(
 	productIds: string[],
-	locale?: string
+	locale?: string,
 ): Promise<ActionResult<Record<string, FormattedDiscount>>> {
 	if (!productIds?.length) {
 		return { success: true, status: 200, data: {} };

@@ -1,19 +1,19 @@
 'use client';
 
-import * as React from 'react';
+import React from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { VariantProps, cva } from 'class-variance-authority';
 import { PanelLeftIcon } from 'lucide-react';
 
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { dir } from 'i18next';
+import { Button } from '@/components/ui-custom/custom-button';
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -153,7 +153,7 @@ function Sidebar({
 		return (
 			<div
 				data-slot='sidebar'
-				className={cn('bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col', className)}
+				className={cn('bg-aurora text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col', className)}
 				{...props}
 			>
 				{children}

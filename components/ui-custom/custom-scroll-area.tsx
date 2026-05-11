@@ -11,7 +11,7 @@ const ScrollArea = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
 	<ScrollAreaPrimitive.Root
 		ref={ref}
-		dir='rtl'
+		// dir={dir()}
 		className={cn('relative flex-1 overflow-x-hidden overflow-y-auto md:pe-3', className)}
 		{...props}
 	>

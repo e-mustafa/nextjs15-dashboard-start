@@ -232,7 +232,7 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	return (
-		<Sidebar collapsible='icon' side={dir() === 'rtl' ? 'right' : 'left'} {...props} className='font-medium border-0'>
+		<Sidebar collapsible='icon' side={dir() === 'rtl' ? 'right' : 'left'} {...props} className='font-medium border-0 bg-sidebar shadow-md shadow-aurora backdrop-blur-md'>
 			<SidebarHeader className='min-h-[72px]'>
 				<SidebarLogo />
 			</SidebarHeader>

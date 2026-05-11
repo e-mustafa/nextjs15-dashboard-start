@@ -16,9 +16,10 @@ const buttonVariants = cva(
 				ghost: 'hover:bg-accent/20 hover:text-accent-foreground',
 				link: 'text-primary underline-offset-4 hover:underline',
 				delete:
-					'bg-destructive/20 text-destructive hover:text-white shadow-xs hover:!bg-destructive/90 focus-visible:ring-destructive/20',
+				'bg-destructive/20 text-destructive hover:text-white shadow-xs hover:!bg-destructive/90 focus-visible:ring-destructive/20',
 				hero: 'bg-aurora text-primary-foreground shadow-glow-fuchsia hover:opacity-95 transition-opacity',
 				lagoon: 'bg-lagoon text-primary-foreground shadow-glow-teal hover:opacity-95',
+				input: 'border border-input bg-background shadow-sm hover:bg-input ',
 			},
 			size: {
 				default: 'h-9 px-4 py-2',

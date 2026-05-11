@@ -410,7 +410,7 @@ export default function ReusableDataTable<T extends { id: string }>({
 			<div className='flex flex-wrap items-center justify-between gap-3'>
 				<div className='flex items-center flex-wrap gap-3'>
 					{/* Search input */}
-					<div className='relative'>
+					<div className='relative shadow-lg'>
 						<Input
 							id={`${id}-input`}
 							ref={inputRef}
@@ -971,7 +971,7 @@ export function SortableHeader<T>({ header }: { header: HeaderType<T, unknown> }
 		>
 			{header.isPlaceholder ? null : (
 				<div
-					className='flex h-full items-center justify-between gap-2 select-none group hover:bg-muted/30 px-2 cursor-pointer'
+					className='flex h-full items-center justify-between gap-2 select-none group hover:bg-muted px-2 cursor-pointer'
 					onClick={header.column.getToggleSortingHandler()}
 					tabIndex={0}
 				>
@@ -1197,7 +1197,7 @@ export function TableComponent<T>({
 	}
 
 	return (
-		<div className='table-container overflow-x-auto w-full'>
+		<div className='table-container overflow-x-auto w-full min-h-[450px]'>
 			<Table className='table-auto w-full'>
 				{/* Header */}
 				<TableHeader>

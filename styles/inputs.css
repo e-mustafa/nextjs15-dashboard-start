@@ -1,6 +1,6 @@
 	@import './data-table.css';
 	.form-section {
-		@apply w-full grid gap-6 border p-2 sm:p-4 rounded-md shadow shadow-accent;
+		@apply w-full grid gap-6 border p-2 sm:p-4 rounded-md shadow shadow-accent/60 backdrop-blur-md bg-card/50 border-border/60;
 	}
 
 	.form-inputs {
