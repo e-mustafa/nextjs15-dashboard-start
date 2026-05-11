@@ -588,7 +588,8 @@
 		"startDate": "تاريخ البدء",
 		"endDate": "تاريخ الانتهاء",
 		"applies_to": "تطبيق على",
-		"priority": "الاولوية"
+		"priority": "الاولوية",
+		"finalPrice": "السعر النهائي"
 	},
 	"charts": {
 		"sales_over_time": "المبيعات مع مرور الوقت",
