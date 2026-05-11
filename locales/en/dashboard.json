@@ -588,7 +588,8 @@
 		"startDate": "Start Date",
 		"endDate": "End Date",
 		"applies_to": "Applies To",
-		"priority": "Priority"
+		"priority": "Priority",
+		"finalPrice": "Final Price"
 	},
 	"charts": {
 		"sales_over_time": "Sales Over Time",
