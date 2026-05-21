@@ -1,16 +1,20 @@
-import { isDEV } from '@/configs/general';
-import { attachPrismaLogger } from '@/lib/logs/prisma-logger.middleware';
+import attachPrismaLogger from '@/lib/logs/prisma-logger.middleware';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
+// import { PrismaClient } from "./generated/client";
 
-const globalForPrisma = global as unknown as {
-	prisma: PrismaClient | undefined;
-};
+const adapter = new PrismaPg({
+	connectionString: process.env.DATABASE_URL!,
+});
 
-export const prisma_DB =
-	globalForPrisma.prisma ??
-	new PrismaClient({
-		log: isDEV ? ['query', 'info', 'warn', 'error'] : ['error'],
-	});
+export const prisma_DB = new PrismaClient({ adapter });
+
+// export const prisma_DB =
+// 	globalForPrisma.prisma ??
+// 	new PrismaClient({
+// 		log: isDEV ? ['query', 'info', 'warn', 'error'] : ['error'],
+// 	});
+
 
 // ✅ Attach custom logger safely
 try {
@@ -19,4 +23,4 @@ try {
 	console.warn('⚠️ Prisma logger attachment skipped:', err);
 }
 
-if (isDEV) globalForPrisma.prisma = prisma_DB;
+// if (isDEV) globalForPrisma.prisma = prisma_DB;

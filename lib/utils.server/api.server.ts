@@ -50,7 +50,7 @@ export async function getDataInServer<T>({
 		const useCache = !id && tags.length > 0;
 
 		console.log('🔗 Fetching from:', url.toString());
-		console.log('🧾 Headers:', headers);
+		// console.log('🧾 Headers:', headers);
 
 		const res = await fetch(url.toString(), {
 			method: 'GET',
@@ -60,7 +60,7 @@ export async function getDataInServer<T>({
 			...options,
 		});
 
-		console.log('🧾 res:', res);
+		// console.log('🧾 res:', res);
 
 		const data = await res.json();
 		return data;

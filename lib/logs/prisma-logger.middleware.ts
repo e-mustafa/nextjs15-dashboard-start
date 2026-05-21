@@ -5,11 +5,12 @@ import { logger } from './logger';
 
 type PrismaOnQuery = (eventType: 'query', callback: (e: Prisma.QueryEvent) => void) => void;
 type PrismaOnEvent = (eventType: 'info' | 'warn' | 'error', callback: (e: Prisma.LogEvent) => void) => void;
+
 /**
  * ✅ Attach runtime logging to PrismaClient events
  * Logs: query, info, warn, error
  */
-export function attachPrismaLogger(prisma: PrismaClient) {
+export default function attachPrismaLogger(prisma: PrismaClient) {
 	// ✅ Log SQL queries
 	(prisma.$on as PrismaOnQuery)('query', (e) => {
 		const msg = `SQL: ${e.query} | Params: ${e.params} | Duration: ${e.duration}ms`;
