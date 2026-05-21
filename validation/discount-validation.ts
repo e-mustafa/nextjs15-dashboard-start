@@ -48,7 +48,7 @@ export const formSchemaDiscount = z
 				ctx.addIssue({
 					path: ['value'],
 					code: 'custom',
-					message: msg('forms.validation.invalid_percentage_value'),
+					message: msg('forms.validation.invalid_percentage'),
 				});
 			}
 		}

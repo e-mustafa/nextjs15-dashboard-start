@@ -8,7 +8,7 @@ import { prisma_DB } from '@/prisma/prisma.db';
 import { ActionResult, TImage } from '@/types/api';
 import { fields, formSchemaBrand, TBrandFormValues } from '@/validation/brand-validation';
 import { Prisma } from '@prisma/client';
-import { revalidatePath, revalidateTag } from 'next/cache';
+import { revalidatePath, revalidateTag, updateTag } from 'next/cache';
 import { cookies } from 'next/headers';
 
 type TFormValues = TBrandFormValues;
@@ -226,6 +226,8 @@ export async function createBrand(data: TFormValues): Promise<ActionResult<TForm
 	});
 
 	revalidatePath('/dashboard/brands');
+	revalidateTag('brands', 'max');
+	// updateTag('brands');
 	const formattedData = await formatBrand(brand as BrandWithRelations);
 	logger.info(`✅ Brand created: ${brand.id}`, { context: 'BrandService' });
 

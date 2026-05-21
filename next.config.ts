@@ -30,6 +30,11 @@ const nextConfig: NextConfig = {
 			// },
 		],
 	},
+
+	typescript: {
+		// disable TypeScript type checking during build -> faster for `next build`
+		// ignoreBuildErrors: true,
+	},
 };
 
 export default nextConfig;
