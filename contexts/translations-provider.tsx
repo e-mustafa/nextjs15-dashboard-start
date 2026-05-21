@@ -10,7 +10,7 @@ interface Props {
 	children: React.ReactNode;
 	locale: TLocalesData;
 	namespaces: string[];
-	resources: any;
+	resources?: any;
 }
 
 export default function TranslationsProvider({ children, locale, namespaces, resources }: Props) {

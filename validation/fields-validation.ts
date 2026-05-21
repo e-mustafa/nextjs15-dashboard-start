@@ -17,6 +17,10 @@ export const intNotNegativeField = preprocessNumber(
 	z.int({ message: msg('forms.validation.integer') }).nonnegative({ message: msg('forms.validation.price_nonnegative') })
 );
 
+export const integerPositiveNumber = preprocessNumber(
+	z.number({ message: msg('forms.validation.integer') }).positive(msg('forms.validation.positive')),
+);
+
 // slug ----------------------------------------------
 const regExp_slugAr = /^[\u0600-\u06FFA-Za-z0-9-]+$/; // allow arabic, latin characters and numbers
 const regExp_slugEn = /^[A-Za-z0-9-]+$/; // allow latin characters and numbers

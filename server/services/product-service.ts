@@ -11,7 +11,7 @@ import { ActionResult, TImage } from '@/types/api';
 import { fields, formSchemaProduct, TProductFormValues } from '@/validation/product-validation';
 import { $Enums, AttributeType, DiscountType, Prisma } from '@prisma/client';
 import { revalidatePath, revalidateTag } from 'next/cache';
-import { calculateDiscountedPrice } from './discount-service';
+import { calculateDiscountedPrice } from './utils';
 
 /////////////////////////
 // TYPES

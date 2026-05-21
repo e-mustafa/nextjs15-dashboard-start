@@ -22,12 +22,6 @@ enum AttributeType {
   CUSTOM
 }
 
-enum CouponType {
-  BUY_X_GET_Y
-  BUNDLE
-  SHIPPING
-}
-
 enum DiscountType {
   FIXED
   PERCENTAGE
@@ -39,6 +33,7 @@ enum ProductType {
   DIGITAL
   SERVICE
 }
+
 /////////////////////////
 model User {
   id             String          @id @default(cuid())
@@ -137,7 +132,6 @@ model Image {
 }
 
 /// //////////////////////
-/// //////////////////////
 model Brand {
   id           String             @id @default(cuid())
   imageId      String?
@@ -186,6 +180,7 @@ model BrandImage {
   @@index([brandId, sortOrder])
 }
 
+/// //////////////////////
 model Category {
   id           String                @id @default(cuid())
   imageId      String?
@@ -202,6 +197,7 @@ model Category {
   images       CategoryImage[]
   translations CategoryTranslation[]
   products     Product[]
+  coupons      CouponCategory[]
 
   @@index([parentId])
   @@index([isActive])
@@ -254,6 +250,8 @@ model Collection {
   images       CollectionImage[]
   products     CollectionProduct[]
   translations CollectionTranslation[]
+
+  coupons CouponCollection[]
 
   @@index([isActive])
   @@index([isFeatured])
@@ -361,6 +359,8 @@ model Product {
   tags           ProductTag[]
   translations   ProductTranslation[]
   variants       ProductVariant[]
+
+  coupons CouponProduct[]
 
   @@index([sku])
   @@index([brandId])
@@ -588,4 +588,124 @@ model ProductDiscountRelation {
   @@index([discountId])
 }
 
-/// //////////////////////
+// ====================================
+// Coupon Models
+// ====================================
+
+enum CouponType {
+  FIXED // خصم ثابت (مثل 50 ريال)
+  PERCENTAGE // خصم نسبة مئوية (مثل 20%)
+  FREE_SHIPPING // شحن مجاني
+}
+
+enum CouponApplicableOn {
+  ALL_PRODUCTS // جميع المنتجات
+  SPECIFIC_PRODUCTS // منتجات محددة
+  SPECIFIC_CATEGORIES // فئات محددة
+  SPECIFIC_COLLECTIONS // مجموعات محددة
+  MINIMUM_PURCHASE // حد أدنى للشراء
+}
+
+model Coupon {
+  id             String             @id @default(cuid())
+  code           String             @unique // كود الكوبون (مثل: SUMMER2024)
+  name_ar        String
+  name_en        String
+  description_ar String?
+  description_en String?
+  type           CouponType
+  value          Float // القيمة (50 للثابت، 20 للنسبة)
+  applicableOn   CouponApplicableOn @default(ALL_PRODUCTS)
+
+  // Constraints
+  minPurchaseAmount Float? // حد أدنى لقيمة الطلب
+  maxDiscountAmount Float? // حد أقصى للخصم (للنسبة المئوية)
+  usageLimit        Int? // عدد مرات الاستخدام الكلي
+  usagePerUser      Int? // عدد مرات الاستخدام لكل مستخدم
+  usedCount         Int    @default(0) // عدد مرات الاستخدام الفعلي
+
+  // Dates
+  startDate DateTime
+  endDate   DateTime?
+
+  // Status
+  isActive Boolean @default(true)
+  isPublic Boolean @default(true) // ظاهر للجميع أم خاص
+
+  // Relations
+  products    CouponProduct[] // المنتجات المحددة
+  categories  CouponCategory[] // الفئات المحددة
+  collections CouponCollection[] // المجموعات المحددة
+  usages      CouponUsage[] // سجل الاستخدام
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([code])
+  @@index([isActive])
+  @@index([startDate, endDate])
+  @@index([type])
+  @@index([applicableOn])
+}
+
+// Junction table: Coupon - Products (Many-to-Many)
+model CouponProduct {
+  id        String   @id @default(cuid())
+  couponId  String
+  productId String
+  createdAt DateTime @default(now())
+
+  coupon  Coupon  @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([couponId, productId])
+  @@index([couponId])
+  @@index([productId])
+}
+
+// Junction table: Coupon - Categories (Many-to-Many)
+model CouponCategory {
+  id         String   @id @default(cuid())
+  couponId   String
+  categoryId String
+  createdAt  DateTime @default(now())
+
+  coupon   Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([couponId, categoryId])
+  @@index([couponId])
+  @@index([categoryId])
+}
+
+// Junction table: Coupon - Collections (Many-to-Many)
+model CouponCollection {
+  id           String   @id @default(cuid())
+  couponId     String
+  collectionId String
+  createdAt    DateTime @default(now())
+
+  coupon     Coupon     @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@unique([couponId, collectionId])
+  @@index([couponId])
+  @@index([collectionId])
+}
+
+// Coupon Usage History
+model CouponUsage {
+  id       String  @id @default(cuid())
+  couponId String
+  userId   String? // اختياري إذا كان الضيف
+  orderId  String? // ربط مع الطلب
+
+  discount  Float // قيمة الخصم الفعلية
+  createdAt DateTime @default(now())
+
+  coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
+
+  @@index([couponId])
+  @@index([userId])
+  @@index([orderId])
+}

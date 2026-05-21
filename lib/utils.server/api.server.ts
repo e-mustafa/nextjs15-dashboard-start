@@ -1,11 +1,10 @@
 'use server';
 
-import { config_env, isDEV, TLocalesData } from '@/configs/general';
+import { config_env, TLocalesData } from '@/configs/general';
 import { ActionResult } from '@/types/api';
 import { cookies } from 'next/headers';
 import { runAction } from '../error-handler/error-handler.server';
 import getCurrentLocale from './getCurrentLocale.server';
-import Error from 'next/error';
 
 export const getToken = async () => {
 	const cookieStore = await cookies();
@@ -31,39 +30,42 @@ export async function getDataInServer<T>({
 	locale,
 }: TGetDataInPage): Promise<ActionResult<T>> {
 	// try {
-		const headers: Record<string, string> = {
-			'Content-Type': 'application/json',
-			Accept: 'application/json',
-			Authorization: `Bearer ${await getToken()}`,
-		};
+	const headers: Record<string, string> = {
+		'Content-Type': 'application/json',
+		Accept: 'application/json',
+		Authorization: `Bearer ${await getToken()}`,
+	};
 
-		if (!id) {
-			headers['accept-language'] = locale || (await getCurrentLocale());
-		}
+	if (!id) {
+		headers['accept-language'] = locale || (await getCurrentLocale());
+	}
 
-		// ✅ Use URL and URLSearchParams for better handling of query parameters
-		const url = new URL(`${config_env.domainAPI}/${url_segment}/${id}`);
-		Object.entries(query).forEach(([key, value]) => {
-			if (value !== undefined && value !== null && value !== '') url.searchParams.set(key, String(value));
-		});
+	// ✅ Use URL and URLSearchParams for better handling of query parameters
+	const url = new URL(`${config_env.domainAPI}/${url_segment}/${id}`);
+	Object.entries(query).forEach(([key, value]) => {
+		if (value !== undefined && value !== null && value !== '') url.searchParams.set(key, String(value));
+	});
 
-		const useCache = !id && tags.length > 0;
+	const useCache = !id && tags.length > 0;
 
-		console.log('🔗 Fetching from:', url.toString());
-		// console.log('🧾 Headers:', headers);
+	console.log('tags--', tags);
 
-		const res = await fetch(url.toString(), {
-			method: 'GET',
-			headers,
-			cache: useCache ? 'default' : 'no-store',
-			next: useCache ? { tags, revalidate: 60 } : undefined,
-			...options,
-		});
+	console.log('🔗 Fetching from:', url.toString());
+	// console.log('🧾 Headers:', headers);
 
-		// console.log('🧾 res:', res);
+	const res = await fetch(url.toString(), {
+		method: 'GET',
+		headers,
+		cache: useCache ? 'default' : 'no-store',
+		// next: useCache ? { tags, revalidate: 60 } : undefined,
+		next: useCache ? { tags } : undefined,
+		...options,
+	});
 
-		const data = await res.json();
-		return data;
+	// console.log('🧾 res:', res);
+
+	const data = await res.json();
+	return data;
 	// } catch (error: any) {
 	// 	if (isDEV) console.error('Error in getDataInServer:', error);
 	// 	return {

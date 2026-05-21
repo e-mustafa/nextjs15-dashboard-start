@@ -22,6 +22,7 @@ let user: { id: string; name: string } | null = null;
 
 import getCurrentLocale from '@/lib/utils.server/getCurrentLocale.server';
 import { TImage } from '@/types/api';
+import { calculateDiscountedPrice } from './utils';
 
 // ✅ Type discount with relations
 type DiscountWithRelations = Prisma.ProductDiscountGetPayload<{
@@ -427,44 +428,6 @@ export async function getActiveDiscountForProduct(productId: string, locale?: st
 	if (!discount) return null;
 
 	return formatDiscount(discount, locale);
-}
-
-/** 🔹 Calculate Discounted Price */
-export async function calculateDiscountedPrice(
-	basePrice: number,
-	discount: {
-		type: DiscountType;
-		value: number;
-		minDiscountValue?: number | null;
-		maxDiscountValue?: number | null;
-	},
-): Promise<number> {
-	if (basePrice <= 0 || discount.value <= 0) return basePrice;
-
-	let discountAmount = 0;
-
-	// Calculate discount amount
-	if (discount.type === DiscountType.FIXED) {
-		discountAmount = discount.value;
-	} else if (discount.type === DiscountType.PERCENTAGE) {
-		discountAmount = (basePrice * discount.value) / 100;
-	}
-
-	// Apply min constraint (only if > 0)
-	if (discount.minDiscountValue && discount.minDiscountValue > 0 && discountAmount < discount.minDiscountValue) {
-		discountAmount = discount.minDiscountValue;
-	}
-
-	// Apply max constraint (only if > 0)
-	if (discount.maxDiscountValue && discount.maxDiscountValue > 0 && discountAmount > discount.maxDiscountValue) {
-		discountAmount = discount.maxDiscountValue;
-	}
-
-	// Ensure discount doesn't exceed base price
-	discountAmount = Math.min(discountAmount, basePrice);
-
-	const finalPrice = Math.max(0, basePrice - discountAmount);
-	return Math.round(finalPrice * 100) / 100; // Round to 2 decimal places
 }
 
 /** 🔹 Validate Products Exist */
