@@ -22,8 +22,10 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export interface TSidebarItems {
-	group_name?: Record<TLocalesData, string>;
-	title: Record<TLocalesData, string>;
+	group_name?: string;
+	// group_name?: Record<TLocalesData, string>;
+	// title: Record<TLocalesData, string>;
+	title: string;
 	url: string;
 	icon?: LucideIcon;
 	isActive?: boolean;
@@ -31,7 +33,7 @@ export interface TSidebarItems {
 }
 
 export function NavMain({ items }: { items: TSidebarItems[] }) {
-	const { i18n } = useTranslation('dashboard');
+	const { t, i18n } = useTranslation();
 	const locale = i18n.language as TLocalesData;
 	const { state } = useSidebar();
 	const [openPopoverIndex, setOpenPopoverIndex] = useState<number | null>(null);
@@ -41,12 +43,12 @@ export function NavMain({ items }: { items: TSidebarItems[] }) {
 			<SidebarMenu className='gap-3 ps-1'>
 				{items.map((item, index) => {
 					const hasChildren = item.items && item.items.length > 0;
-					const itemKey = item.title[locale] + index;
+					const itemKey = item.title + index;
 
 					return (
 						<div key={itemKey} className='relative text-sidebar-primary'>
-							{item.group_name && item.group_name[locale] && state !== 'collapsed' && (
-								<SidebarGroupLabel>{item.group_name[locale]}</SidebarGroupLabel>
+							{item.group_name && item.group_name && state !== 'collapsed' && (
+								<SidebarGroupLabel>{t(item.group_name)}</SidebarGroupLabel>
 							)}
 
 							{hasChildren ? (
@@ -56,22 +58,22 @@ export function NavMain({ items }: { items: TSidebarItems[] }) {
 											<CollapsibleTrigger asChild>
 												<SidebarMenuButton
 													size='lg'
-													tooltip={item.title[locale]}
+													tooltip={t(item.title)}
 													className='rtl:text-start group-data-[state=open]/collapsible:bg-muted!'
 												>
 													{item.icon && <item.icon className='size-6!' />}
-													<span className='grow truncate capitalize'>{item.title[locale]}</span>
+													<span className='grow truncate capitalize'>{t(item.title)}</span>
 													<ChevronRight className='ms-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180' />
 												</SidebarMenuButton>
 											</CollapsibleTrigger>
 											<CollapsibleContent className='overflow-hidden transition-all data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down'>
 												<SidebarMenuSub className='rtl:border-r-2 rtl:border-l-0'>
 													{item.items?.map((subItem, subIndex) => (
-														<SidebarMenuSubItem key={subItem.title[locale] + subIndex} className='group'>
+														<SidebarMenuSubItem key={subItem.title + subIndex} className='group'>
 															<SidebarMenuSubButton asChild className='p-2 h-auto'>
 																<Link href={subItem.url} className='flex items-center gap-2 capitalize'>
 																	{subItem.icon && <subItem.icon className='size-full!' />}
-																	{subItem.title[locale]}
+																	{t(subItem.title)}
 																</Link>
 															</SidebarMenuSubButton>
 														</SidebarMenuSubItem>
@@ -91,15 +93,15 @@ export function NavMain({ items }: { items: TSidebarItems[] }) {
 											<PopoverTrigger asChild className=''>
 												<SidebarMenuButton
 													size='lg'
-													tooltip={state !== 'collapsed' ? item.title[locale] : ''}
+													tooltip={state !== 'collapsed' ? t(item.title) : ''}
 													className={cn(
 														'rtl:text-start p-1!',
-														openPopoverIndex === index && ' bg-sidebar-accent text-sidebar-foreground'
+														openPopoverIndex === index && ' bg-sidebar-accent text-sidebar-foreground',
 													)}
 												>
 													{item.icon && <item.icon className='size-full!' />}
 													{state !== 'collapsed' && (
-														<span className='grow truncate capitalize'>{item.title[locale]}</span>
+														<span className='grow truncate capitalize'>{t(item.title)}</span>
 													)}
 												</SidebarMenuButton>
 											</PopoverTrigger>
@@ -111,15 +113,15 @@ export function NavMain({ items }: { items: TSidebarItems[] }) {
 												<SidebarMenuSub className='m-0 p-0 border-0'>
 													{!!item.group_name && (
 														<span className='text-muted-foreground text-center text-xs'>
-															{item.group_name?.[locale]}
+															{t(item.group_name)}
 														</span>
 													)}
 													{item.items?.map((subItem, subIndex) => (
-														<SidebarMenuSubItem key={subItem.title[locale] + subIndex} className='group'>
+														<SidebarMenuSubItem key={subItem.title + subIndex} className='group'>
 															<SidebarMenuSubButton asChild className='p-2 h-auto'>
 																<Link href={subItem.url} className='flex items-center gap-2 capitalize'>
 																	{subItem.icon && <subItem.icon className='size-full!' />}
-																	{subItem.title[locale]}
+																	{t(subItem.title)}
 																</Link>
 															</SidebarMenuSubButton>
 														</SidebarMenuSubItem>
@@ -130,15 +132,15 @@ export function NavMain({ items }: { items: TSidebarItems[] }) {
 									</div>
 								)
 							) : (
-								<SidebarMenuButton size='lg' tooltip={item.title[locale]} className='rtl:text-start'>
+								<SidebarMenuButton size='lg' tooltip={t(item.title)} className='rtl:text-start'>
 									{item.icon && <item.icon className={cn(state == 'collapsed' ? 'size-8!' : 'size-6!')} />}
 
 									{item.url ? (
 										<Link href={item.url} className='grow truncate capitalize'>
-											{item.title[locale]}
+											{t(item.title)}
 										</Link>
 									) : (
-										<span className='grow truncate capitalize'>{item.title[locale]}</span>
+										<span className='grow truncate capitalize'>{t(item.title)}</span>
 									)}
 								</SidebarMenuButton>
 							)}
