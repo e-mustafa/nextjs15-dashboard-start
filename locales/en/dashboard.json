@@ -39,7 +39,8 @@
 			"delete_property": "Delete property",
 			"add_more": "Add more",
 			"today": "Today",
-			"clear": "Clear"
+			"clear": "Clear",
+			"copy_to_clipboard": "Copy to clipboard"
 		},
 		"status": {
 			"active": "Active",
@@ -163,7 +164,23 @@
 			"settings": "Settings",
 			"users": "Users",
 			"analytics": "Analytics",
-			"help": "Help"
+			"help": "Help",
+			"main_group": "Main",
+			"main": "Main",
+			"sales_group": "Sales",
+			"products_group": "Product Management",
+			"inventory_group": "Inventory Management",
+			"vendors": "Vendors",
+			"reports": "Reports",
+			"marketing": "Marketing",
+			"newsletters": "Newsletters",
+			"blog": "Blog",
+			"store_management_group": "Store Management",
+			"store": "Store",
+			"brand_identity": "Brand Identity",
+			"terms_pages": "Legal Pages",
+			"general_settings": "General Settings",
+			"payments": "Payments"
 		},
 		"labels": {
 			"name": "Name",
@@ -203,7 +220,13 @@
 			"discount_info": "Discount Information",
 			"supplier_info": "Supplier Information",
 			"warehouse_info": "Warehouse Information",
-			"choose_products_to_discount": "Choose products to discount"
+			"choose_products_to_discount": "Choose products to discount",
+
+			"coupon_usage_info": "Coupon usage information",
+			"elements_apply_coupon": "Elements that the coupon applies to",
+			"choose_products_to_coupon": "Choose products to apply coupon",
+			"choose_categories_to_coupon": "Choose categories to apply coupon",
+			"choose_collections_to_coupon": "Choose collections to apply coupon"
 		},
 		"labels": {
 			"name": "Name",
@@ -310,7 +333,21 @@
 			"discount_start_date": "Discount Start Date",
 			"discount_end_date": "Discount End Date",
 			"min_discount_value": "Minimum Discount Value",
-			"max_discount_value": "Maximum Discount Value"
+			"max_discount_value": "Maximum Discount Value",
+
+			"coupon_code": "Coupon Code",
+			"coupon_type": "Coupon Type",
+			"coupon_value": "Coupon Value",
+			"minPurchaseAmount": "Minimum Purchase Amount",
+			"maxDiscountAmount": "Maximum Discount Amount",
+			"min_coupon_value": "Minimum Coupon Value",
+			"max_coupon_value": "Maximum Coupon Value",
+			"coupon_start_date": "Coupon Start Date",
+			"coupon_expiry_date": "Coupon Expiry Date",
+			"coupon_usage_limit": "Coupon Usage Limit",
+			"coupon_limit_per_user": "Coupon Limit Per User",
+			"elements_apply_coupon": "Elements that the coupon applies to",
+			"coupon_priority": "Coupon Priority"
 		},
 		"placeholders": {
 			"name": "Enter name",
@@ -427,7 +464,21 @@
 			"min_discount_value": "Enter minimum discount value",
 			"max_discount_value": "Enter maximum discount value",
 			"discount_limit": "Enter discount limit",
-			"discount_priority": "Enter discount priority"
+			"discount_limit_per_user": "Enter discount limit per user",
+
+			"coupon_code": "Enter coupon code",
+			"coupon_type": "Select coupon type",
+			"coupon_value": "Enter coupon value",
+			"minPurchaseAmount": "Enter minimum purchase amount to activate coupon",
+			"maxDiscountAmount": "Enter maximum discount amount allowed by coupon",
+			"coupon_start_date": "Select coupon start date",
+			"coupon_expiry_date": "Select coupon expiry date",
+			"coupon_usage_limit": "Enter coupon usage limit for all users",
+			"coupon_limit_per_user": "Enter coupon usage limit per user",
+			"choose_products_to_coupon": "Select products to apply coupon to",
+			"choose_categories_to_coupon": "Select categories to apply coupon to",
+			"choose_collections_to_coupon": "Select collections to apply coupon to",
+			"elements_apply_coupon": "Select items to apply coupon to"
 		},
 		"validation": {
 			"required": "This field is required",
@@ -436,6 +487,7 @@
 			"max": "Please enter a valid value",
 			"numeric": "Please enter a valid value",
 			"integer": "Please enter a whole number",
+			"positive": "Please enter a positive number",
 			"invalid_url": "Invalid URL, please enter a valid URL like: https://www.google.com",
 			"invalid_phone": "Invalid phone number, please enter a valid phone number like: +1234567890",
 			"invalid_zip": "Invalid ZIP code, please enter a valid ZIP code like: 12345",
@@ -477,15 +529,32 @@
 			"at_least_one_spec_key": "At least one specification key must be added.",
 			"at_least_one_spec_value": "At least one specification value must be added.",
 			"at_least_one_product": "At least one product must be added.",
+			"invalid_percentage": "Percentage value must be between 0 and 100.",
 			"invalid_percentage_value": "Invalid percentage value.",
 			"max_less_than_min": "Maximum value must be less than minimum value.",
-			"end_date_before_start_date": "End date must be before start date."
+			"end_date_before_start_date": "End date must be before start date.",
+			"start_date_in_past": "Start date cannot be in the past.",
+			"min_length": "Must be at least {{min}} characters.",
+			"max_length": "Must not exceed {{max}} characters.",
+			"invalid_code_format": "Invalid code format. It should only contain letters, numbers, and dashes.",
+			"min_purchase_required": "Minimum purchase amount is required to activate the coupon.",
+			"max_discount_required": "Maximum discount amount allowed by the coupon is required.",
+			"no_products_selected": "No products selected.",
+			"no_categories_selected": "No categories selected.",
+			"no_collections_selected": "No collections selected."
 		},
 		"descriptions": {
-			"slug": "Slug is a text that must be unique and can only contain English letters, numbers and dash.",
-			"seo_image": "Image that represents the content and appears in search engine results and when sharing the link on social media. \n Recommended size 1200*630 pixels. \n You can ignore this and the main image will be used if available.",
-			"add_variants": "Add variants like color, size or materials to create different product variants.",
-			"add_specifications": "Add product specifications like materials, dimensions, weight, or any other information that helps customers better understand the product."
+			"slug": "The slug is a unique text identity that can only contain English letters, numbers, and dashes.",
+			"seo_image": "An image representing the content that appears in search engine results and when sharing links on social media. \n Recommended size is 1200x630 pixels. \n You can ignore this, and the main image will be used if available.",
+			"add_variants": "Add options like color, size, or material to create different variations of the product.",
+			"add_specifications": "Add product details such as material, dimensions, weight, or any other information to help customers understand the product better.",
+			"coupon": {
+				"apply_on_all_products": "The coupon will apply to all products in the cart upon purchase.",
+				"apply_on_specific_products": "The coupon will apply only to the selected products if they are added to the cart.",
+				"apply_on_specific_categories": "The coupon will apply only to products within the selected categories if they are added to the cart.",
+				"apply_on_specific_collections": "The coupon will apply only to products within the selected collections if they are added to the cart.",
+				"apply_on_minimum_purchase_amount": "The coupon will apply once the total cart amount reaches the specified minimum purchase requirement."
+			}
 		},
 		"infos": {
 			"slug": "Slug is a text that must be unique, as it is part of the website page links. It can only contain English letters, numbers and dash.",
@@ -518,8 +587,16 @@
 			"search_images_placeholder": "Search in images..."
 		},
 		"select": {
-			"fixed": "Fixed",
-			"percentage": "Percentage"
+			"fixed": "Fixed amount",
+			"percentage": "Percentage",
+			"free_shipping": "Free shipping",
+
+			"all_products": "All products",
+			"specific_products": "Specific products",
+			"specific_categories": "Specific categories",
+			"specific_collections": "Specific collections",
+			"minimum_purchase_amount": "Minimum purchase amount",
+			"minimum_purchase": "Minimum purchase amount"
 		}
 	},
 	"general": {
@@ -589,7 +666,10 @@
 		"endDate": "End Date",
 		"applies_to": "Applies To",
 		"priority": "Priority",
-		"finalPrice": "Final Price"
+		"finalPrice": "Final Price",
+		"coupon_value": "Coupon value",
+		"coupon_type": "Coupon type",
+		"coupon_code": "Coupon code"
 	},
 	"charts": {
 		"sales_over_time": "Sales Over Time",
@@ -774,6 +854,40 @@
 				"not_found": "Discount not found",
 				"exists": "Discount already exists",
 				"overlapping_discount": "Discount is overlapping with another discount"
+			}
+		},
+		"coupons": {
+			"success": {
+				"create": "Coupon created successfully",
+				"update": "Coupon updated successfully",
+				"delete": "Coupon deleted successfully",
+				"delete_many": "Discounts deleted successfully",
+				"applied": "Coupon applied successfully",
+				"usage_recorded": "Coupon usage recorded successfully",
+				"valid": "Coupon is valid"
+			},
+			"errors": {
+				"create": "Failed to create coupon",
+				"update": "Failed to update coupon",
+				"delete": "Failed to delete coupon",
+				"not_found": "Coupon not found",
+				"exists": "Coupon already exists",
+
+				"apply_failed": "Failed to apply coupon",
+				"usage_record_failed": "Failed to record coupon usage",
+				"stats_failed": "Failed to fetch coupon statistics",
+				"usage_fetch_failed": "Failed to fetch coupon usage",
+				"validation_failed": "Coupon validation failed",
+
+				"invalid_code": "Invalid coupon code",
+				"expired": "Coupon has expired",
+				"inactive": "Coupon is inactive",
+				"usage_limit_reached": "Coupon usage limit has been reached",
+				"min_purchase_not_met": "Minimum purchase amount required for this coupon is not met",
+				"max_discount_exceeded": "Maximum coupon discount amount has been exceeded",
+				"not_applicable": "Coupon is not applicable to the selected items",
+				"not_started": "Coupon has not started yet",
+				"user_limit_reached": "User usage limit for this coupon has been reached"
 			}
 		},
 		"customers": "Customers"

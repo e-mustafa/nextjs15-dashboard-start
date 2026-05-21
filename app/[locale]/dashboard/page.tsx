@@ -1,7 +1,7 @@
 import initTranslations from '@/app/i18n';
 import { TLocalesData } from '@/configs/general';
 import TranslationsProvider from '@/contexts/translations-provider';
-import { prisma_DB } from '@/prisma/prisma.db';
+// import { prisma_DB } from '@/prisma/prisma.db';
 import { TLayoutProps } from '../layout';
 
 const i18nNamespaces = ['dashboard'];
@@ -37,6 +37,7 @@ export default async function DashboardPage({ children, params }: TLayoutProps) 
 		// </SidebarInset>
 		<TranslationsProvider namespaces={i18nNamespaces} locale={locale as TLocalesData}>
 			<div>{t('general.welcome')}</div>
+			{children}
 		</TranslationsProvider>
 	);
 }
