@@ -2,44 +2,44 @@
 
 import { FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui-custom/custom-form';
 import { isDEV } from '@/configs/general';
-import { FieldTypeMap, RenderFieldProps } from '@/lib/create-forms/types-create-forms';
+import useLocale from '@/hooks/useLocale';
+import { RenderFieldProps } from '@/lib/create-forms/types-create-forms';
 import { renderErrorMessage } from '@/lib/utils';
 import { JSX } from 'react';
 import { FieldValues } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
+import InfoIconTooltip from '../Shared/info-icon-tooltip';
 import { FormMessageTranslated } from '../ui-custom/custom-form';
 import ReusableCombobox from '../ui-custom/reuseable-combobox';
-import InfoIconTooltip from './info-icon-tooltip';
 
 /**
  * Combobox input field
  *
  * @param {RenderFieldProps<T, K>} props
  * `optionUrl`: string - API endpoint to fetch options.
- * 
+ *
  * `fetchOptions`?: (query: string, page?: number) => Promise<{ data: ComboboxOption[]; pagination: any }>.
- * 
+ *
  * `revalidateTags`?: string[] - Tags for revalidation.
- * 
+ *
  * `returnObject`?: boolean - Whether to return the full object or just the ID/IDs.
- * 
+ *
  * `isProducts`?: boolean - Whether the combobox has additional section to display selected products.
- * 
+ *
  * `isTags`?: boolean - Whether the combobox is for tags.
- * 
+ *
  * `deleteTag`?: (id: string) => Promise<void> - Function to delete a tag by ID.
- * 
+ *
  * `linkHref`?: string - Link href for each option.
- * 
+ *
  * `multiple`?: boolean - Whether multiple selections are allowed.
- * 
+ *
  * @returns {JSX.Element}
  *
  */
-export function ComboboxInputField<T extends FieldValues, K extends FieldTypeMap>({
+export default function ComboboxInputField<T extends FieldValues>({
 	fieldConfig,
 	form,
-}: RenderFieldProps<T, K>): JSX.Element {
+}: RenderFieldProps<T, 'combobox'>): JSX.Element {
 	const {
 		name,
 		label,
@@ -54,10 +54,8 @@ export function ComboboxInputField<T extends FieldValues, K extends FieldTypeMap
 		returnObject = false,
 		linkHref,
 	} = fieldConfig;
-	const {
-		t,
-		i18n: { language },
-	} = useTranslation();
+
+	const { t, locale } = useLocale();
 
 	async function fetchItemsFromAPI(query: string, page: number = 1) {
 		const params = new URLSearchParams({
@@ -68,7 +66,7 @@ export function ComboboxInputField<T extends FieldValues, K extends FieldTypeMap
 
 		// try {
 		const response = await fetch(`${optionUrl}?${params}`, {
-			headers: { 'Accept-Language': language },
+			headers: { 'Accept-Language': locale },
 			next: { tags: revalidateTags },
 		});
 

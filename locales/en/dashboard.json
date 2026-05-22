@@ -88,7 +88,8 @@
 			"create_coupon": "Add coupon",
 			"edit_coupon": "Edit coupon",
 			"gregorian": "Gregorian",
-			"hijri": "Hijri"
+			"hijri": "Hijri",
+			"list_section": "{{name}} List"
 		},
 		"messages": {
 			"processing": "Processing...",

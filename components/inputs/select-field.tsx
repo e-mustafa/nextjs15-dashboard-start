@@ -1,7 +1,4 @@
-import { JSX } from 'react';
-import { FieldValues, Path } from 'react-hook-form';
-
-import InfoIconTooltip from '@/components/inputs/info-icon-tooltip';
+import InfoIconTooltip from '@/components/Shared/info-icon-tooltip';
 import {
 	FormControl,
 	FormDescription,
@@ -10,14 +7,16 @@ import {
 	FormLabel,
 	FormMessageTranslated,
 } from '@/components/ui-custom/custom-form';
-import { FieldTypeMap, RenderFieldProps } from '@/lib/create-forms/types-create-forms';
+import { RenderFieldProps } from '@/lib/create-forms/types-create-forms';
+import { JSX } from 'react';
+import { FieldValues, Path } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import ReusableSelect from './reusable-select';
 
-export default function SelectField<T extends FieldValues, K extends FieldTypeMap>({
+export default function SelectField<T extends FieldValues>({
 	fieldConfig: { name, label, required, options, noneItem, sectorProperty_1, sectorProperty_2, ...fieldConfig },
 	form,
-}: RenderFieldProps<T, K>): JSX.Element {
+}: RenderFieldProps<T, 'selectFiled'>): JSX.Element {
 	const { t } = useTranslation();
 
 	return (

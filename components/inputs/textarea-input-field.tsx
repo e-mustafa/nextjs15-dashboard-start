@@ -1,8 +1,8 @@
-import { FieldTypeMap, RenderFieldProps } from '@/lib/create-forms/types-create-forms';
+import { RenderFieldProps } from '@/lib/create-forms/types-create-forms';
 import { JSX } from 'react';
-import { FieldValues, Path } from 'react-hook-form';
+import { FieldValues } from 'react-hook-form';
 
-import InfoIconTooltip from '@/components/inputs/info-icon-tooltip';
+import InfoIconTooltip from '@/components/Shared/info-icon-tooltip';
 import {
 	FormControl,
 	FormDescription,
@@ -23,27 +23,27 @@ import { Textarea } from '../ui/textarea';
  * @returns {JSX.Element}
  */
 
-export default function TextareaInputField<T extends FieldValues, K extends FieldTypeMap>({
-	fieldConfig,
+export default function TextareaInputField<T extends FieldValues>({
+	fieldConfig: { name, label, required, infoContent, IconStart, IconEnd, description, ...fieldConfig },
 	form,
-}: RenderFieldProps<T, K>): JSX.Element {
+}: RenderFieldProps<T, 'textarea'>): JSX.Element {
 	const { t } = useTranslation();
 
 	return (
 		<FormField
 			control={form.control}
-			name={fieldConfig.name as Path<T>}
+			name={name}
 			render={({ field }) => (
 				<FormItem className={fieldConfig.class}>
-					{!fieldConfig.infoContent ? (
-						<FormLabel aria-required={!!fieldConfig.required}>{t(fieldConfig.label as string)}</FormLabel>
+					{!infoContent ? (
+						<FormLabel aria-required={!!required}>{t(label as string)}</FormLabel>
 					) : (
 						// info Icon
 						<div className='relative flex items-center justify-between h-3.5'>
-							<FormLabel aria-required={!!fieldConfig.required}>{t(fieldConfig.label as string)}</FormLabel>
+							<FormLabel aria-required={!!required}>{t(label as string)}</FormLabel>
 
 							<InfoIconTooltip
-								info={t(fieldConfig.infoContent as string) || ''}
+								info={t(infoContent as string) || ''}
 								t={t}
 								Icon={fieldConfig.InfoIcon && fieldConfig.InfoIcon}
 							/>
@@ -53,14 +53,14 @@ export default function TextareaInputField<T extends FieldValues, K extends Fiel
 					<FormControl>
 						<Textarea
 							placeholder={t(fieldConfig.placeholder as string)}
-							className={cn(fieldConfig.IconStart && 'ps-10', fieldConfig.IconEnd && 'pe-10')}
+							className={cn(IconStart && 'ps-10', IconEnd && 'pe-10')}
 							{...field}
 							value={field.value || ''}
-							rows={fieldConfig.rows}
+							rows={fieldConfig?.rows}
 						/>
 					</FormControl>
 
-					{fieldConfig.description && <FormDescription>{t(fieldConfig.description)}</FormDescription>}
+					{description && <FormDescription>{t(description)}</FormDescription>}
 					{/* <FormMessage /> */}
 					<FormMessageTranslated />
 				</FormItem>

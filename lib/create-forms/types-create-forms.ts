@@ -1,7 +1,11 @@
 import { EnumDatePickerMode } from '@/components/inputs/multi-date-picker';
 import { ComboboxOption, PaginatedResponse } from '@/components/ui-custom/reuseable-combobox';
-import { ChangeEvent, ElementType, ReactNode } from 'react';
+import { ChangeEvent, ComponentType, ElementType, ReactNode } from 'react';
 import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
+
+// ============================================================================
+// 1. FIELD TYPE UNION DEFINITIONS
+// ============================================================================
 
 export type FieldTypeMap =
 	// Base Field Types
@@ -36,44 +40,14 @@ export type FieldTypeMap =
 	| 'seoMockupCard'
 	| 'shardPostMockupCard';
 
-// export type FieldTypeMap = {
-// 	// Base Field Types
-// 	text: string;
-// 	textarea: string;
-// 	number: number;
-// 	email: string;
-// 	tel: string;
-// 	url: string;
-// 	date: string;
-// 	time: string;
-// 	datetime: string;
-
-// 	empty: string;
-
-// 	switch: boolean;
-// 	checkbox: boolean;
-// 	radio: boolean;
-
-// 	// Special Field Types
-// 	password: string;
-// 	richtext: string;
-// 	combobox: string | string[] | number;
-// 	otp: string;
-// 	uploadFile: File | File[] | null;
-// 	slug: string;
-
-// 	productVariants: string;
-// 	attributes: string;
-
-// 	imageManager: File | File[] | null;
-// 	imageUpload: string | string[] | null;
-// 	seoMockupCard: never;
-// 	shardPostMockupCard: never;
-// };
-
 export type FieldType = FieldTypeMap;
 
-export interface FieldConfig<T extends FieldValues = FieldValues, K extends FieldType = FieldType> {
+// ============================================================================
+// 2. DISCRIMINATED UNION CONFIGURATIONS (Enterprise-Grade Architecture)
+// ============================================================================
+
+// Base configuration context inherited by all specialized field components
+export interface BaseFieldConfig<T extends FieldValues, K extends FieldType> {
 	type: K;
 	name: Path<T>;
 	label?: string;
@@ -84,63 +58,127 @@ export interface FieldConfig<T extends FieldValues = FieldValues, K extends Fiel
 	IconEnd?: string | ElementType;
 	InfoIcon?: ElementType;
 	infoContent?: string | ReactNode;
-	// for textarea
-	rows?: number;
-
 	class?: string;
 	parentClass?: string;
-	onChange?: (event: ChangeEvent<HTMLInputElement>, form: UseFormReturn<T>) => void;
-
-	// for switch
-	variants?: 'input' | 'switch';
-
-	// for checkbox
-	items?: { name: string; label: string; checked: boolean }[];
-
 	locale?: string;
 	referenceInput?: string;
+	searchPlaceholder?: string;
+	emptyMessage?: string | ReactNode;
+	onChange?: (event: ChangeEvent<HTMLInputElement>, form: UseFormReturn<T>) => void;
+}
 
+// Dedicated context structure constraints for Textarea nodes
+export interface TextareaFieldConfig<T extends FieldValues> extends BaseFieldConfig<T, 'textarea'> {
+	rows?: number;
+}
+
+// Dedicated context structure constraints for Switch nodes
+export interface SwitchFieldConfig<T extends FieldValues> extends BaseFieldConfig<T, 'switch'> {
+	variants?: 'input' | 'switch';
+}
+
+// Dedicated context structure constraints for Checkbox elements
+interface CheckboxFieldConfig<T extends FieldValues> extends BaseFieldConfig<T, 'checkbox'> {
+	items?: { name: string; label: string; checked: boolean }[];
+}
+
+export interface RichTextFieldConfig<T extends FieldValues> extends BaseFieldConfig<T, 'richtext'> {
+	type: 'richtext';
+}
+
+// Dedicated context structure constraints for standard File upload utilities
+interface UploadFileFieldConfig<T extends FieldValues> extends BaseFieldConfig<T, 'uploadFile'> {
 	file?: {
 		accept?: string;
 		maxSize?: number;
 		multiple?: boolean;
 	};
 	multiple?: boolean;
-	folder?: string; // for ImageManager upload folder name
+}
 
-	// only for special field types that need additional data
-	options?: { id?: string; label: string; value: string }[];
-	fetchItems?: () => Promise<{ label: string; value: string }[]>;
+// Dedicated context structure constraints for specialized Image Manager interfaces
+export interface ImageManagerFieldConfig<T extends FieldValues> extends BaseFieldConfig<T, 'imageManager'> {
+	folder?: string;
+	multiple?: boolean;
+}
 
-	// select field
+// Dedicated context structure constraints for classic Select dropdowns
+interface SelectFieldConfig<T extends FieldValues> extends BaseFieldConfig<T, 'selectFiled'> {
 	noneItem?: string | boolean;
 	sectorProperty_1?: string;
 	sectorProperty_2?: string;
+	options?: { id?: string; label: string; value: string }[];
+	fetchItems?: () => Promise<{ label: string; value: string }[]>;
+}
 
-	// combobox component
+export interface FileInputFieldConfig<T extends FieldValues> extends BaseFieldConfig<T, 'uploadFile'> {
+	type: 'uploadFile';
+	file?: {
+		accept?: string;
+		maxSize?: number;
+		multiple?: boolean;
+	};
+	infoContent?: string;
+	InfoIcon?: React.ComponentType<{ className?: string }>;
+}
+
+// Dedicated context structure constraints for Advanced Paginated Combobox units
+// interface ComboboxFieldConfig<T extends FieldValues> extends BaseFieldConfig<T, 'combobox'> {
+// 	optionUrl?: string;
+// 	revalidateTags?: string[];
+// 	isTags?: boolean;
+// 	isProducts?: boolean;
+// 	returnObject?: boolean;
+// 	linkHref?: string;
+// 	deleteTag?: (id: string) => Promise<void>;
+// 	fetchOptions?: (
+// 		query: string,
+// 		page?: number,
+// 	) => Promise<PaginatedResponse<T extends ComboboxOption ? T : ComboboxOption>>;
+// 	customColumn?: (option: T extends ComboboxOption ? T : ComboboxOption) => ReactNode;
+// }
+
+export interface ComboboxFieldConfig<T extends FieldValues> extends BaseFieldConfig<T, 'combobox'> {
+	type: 'combobox';
+
+	// properties for fetch data (either direct link or custom fetch function)
+	optionUrl?: string;
 	fetchOptions?: (
 		query: string,
-		page?: number
+		page?: number,
 	) => Promise<PaginatedResponse<T extends ComboboxOption ? T : ComboboxOption>>;
-	optionUrl?: string;
+
+	// properties for revalidation
 	revalidateTags?: string[];
+
+	// properties for rendering and additional actions
 	isTags?: boolean;
 	isProducts?: boolean;
-	deleteTag?: (id: string) => Promise<void>;
-	linkHref?: string;
-	customColumn?: (option: T extends ComboboxOption ? T : ComboboxOption) => ReactNode;
+	multiple?: boolean;
 	returnObject?: boolean;
-	// getOptionFn;
+	linkHref?: string;
 
-	// productVariants
+	// passed functions for custom actions
+	deleteTag?: (id: string) => Promise<void>;
+	customColumn?: (option: T extends ComboboxOption ? T : ComboboxOption) => ReactNode;
+}
+
+export interface ImageUploadFieldConfig<T extends FieldValues> extends BaseFieldConfig<T, 'imageUpload'> {
+	type: 'imageUpload';
+	multiple?: boolean;
+	folder?: string;
+	accept?: string;
+	maxSize?: number;
+}
+
+// Dedicated context structure constraints for Matrix Variant controllers
+export interface ProductVariantsFieldConfig<T extends FieldValues> extends BaseFieldConfig<T, 'productVariants'> {
 	attributesName?: string;
 	skuName?: string;
+}
 
-	searchPlaceholder?: string;
-	emptyMessage?: string | ReactNode;
-
-	// multi date picker
-	// DateMode?: 'date' | 'datetime' | 'time';
+// Dedicated context structure constraints for Dynamic Calendar Picker setups
+export interface MultiDatePickerFieldConfig<T extends FieldValues> extends BaseFieldConfig<T, 'multiDatePicker'> {
 	datePickerMode?: EnumDatePickerMode;
 	inputClass?: string;
 	timePicker?: boolean;
@@ -152,6 +190,43 @@ export interface FieldConfig<T extends FieldValues = FieldValues, K extends Fiel
 	};
 }
 
+// Fallback pattern capturing all standard input configs requiring zero extra attributes
+interface StandardFieldConfig<T extends FieldValues> extends BaseFieldConfig<
+	T,
+	Exclude<
+		FieldType,
+		| 'textarea'
+		| 'switch'
+		| 'checkbox'
+		| 'uploadFile'
+		| 'imageManager'
+		| 'selectFiled'
+		| 'combobox'
+		| 'productVariants'
+		| 'multiDatePicker'
+	>
+> {}
+
+// Core Discriminated Union type distribution layer
+export type FieldConfig<T extends FieldValues = FieldValues, K extends FieldType = FieldType> = Extract<
+	| StandardFieldConfig<T>
+	| TextareaFieldConfig<T>
+	| SwitchFieldConfig<T>
+	| CheckboxFieldConfig<T>
+	| UploadFileFieldConfig<T>
+	| ImageManagerFieldConfig<T>
+	| SelectFieldConfig<T>
+	| ComboboxFieldConfig<T>
+	| ProductVariantsFieldConfig<T>
+	| MultiDatePickerFieldConfig<T>
+	|ImageUploadFieldConfig<T>,
+	{ type: K }
+>;
+
+// ============================================================================
+// 3. PROP CONTRACTS & REGISTRY MAP BLUEPRINTS
+// ============================================================================
+
 export interface RenderFieldProps<T extends FieldValues, K extends FieldTypeMap> {
 	fieldConfig: FieldConfig<T, K>;
 	form: UseFormReturn<T>;
@@ -159,9 +234,13 @@ export interface RenderFieldProps<T extends FieldValues, K extends FieldTypeMap>
 
 export type SectionConfig<T extends FieldValues = FieldValues> = {
 	title?: string;
-	fields: FieldConfig<T>[];
+	fields: FieldConfig<T, FieldType>[];
 };
 
-// export type InputRegistry = {
-// 	[K in FieldTypeMap]?: <T extends FieldValues>(props: RenderFieldProps<T, K>) => JSX.Element;
+// export type InputRegistryType<T extends FieldValues> = {
+// 	[K in FieldTypeMap]?: (props: RenderFieldProps<T, K>) => React.JSX.Element;
 // };
+
+export type InputRegistryType<T extends FieldValues> = {
+	[K in FieldTypeMap]?: ComponentType<RenderFieldProps<T, K>>;
+};

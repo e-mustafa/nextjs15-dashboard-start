@@ -1,8 +1,8 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { config_env, defaultLocale, localesData } from '@/configs/general';
 import { SEODataKey } from '@/configs/SEOData';
+import useLocale from '@/hooks/useLocale';
 import Image from 'next/image';
-import { useTranslation } from 'react-i18next';
 import { Skeleton } from '../ui/skeleton';
 
 export type ShardPostMockupCardProps = {
@@ -18,14 +18,11 @@ export type ShardPostMockupCardProps = {
 	};
 };
 
-export default function ShardPostMockupCard({ data, image }: { data?: ShardPostMockupCardProps; image?: string }) {
-	const {
-		t,
-		i18n: { language },
-	} = useTranslation();
+export default function SharedPostMockupCard({ data, image }: { data?: ShardPostMockupCardProps; image?: string }) {
+	const { t, locale } = useLocale();
 
-	const infos = data && data[language as SEODataKey];
-	const oLang = (Object.keys(localesData)?.find((lng) => lng !== language) || defaultLocale.short) as SEODataKey;
+	const infos = data && data[locale as SEODataKey];
+	const oLang = (Object.keys(localesData)?.find((lng) => lng !== locale) || defaultLocale.short) as SEODataKey;
 
 	return (
 		<div className='w-full h-full grid xl:place-content-center space-y-4 bg-background bg-accent/20xxx p-2 rounded-2xl'>

@@ -1,4 +1,4 @@
-import { ReusableDNDSortable, SortableDNDWrapper } from '@/components/shard/dnd-kit-sortable';
+import { ReusableDNDSortable, SortableDNDWrapper } from '@/components/Shared/dnd-kit-sortable';
 import { Button } from '@/components/ui-custom/custom-button';
 import { Checkbox } from '@/components/ui-custom/custom-checkbox';
 import TooltipElement from '@/components/ui-custom/tooltip-element';

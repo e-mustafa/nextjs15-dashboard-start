@@ -1,6 +1,5 @@
 'use client';
-
-import { FieldTypeMap, RenderFieldProps } from '@/lib/create-forms/types-create-forms';
+import { RenderFieldProps } from '@/lib/create-forms/types-create-forms';
 import { JSX } from 'react';
 import { FieldValues, Path } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -14,10 +13,10 @@ import { FormDescription, FormField, FormItem, FormLabel, FormMessageTranslated 
  * @param {Object} form - contains the form control and values
  * @returns {JSX.Element} - renders the product variants field component
  */
-export default function ProductVariantsField<T extends FieldValues, K extends FieldTypeMap>({
+export default function ProductVariantsField<T extends FieldValues>({
 	fieldConfig,
 	form,
-}: RenderFieldProps<T, K>): JSX.Element {
+}: RenderFieldProps<T, 'productVariants'>): JSX.Element {
 	const { name, label = 'forms.labels.product_variants', description, required = false } = fieldConfig;
 	const { t } = useTranslation();
 

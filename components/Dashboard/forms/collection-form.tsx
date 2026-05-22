@@ -1,7 +1,7 @@
 'use client';
 
 import { url_segment } from '@/app/[locale]/dashboard/(products-management)/collections/page';
-import LoaderInstElement from '@/components/shard/loaders/loader-inst-element';
+import LoaderInstElement from '@/components/Shared/loaders/loader-inst-element';
 import { Form } from '@/components/ui-custom/custom-form';
 import { config_env } from '@/configs/general';
 import { EnumFormTypes } from '@/constant/enums-development';

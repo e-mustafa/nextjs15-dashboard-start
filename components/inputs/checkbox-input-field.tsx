@@ -1,7 +1,7 @@
 import { JSX, useId } from 'react';
 import { FieldValues, Path } from 'react-hook-form';
 
-import InfoIconTooltip from '@/components/inputs/info-icon-tooltip';
+import InfoIconTooltip from '@/components/Shared/info-icon-tooltip';
 import { FormControl, FormField, FormItem, FormLabel, FormMessageTranslated } from '@/components/ui-custom/custom-form';
 import { FieldTypeMap, RenderFieldProps } from '@/lib/create-forms/types-create-forms';
 import { useTranslation } from 'react-i18next';
@@ -18,7 +18,7 @@ import { Checkbox } from '../ui-custom/custom-checkbox';
 export default function CheckboxInputField<T extends FieldValues, K extends FieldTypeMap>({
 	fieldConfig: { name, label, placeholder, infoContent, required, IconStart, locale, items, ...fieldConfig },
 	form,
-}: RenderFieldProps<T, K>): JSX.Element {
+}: RenderFieldProps<T, 'checkbox'>): JSX.Element {
 	const { t } = useTranslation();
 	const id = useId();
 
