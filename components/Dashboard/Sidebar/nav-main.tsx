@@ -17,7 +17,7 @@ import useLocale from '@/hooks/useLocale';
 import { cn } from '@/lib/utils';
 import { ChevronRight, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation.js';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
 export interface TSidebarItems {
