@@ -90,7 +90,7 @@ export const formSections_brand: SectionConfig<TFormValues>[] = [
 				name: 'products',
 				label: msg('common.actions.choose_', { item: 'common.sections.products' }),
 				placeholder: 'forms.placeholders.choose_brands_products',
-				optionUrl: `${config_env.domainAPI}/dashboard/brands`,
+				optionUrl: `${config_env.domainAPI}/dashboard/products`,
 				revalidateTags: ['brands'],
 				multiple: true,
 				isProducts: true,

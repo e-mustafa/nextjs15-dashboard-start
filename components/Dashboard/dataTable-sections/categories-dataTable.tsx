@@ -1,5 +1,5 @@
 'use client';
-import { url_segment } from '@/app/[locale]/dashboard/(products-management)/categories/page';
+import { tags, url_segment } from '@/app/[locale]/dashboard/(products-management)/categories/page';
 import { imagesPlaceholder, TLocalesData } from '@/configs/general';
 import { useServerResponse } from '@/hooks/use-server-response';
 import { getDataInPage } from '@/lib/utils.server/api.server';
@@ -29,7 +29,6 @@ export default function CategoryDataTable({ result, locale }: { result: ActionRe
 	// ✅ Optimistic UI state
 	const [optimisticData, setOptimisticData] = useOptimistic<Category[]>((result.data as Category[]) ?? []);
 	const [meta, setMeta] = useState<ApiMeta>(result.meta as ApiMeta);
-	console.log('meta--', meta);
 
 	// ---------------------------------------------------------
 	// URL Query Parameters
@@ -60,8 +59,8 @@ export default function CategoryDataTable({ result, locale }: { result: ActionRe
 	const handleServerRequest = useCallback(
 		async ({ page, limit, search, sortBy, sortOrder }: TQueryParams) => {
 			const res: ActionResult<Category> = await getDataInPage<Category>({
-				url_segment: url_segment,
-				tags: ['categories'],
+				url_segment,
+				tags,
 				locale,
 				query: { page, limit, search, sortBy, sortOrder },
 			});
@@ -71,7 +70,7 @@ export default function CategoryDataTable({ result, locale }: { result: ActionRe
 				setMeta(res.meta as ApiMeta);
 			});
 		},
-		[locale]
+		[locale],
 	);
 
 	// ---------------------------------------------------------
@@ -95,7 +94,6 @@ export default function CategoryDataTable({ result, locale }: { result: ActionRe
 
 	const handleToggleStatus = async (row: Category) => {
 		const result = await toggleStateCategoryAction(row.id, !row.isActive);
-		console.log('result', result);
 		setResponse(result);
 	};
 
@@ -124,7 +122,7 @@ export default function CategoryDataTable({ result, locale }: { result: ActionRe
 			header: 'columns.name',
 			cell: ({ row }) => (
 				<Link
-					href={`/dashboard/categories/${row.original.id}`}
+					href={`${url_segment}/${row.original.id}`}
 					className='font-medium hover:underline text-primary'
 					onClick={(e) => e.stopPropagation()}
 				>
