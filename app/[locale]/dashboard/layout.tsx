@@ -7,7 +7,8 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/s
 import TranslationsProvider from '@/contexts/translations-provider';
 import { TLayoutProps } from '../layout';
 
-const i18nNamespaces = ['dashboard'];
+export const i18nNamespaces = ['dashboard'];
+export const dash_url = '/dashboard';
 
 export default async function DashboardLayout({ children, params }: TLayoutProps) {
 	const { locale } = await params;

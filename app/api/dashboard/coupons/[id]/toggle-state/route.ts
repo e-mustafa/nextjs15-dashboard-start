@@ -1,6 +1,6 @@
 import { HandlerContext, errorHandler } from '@/lib/error-handler/error-handler-route';
 import { AppError } from '@/lib/error-handler/error-handler.server';
-import { toggleStateCoupon } from '@/server/services/coupon-service.js';
+import { toggleStateCoupon } from '@/server/services/coupon-service';
 
 // GET /api/coupons/:id
 

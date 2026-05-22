@@ -1,23 +1,20 @@
 import { TLayoutProps } from '@/app/[locale]/layout';
 import initTranslations from '@/app/i18n';
 import BreadcrumbDashboard from '@/components/Dashboard/breadcrumb-dashboard';
+import HeadSectionGeneral from '@/components/Dashboard/shard/head-section-general-page';
 import LoaderTableSkeleton from '@/components/shard/loaders/loader-table-skeleton';
-import { Button } from '@/components/ui-custom/custom-button';
 import { getDataInPage } from '@/lib/utils.server/api.server';
 import { FormattedDiscount } from '@/server/services/discount-service';
-import { FilePlusIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import Link from 'next/link';
 import { Suspense } from 'react';
+import { dash_url, i18nNamespaces } from '../../layout';
 
 const DiscountDataTable = dynamic(() => import('@/components/Dashboard/dataTable-sections/discounts-dataTable'), {
 	// ssr: false,
 });
 
-export const url_segment = 'dashboard/discounts';
+export const url_segment = `${dash_url}/discounts`;
 export const tags = ['discounts', 'products'];
-
-const i18nNamespaces = ['dashboard'];
 
 export default async function DiscountsPage({ params }: TLayoutProps) {
 	const { locale } = await params;
@@ -28,18 +25,13 @@ export default async function DiscountsPage({ params }: TLayoutProps) {
 	return (
 		<div className='page-component flex-col'>
 			<BreadcrumbDashboard />
-			<div className='stack-component flex-wrap'>
-				<h1>
-					{t('common.sections.list')} {t('common.sections.discounts')}
-				</h1>
 
-				<Button asChild className='ms-auto'>
-					<Link href='/dashboard/discounts/create'>
-						<FilePlusIcon />
-						{t('common.sections.create_discount')}
-					</Link>
-				</Button>
-			</div>
+			<HeadSectionGeneral
+				title={t('common.sections.list_section', { name: t('common.sections.discounts') })}
+				link={`${url_segment}/create`}
+				btnTitle={t('common.sections.create_discount')}
+			/>
+
 			<div className='stack-component'>
 				<Suspense
 					fallback={
