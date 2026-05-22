@@ -1,11 +1,11 @@
 import { TLayoutProps } from '@/app/[locale]/layout';
 import initTranslations from '@/app/i18n';
 import BreadcrumbDashboard from '@/components/Dashboard/breadcrumb-dashboard';
-import LoaderTableSkeleton from '@/components/shard/loaders/loader-table-skeleton';
+import LoaderTableSkeleton from '@/components/Shared/loaders/loader-table-skeleton';
 import { getDataInPage } from '@/lib/utils.server/api.server';
 import { Product } from '@prisma/client';
 // import { Product } from '@/server/services/product-service';
-import HeadSectionGeneral from '@/components/Dashboard/shard/head-section-general-page';
+import HeadSectionGeneral from '@/components/Dashboard/Shared/head-section-general-page';
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { dash_url, i18nNamespaces } from '../../layout';

@@ -1,7 +1,7 @@
 import initTranslations from '@/app/i18n';
 import BreadcrumbDashboard from '@/components/Dashboard/breadcrumb-dashboard';
-import HeadSectionCreate from '@/components/Dashboard/shard/head-section-create-page';
-import LoaderBlock from '@/components/shard/loaders/loader-block';
+import HeadSectionCreate from '@/components/Dashboard/Shared/head-section-create-page';
+import LoaderBlock from '@/components/Shared/loaders/loader-block';
 import { TLocalesData } from '@/configs/general';
 import { EnumFormTypes } from '@/constant/enums-development';
 import { getDataInPage } from '@/lib/utils.server/api.server';

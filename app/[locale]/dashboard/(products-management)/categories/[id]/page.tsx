@@ -1,15 +1,15 @@
 import initTranslations from '@/app/i18n';
 import BreadcrumbDashboard from '@/components/Dashboard/breadcrumb-dashboard';
-import HeadSectionCreate from '@/components/Dashboard/shard/head-section-create-page';
-import LoaderBlock from '@/components/shard/loaders/loader-block';
+import HeadSectionCreate from '@/components/Dashboard/Shared/head-section-create-page';
+import LoaderBlock from '@/components/Shared/loaders/loader-block';
 import { TLocalesData } from '@/configs/general';
 import { EnumFormTypes } from '@/constant/enums-development';
 import { getDataInPage } from '@/lib/utils.server/api.server';
 import { TCategoryFormValues } from '@/validation/category-validation';
 import dynamic from 'next/dynamic';
 import { ReactNode, Suspense } from 'react';
-import { url_segment } from '../page';
 import { i18nNamespaces } from '../../../layout';
+import { url_segment } from '../page';
 
 const CategoryForm = dynamic(() => import('@/components/Dashboard/forms/category-form'), {
 	// ssr: false,

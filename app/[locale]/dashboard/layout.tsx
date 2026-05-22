@@ -1,6 +1,6 @@
 import initTranslations from '@/app/i18n';
 import { AppSidebar } from '@/components/Dashboard/Sidebar/app-sidebar';
-import GlobalProgressBar from '@/components/shard/loaders/global-progress-bar';
+import GlobalProgressBar from '@/components/Shared/loaders/global-progress-bar';
 import { ScrollArea } from '@/components/ui-custom/custom-scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar-rtl';

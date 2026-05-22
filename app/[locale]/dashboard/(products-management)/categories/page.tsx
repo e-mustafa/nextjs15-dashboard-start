@@ -1,8 +1,8 @@
 import { TLayoutProps } from '@/app/[locale]/layout';
 import initTranslations from '@/app/i18n';
 import BreadcrumbDashboard from '@/components/Dashboard/breadcrumb-dashboard';
-import HeadSectionGeneral from '@/components/Dashboard/shard/head-section-general-page';
-import LoaderTableSkeleton from '@/components/shard/loaders/loader-table-skeleton';
+import HeadSectionGeneral from '@/components/Dashboard/Shared/head-section-general-page';
+import LoaderTableSkeleton from '@/components/Shared/loaders/loader-table-skeleton';
 import { getDataInPage } from '@/lib/utils.server/api.server';
 import { Category } from '@/server/services/category-service';
 import dynamic from 'next/dynamic';

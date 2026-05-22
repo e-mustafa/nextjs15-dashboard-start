@@ -1,7 +1,5 @@
 'use client';
 
-import { ChevronRight, type LucideIcon } from 'lucide-react';
-
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
@@ -15,11 +13,12 @@ import {
 	SidebarMenuSubItem,
 	useSidebar,
 } from '@/components/ui/sidebar-rtl';
-import { TLocalesData } from '@/configs/general';
+import useLocale from '@/hooks/useLocale';
 import { cn } from '@/lib/utils';
+import { ChevronRight, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation.js';
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 
 export interface TSidebarItems {
 	group_name?: string;
@@ -33,10 +32,20 @@ export interface TSidebarItems {
 }
 
 export function NavMain({ items }: { items: TSidebarItems[] }) {
-	const { t, i18n } = useTranslation();
-	const locale = i18n.language as TLocalesData;
+	const { t, locale } = useLocale();
 	const { state } = useSidebar();
+	const pathname = usePathname().replace(new RegExp(`^/${locale}`), '');
 	const [openPopoverIndex, setOpenPopoverIndex] = useState<number | null>(null);
+
+	const isItemActive = (item: TSidebarItems): boolean => {
+		if (item.url && item.url !== '#') return pathname.startsWith(item.url);
+		if (item.items) return item.items.some((sub) => sub.url && pathname === sub.url);
+		return false;
+	};
+
+	const isSubItemActive = (url: string): boolean => {
+		return pathname.startsWith(url);
+	};
 
 	return (
 		<SidebarGroup className='p-1'>
@@ -44,21 +53,27 @@ export function NavMain({ items }: { items: TSidebarItems[] }) {
 				{items.map((item, index) => {
 					const hasChildren = item.items && item.items.length > 0;
 					const itemKey = item.title + index;
+					const active = isItemActive(item);
 
 					return (
 						<div key={itemKey} className='relative text-sidebar-primary'>
-							{item.group_name && item.group_name && state !== 'collapsed' && (
+							{item.group_name && state !== 'collapsed' && (
 								<SidebarGroupLabel>{t(item.group_name)}</SidebarGroupLabel>
 							)}
 
 							{hasChildren ? (
 								state !== 'collapsed' ? (
-									<Collapsible asChild defaultOpen={item.isActive} className='group/collapsible '>
+									<Collapsible
+										asChild
+										defaultOpen={active} // 👈 un collapse if some it's chid is active
+										className='group/collapsible'
+									>
 										<SidebarMenuItem>
 											<CollapsibleTrigger asChild>
 												<SidebarMenuButton
 													size='lg'
 													tooltip={t(item.title)}
+													isActive={active}
 													className='rtl:text-start group-data-[state=open]/collapsible:bg-muted!'
 												>
 													{item.icon && <item.icon className='size-6!' />}
@@ -70,7 +85,11 @@ export function NavMain({ items }: { items: TSidebarItems[] }) {
 												<SidebarMenuSub className='rtl:border-r-2 rtl:border-l-0'>
 													{item.items?.map((subItem, subIndex) => (
 														<SidebarMenuSubItem key={subItem.title + subIndex} className='group'>
-															<SidebarMenuSubButton asChild className='p-2 h-auto'>
+															<SidebarMenuSubButton
+																asChild
+																className='p-2 h-auto data-[active=true]:bg-sidebar-primary/20'
+																isActive={isSubItemActive(subItem.url)}
+															>
 																<Link href={subItem.url} className='flex items-center gap-2 capitalize'>
 																	{subItem.icon && <subItem.icon className='size-full!' />}
 																	{t(subItem.title)}
@@ -83,26 +102,23 @@ export function NavMain({ items }: { items: TSidebarItems[] }) {
 										</SidebarMenuItem>
 									</Collapsible>
 								) : (
+									// Popover (collapsed state)
 									<div
-										key={itemKey}
 										className='relative group'
 										onMouseEnter={() => setOpenPopoverIndex(index)}
 										onMouseLeave={() => setOpenPopoverIndex(null)}
 									>
 										<Popover open={openPopoverIndex === index}>
-											<PopoverTrigger asChild className=''>
+											<PopoverTrigger asChild>
 												<SidebarMenuButton
 													size='lg'
-													tooltip={state !== 'collapsed' ? t(item.title) : ''}
+													isActive={active}
 													className={cn(
 														'rtl:text-start p-1!',
-														openPopoverIndex === index && ' bg-sidebar-accent text-sidebar-foreground',
+														openPopoverIndex === index && 'bg-sidebar-accent text-sidebar-foreground',
 													)}
 												>
 													{item.icon && <item.icon className='size-full!' />}
-													{state !== 'collapsed' && (
-														<span className='grow truncate capitalize'>{t(item.title)}</span>
-													)}
 												</SidebarMenuButton>
 											</PopoverTrigger>
 											<PopoverContent
@@ -112,13 +128,17 @@ export function NavMain({ items }: { items: TSidebarItems[] }) {
 											>
 												<SidebarMenuSub className='m-0 p-0 border-0'>
 													{!!item.group_name && (
-														<span className='text-muted-foreground text-center text-xs'>
+														<span className='text-muted-foreground text-center text-xs mb-2'>
 															{t(item.group_name)}
 														</span>
 													)}
 													{item.items?.map((subItem, subIndex) => (
 														<SidebarMenuSubItem key={subItem.title + subIndex} className='group'>
-															<SidebarMenuSubButton asChild className='p-2 h-auto'>
+															<SidebarMenuSubButton
+																asChild
+																className='p-2 h-auto hover:bg-sidebar-primary/10 data-[active=true]:bg-sidebar-primary/20'
+																isActive={isSubItemActive(subItem.url)} // 👈
+															>
 																<Link href={subItem.url} className='flex items-center gap-2 capitalize'>
 																	{subItem.icon && <subItem.icon className='size-full!' />}
 																	{t(subItem.title)}
@@ -132,16 +152,17 @@ export function NavMain({ items }: { items: TSidebarItems[] }) {
 									</div>
 								)
 							) : (
-								<SidebarMenuButton size='lg' tooltip={t(item.title)} className='rtl:text-start'>
-									{item.icon && <item.icon className={cn(state == 'collapsed' ? 'size-8!' : 'size-6!')} />}
-
-									{item.url ? (
-										<Link href={item.url} className='grow truncate capitalize'>
-											{t(item.title)}
-										</Link>
-									) : (
-										<span className='grow truncate capitalize'>{t(item.title)}</span>
-									)}
+									// No children
+								<SidebarMenuButton
+									size='lg'
+									tooltip={t(item.title)}
+									isActive={pathname === item.url}
+									className='rtl:text-start data-[active=true]:bg-sidebar-primary/20'
+								>
+									{item.icon && <item.icon className={cn(state === 'collapsed' ? 'size-8!' : 'size-6!')} />}
+									<Link href={item.url} className='grow truncate capitalize'>
+										{t(item.title)}
+									</Link>
 								</SidebarMenuButton>
 							)}
 						</div>

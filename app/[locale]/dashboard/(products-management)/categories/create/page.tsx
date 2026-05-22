@@ -1,8 +1,8 @@
 import { TLayoutProps } from '@/app/[locale]/layout';
 import initTranslations from '@/app/i18n';
 import BreadcrumbDashboard from '@/components/Dashboard/breadcrumb-dashboard';
-import HeadSectionCreate from '@/components/Dashboard/shard/head-section-create-page';
-import LoaderFormSkeleton from '@/components/shard/loaders/loader-form-skeleton';
+import HeadSectionCreate from '@/components/Dashboard/Shared/head-section-create-page';
+import LoaderFormSkeleton from '@/components/Shared/loaders/loader-form-skeleton';
 import { EnumFormTypes } from '@/constant/enums-development';
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
