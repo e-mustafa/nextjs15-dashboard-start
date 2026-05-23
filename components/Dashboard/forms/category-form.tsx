@@ -1,6 +1,7 @@
 'use client';
 
 import { url_segment } from '@/app/[locale]/dashboard/(products-management)/categories/page';
+import { url_segment as url_Product } from '@/app/[locale]/dashboard/(products-management)/products/page';
 import LoaderInstElement from '@/components/Shared/loaders/loader-inst-element';
 import { Form } from '@/components/ui-custom/custom-form';
 import { config_env } from '@/configs/general';
@@ -90,7 +91,8 @@ export const formSections_category: SectionConfig<TFormValues>[] = [
 				name: 'products',
 				label: msg('common.actions.choose_', { item: 'common.sections.products' }),
 				placeholder: 'forms.placeholders.choose_categorys_products',
-				optionUrl: `${config_env.domainAPI}/dashboard/categories`,
+				optionUrl: `${config_env.domainAPI}${url_Product}`,
+				multiple: true
 			},
 		],
 	},
@@ -122,7 +124,7 @@ export default function CategoryForm({
 	const [isPending, startTransition] = useTransition();
 
 	useFormResponse<TFormValues>(result!, form, {
-		redirectUrl: `/${url_segment}`,
+		redirectUrl: `${url_segment}`,
 		reset_on_success: (result?.data as TFormValues) || true,
 	});
 

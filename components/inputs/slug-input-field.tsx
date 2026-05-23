@@ -45,7 +45,6 @@ export default function SlugInputField<T extends FieldValues, K extends FieldTyp
 	const { t } = useTranslation();
 
 	const formatSlug = async (slug: string, form: UseFormReturn<T>) => {
-		// if (slug) return;
 		const formattedSlug = await slugify(slug, locale);
 		form.setValue(name as Path<T>, formattedSlug as PathValue<T, Path<T>>, { shouldValidate: true });
 	};
@@ -86,7 +85,10 @@ export default function SlugInputField<T extends FieldValues, K extends FieldTyp
 								placeholder={t(placeholder as string)}
 								className={cn(IconStart && 'ps-10', IconEnd && 'pe-10')}
 								{...field}
-								onChange={(event) => formatSlug(event.target.value, form)}
+								onChange={(event) => {
+									field.onChange(event);
+									formatSlug(event.target.value, form);
+								}}
 							/>
 						</FormControl>
 

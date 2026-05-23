@@ -2,14 +2,7 @@ import { FieldTypeMap, RenderFieldProps } from '@/lib/create-forms/types-create-
 import { JSX } from 'react';
 import { FieldValues, Path } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import {
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessageTranslated,
-} from '../ui-custom/custom-form';
+import { FormDescription, FormField, FormItem, FormLabel, FormMessageTranslated } from '../ui-custom/custom-form';
 import SharedPostMockupCard from './shared-post-mockup';
 
 export default function SharedPostMockupField<T extends FieldValues, K extends FieldTypeMap>({
@@ -31,8 +24,7 @@ export default function SharedPostMockupField<T extends FieldValues, K extends F
 		},
 	};
 	const image = form.watch('seoImage' as Path<T>)?.[0]?.url || form.watch('images' as Path<T>)?.[0]?.url;
-	
-	
+
 	return (
 		<FormField
 			control={form.control}
@@ -40,10 +32,7 @@ export default function SharedPostMockupField<T extends FieldValues, K extends F
 			render={() => (
 				<FormItem className={fieldConfig.class}>
 					<FormLabel aria-required={!!required}>{t(label as string)}</FormLabel>
-					<FormControl>
-						<SharedPostMockupCard data={data} image={image} />;
-					</FormControl>
-
+					<SharedPostMockupCard data={data} image={image} />;
 					{description && <FormDescription>{t(description as string)}</FormDescription>}
 					<FormMessageTranslated />
 				</FormItem>

@@ -133,10 +133,10 @@ export default function ComboboxInputField<T extends FieldValues>({
 								returnFullObject={returnObject}
 								linkHref={linkHref}
 								customColumn={fieldConfig.customColumn}
+								{...field}
 								// ={fieldConfig.customColumn}
 								// onChange={(val) => setBrandsValue(val as string[])}
 								// onChange={field.onChange}
-								{...field}
 								// options={Array.isArray(value) ? value : [value]}
 								// value={value && Array.isArray(value) ? value?.map((v: T) => v.id) : value?.id}
 							/>

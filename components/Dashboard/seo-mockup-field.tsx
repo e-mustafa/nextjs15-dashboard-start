@@ -2,14 +2,7 @@ import { FieldTypeMap, RenderFieldProps } from '@/lib/create-forms/types-create-
 import { JSX } from 'react';
 import { FieldValues, Path } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import {
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessageTranslated,
-} from '../ui-custom/custom-form';
+import { FormDescription, FormField, FormItem, FormLabel, FormMessageTranslated } from '../ui-custom/custom-form';
 import SEOMockupCard from './seo-mockup';
 
 export default function seoMockupField<T extends FieldValues, K extends FieldTypeMap>({
@@ -39,10 +32,7 @@ export default function seoMockupField<T extends FieldValues, K extends FieldTyp
 			render={() => (
 				<FormItem className={fieldConfig.class}>
 					<FormLabel aria-required={!!required}>{t(label as string)}</FormLabel>
-					<FormControl>
-						<SEOMockupCard data={data} image={image} />;
-					</FormControl>
-
+					<SEOMockupCard data={data} image={image} />;
 					{description && <FormDescription>{t(description as string)}</FormDescription>}
 					<FormMessageTranslated />
 				</FormItem>
