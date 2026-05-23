@@ -38,7 +38,15 @@ export function NavMain({ items }: { items: TSidebarItems[] }) {
 	const [openPopoverIndex, setOpenPopoverIndex] = useState<number | null>(null);
 
 	const isItemActive = (item: TSidebarItems): boolean => {
-		if (item.url && item.url !== '#') return pathname.startsWith(item.url);
+		const hasChildren = item.items && item.items.length > 0;
+
+		if (item.url && item.url !== '#') {
+			// full match for elements without children
+			if (!hasChildren) return pathname === item.url;
+			// partial match for elements with children => startsWith
+			return pathname.startsWith(item.url);
+		}
+
 		if (item.items) return item.items.some((sub) => sub.url && pathname === sub.url);
 		return false;
 	};
