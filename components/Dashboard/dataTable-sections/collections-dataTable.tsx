@@ -1,5 +1,5 @@
 'use client';
-import { url_segment } from '@/app/[locale]/dashboard/(products-management)/collections/page';
+import { tags, url_segment } from '@/app/[locale]/dashboard/(products-management)/collections/page';
 import { imagesPlaceholder, TLocalesData } from '@/configs/general';
 import { useServerResponse } from '@/hooks/use-server-response';
 import { getDataInPage } from '@/lib/utils.server/api.server';
@@ -29,8 +29,7 @@ export default function CollectionDataTable({ result, locale }: { result: Action
 	// ✅ Optimistic UI state
 	const [optimisticData, setOptimisticData] = useOptimistic<Collection[]>((result.data as Collection[]) ?? []);
 	const [meta, setMeta] = useState<ApiMeta>(result.meta as ApiMeta);
-	console.log('meta--', meta);
-
+	
 	// ---------------------------------------------------------
 	// URL Query Parameters
 	// ---------------------------------------------------------
@@ -60,8 +59,8 @@ export default function CollectionDataTable({ result, locale }: { result: Action
 	const handleServerRequest = useCallback(
 		async ({ page, limit, search, sortBy, sortOrder }: TQueryParams) => {
 			const res: ActionResult<Collection> = await getDataInPage<Collection>({
-				url_segment: url_segment,
-				tags: ['collections'],
+				url_segment,
+				tags: tags,
 				locale,
 				query: { page, limit, search, sortBy, sortOrder },
 			});
@@ -71,7 +70,7 @@ export default function CollectionDataTable({ result, locale }: { result: Action
 				setMeta(res.meta as ApiMeta);
 			});
 		},
-		[locale]
+		[locale],
 	);
 
 	// ---------------------------------------------------------
@@ -95,7 +94,6 @@ export default function CollectionDataTable({ result, locale }: { result: Action
 
 	const handleToggleStatus = async (row: Collection) => {
 		const result = await toggleStateCollectionAction(row.id, !row.isActive);
-		console.log('result', result);
 		setResponse(result);
 	};
 

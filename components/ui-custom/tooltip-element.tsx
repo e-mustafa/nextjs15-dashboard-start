@@ -12,7 +12,7 @@ export default function TooltipElement({
 	return (
 		<Tooltip delayDuration={delayDuration}>
 			<TooltipTrigger asChild>{children}</TooltipTrigger>
-			<TooltipContent>{content}</TooltipContent>
+			<TooltipContent className='bg-lagoon'>{content}</TooltipContent>
 		</Tooltip>
 		// <TooltipProvider></TooltipProvider>
 	);

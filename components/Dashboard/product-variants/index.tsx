@@ -1,5 +1,5 @@
 import ReusableSelect from '@/components/inputs/reusable-select';
-import { ReusableDNDSortable, SortableDNDWrapper } from '@/components/shard/dnd-kit-sortable';
+import { ReusableDNDSortable, SortableDNDWrapper } from '@/components/Shared/dnd-kit-sortable';
 import { Button } from '@/components/ui-custom/custom-button';
 import { Label } from '@/components/ui/label';
 import { isDEV } from '@/configs/general';
@@ -147,7 +147,8 @@ export default function ProductVariantsComponent({
 
 				return newCombo.attributes.every((attr) =>
 					old.attributes.some(
-						(oldAttr) => oldAttr.attributeId === attr.attributeId && oldAttr.attributeValueId === attr.attributeValueId
+						(oldAttr) =>
+							oldAttr.attributeId === attr.attributeId && oldAttr.attributeValueId === attr.attributeValueId,
 					)
 				);
 			});

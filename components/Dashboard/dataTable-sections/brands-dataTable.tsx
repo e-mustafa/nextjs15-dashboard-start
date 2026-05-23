@@ -1,5 +1,5 @@
 'use client';
-import { url_segment } from '@/app/[locale]/dashboard/(products-management)/brands/page';
+import { tags, url_segment } from '@/app/[locale]/dashboard/(products-management)/brands/page';
 import { imagesPlaceholder, TLocalesData } from '@/configs/general';
 import { useServerResponse } from '@/hooks/use-server-response';
 import { getDataInPage } from '@/lib/utils.server/api.server';
@@ -25,7 +25,6 @@ export default function BrandDataTable({ result, locale }: { result: ActionResul
 	// ✅ Optimistic UI state
 	const [optimisticData, setOptimisticData] = useOptimistic<Brand[]>((result.data as Brand[]) ?? []);
 	const [meta, setMeta] = useState<ApiMeta>(result.meta as ApiMeta);
-	console.log('meta--', meta);
 
 	// ---------------------------------------------------------
 	// URL Query Parameters
@@ -56,8 +55,8 @@ export default function BrandDataTable({ result, locale }: { result: ActionResul
 	const handleServerRequest = useCallback(
 		async ({ page, limit, search, sortBy, sortOrder }: TQueryParams) => {
 			const res: ActionResult<Brand> = await getDataInPage<Brand>({
-				url_segment: url_segment,
-				tags: ['brands'],
+				url_segment,
+				tags,
 				locale,
 				query: { page, limit, search, sortBy, sortOrder },
 			});
@@ -67,7 +66,7 @@ export default function BrandDataTable({ result, locale }: { result: ActionResul
 				setMeta(res.meta as ApiMeta);
 			});
 		},
-		[locale]
+		[locale],
 	);
 
 	// ---------------------------------------------------------
@@ -94,7 +93,6 @@ export default function BrandDataTable({ result, locale }: { result: ActionResul
 	// ---------------------------------------------------------
 	const handleToggleStatus = async (row: Brand) => {
 		const result = await toggleStateBrandAction(row.id, !row.isActive);
-		console.log('result', result);
 		setResponse(result);
 	};
 
@@ -123,7 +121,7 @@ export default function BrandDataTable({ result, locale }: { result: ActionResul
 			header: 'columns.name',
 			cell: ({ row }) => (
 				<Link
-					href={`/dashboard/brands/${row.original.id}`}
+					href={`${url_segment}/${row.original.id}`}
 					className='font-medium hover:underline text-primary'
 					onClick={(e) => e.stopPropagation()}
 				>

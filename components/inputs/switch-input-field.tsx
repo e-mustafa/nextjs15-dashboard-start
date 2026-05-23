@@ -1,10 +1,9 @@
+import InfoIconTooltip from '@/components/Shared/info-icon-tooltip';
+import { FormDescription, FormField, FormItem, FormLabel, FormMessageTranslated } from '@/components/ui-custom/custom-form';
+import { RenderFieldProps } from '@/lib/create-forms/types-create-forms';
+import { cn } from '@/lib/utils';
 import { JSX, useId } from 'react';
 import { FieldValues } from 'react-hook-form';
-
-import InfoIconTooltip from '@/components/inputs/info-icon-tooltip';
-import { FormDescription, FormField, FormItem, FormLabel, FormMessageTranslated } from '@/components/ui-custom/custom-form';
-import { FieldTypeMap, RenderFieldProps } from '@/lib/create-forms/types-create-forms';
-import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { Switch } from '../ui/switch';
 
@@ -14,10 +13,10 @@ import { Switch } from '../ui/switch';
  * @param {RenderFieldProps<T, K>} props variants can be 'input' to be same as input text or undefined
  * @returns {JSX.Element}
  */
-export default function SwitchInputField<T extends FieldValues, K extends FieldTypeMap>({
+export default function SwitchInputField<T extends FieldValues>({
 	fieldConfig: { name, label, placeholder, infoContent, required, IconStart, locale, variants, ...fieldConfig },
 	form,
-}: RenderFieldProps<T, K>): JSX.Element {
+}: RenderFieldProps<T, 'switch'>): JSX.Element {
 	const { t } = useTranslation();
 	const id = useId();
 
@@ -47,7 +46,7 @@ export default function SwitchInputField<T extends FieldValues, K extends FieldT
 						className={cn(
 							'flex gap-3 items-center',
 							variants === 'input' &&
-								'justify-between file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input  h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive [&_label]:grow'
+								'justify-between file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input  h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive [&_label]:grow',
 						)}
 					>
 						<FormLabel htmlFor={id} className='text-sm font-normal text-muted-foreground '>

@@ -1,23 +1,20 @@
 import { TLayoutProps } from '@/app/[locale]/layout';
 import initTranslations from '@/app/i18n';
 import BreadcrumbDashboard from '@/components/Dashboard/breadcrumb-dashboard';
-import LoaderTableSkeleton from '@/components/shard/loaders/loader-table-skeleton';
-import { Button } from '@/components/ui-custom/custom-button';
+import HeadSectionGeneral from '@/components/Dashboard/Shared/head-section-general-page';
+import LoaderTableSkeleton from '@/components/Shared/loaders/loader-table-skeleton';
 import { getDataInPage } from '@/lib/utils.server/api.server';
 import { FormattedCoupon } from '@/server/services/coupon-service';
-import { FilePlusIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import Link from 'next/link';
 import { Suspense } from 'react';
+import { dash_url, i18nNamespaces } from '../../layout';
 
 const CouponDataTable = dynamic(() => import('@/components/Dashboard/dataTable-sections/coupons-dataTable'), {
 	// ssr: false,
 });
 
-export const url_segment = 'dashboard/coupons';
+export const url_segment = `${dash_url}/coupons`;
 export const tags = ['coupons', 'products'];
-
-export const i18nNamespaces = ['dashboard'];
 
 export default async function CouponsPage({ params }: TLayoutProps) {
 	const { locale } = await params;
@@ -30,18 +27,13 @@ export default async function CouponsPage({ params }: TLayoutProps) {
 	return (
 		<div className='page-component flex-col'>
 			<BreadcrumbDashboard />
-			<div className='stack-component flex-wrap'>
-				<h1>
-					{t('common.sections.list')} {t('common.sections.coupons')}
-				</h1>
 
-				<Button asChild className='ms-auto'>
-					<Link href='/dashboard/coupons/create'>
-						<FilePlusIcon />
-						{t('common.sections.create_coupon')}
-					</Link>
-				</Button>
-			</div>
+			<HeadSectionGeneral
+				title={t('common.sections.list_section', { name: t('common.sections.coupons') })}
+				link={`${url_segment}/create`}
+				btnTitle={t('common.sections.create_coupon')}
+			/>
+
 			<div className='stack-component'>
 				<Suspense
 					fallback={

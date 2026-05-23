@@ -1,5 +1,5 @@
 'use client';
-import { url_segment } from '@/app/[locale]/dashboard/(products-management)/discounts/page';
+import { tags, url_segment } from '@/app/[locale]/dashboard/(products-management)/discounts/page';
 import { TLocalesData } from '@/configs/general';
 import { useServerResponse } from '@/hooks/use-server-response';
 import { formDate } from '@/lib/utils';
@@ -34,7 +34,6 @@ export default function DiscountDataTable({ result, locale }: { result: ActionRe
 	// ✅ Optimistic UI state
 	const [optimisticData, setOptimisticData] = useOptimistic<TFormValues[]>((result.data as TFormValues[]) ?? []);
 	const [meta, setMeta] = useState<ApiMeta>(result.meta as ApiMeta);
-	console.log('meta--', meta);
 
 	// ---------------------------------------------------------
 	// URL Query Parameters
@@ -65,8 +64,8 @@ export default function DiscountDataTable({ result, locale }: { result: ActionRe
 	const handleServerRequest = useCallback(
 		async ({ page, limit, search, sortBy, sortOrder }: TQueryParams) => {
 			const res: ActionResult<TFormValues> = await getDataInPage<TFormValues>({
-				url_segment: url_segment,
-				tags: ['discounts'],
+				url_segment,
+				tags,
 				locale,
 				query: { page, limit, search, sortBy, sortOrder },
 			});
@@ -76,7 +75,7 @@ export default function DiscountDataTable({ result, locale }: { result: ActionRe
 				setMeta(res.meta as ApiMeta);
 			});
 		},
-		[locale]
+		[locale],
 	);
 
 	// ---------------------------------------------------------
@@ -103,7 +102,6 @@ export default function DiscountDataTable({ result, locale }: { result: ActionRe
 	// ---------------------------------------------------------
 	const handleToggleStatus = async (row: TFormValues) => {
 		const result = await toggleStateDiscountAction(row.id, !row.isActive);
-		console.log('result', result);
 		setResponse(result);
 	};
 
@@ -116,7 +114,7 @@ export default function DiscountDataTable({ result, locale }: { result: ActionRe
 			header: 'columns.name',
 			cell: ({ row }) => (
 				<Link
-					href={`/${url_segment}/${row.original.id}`}
+					href={`${url_segment}/${row.original.id}`}
 					className='font-medium hover:underline text-primary'
 					onClick={(e) => e.stopPropagation()}
 				>

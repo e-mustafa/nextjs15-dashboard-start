@@ -1,20 +1,20 @@
 'use client';
 
 import { FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui-custom/custom-form';
-import { FieldTypeMap, RenderFieldProps } from '@/lib/create-forms/types-create-forms';
+import { RenderFieldProps } from '@/lib/create-forms/types-create-forms';
 import { cn } from '@/lib/utils';
 import { Calendar1Icon, CalendarDaysIcon, CalendarRangeIcon } from 'lucide-react';
 import { JSX } from 'react';
 import { FieldValues } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import InfoIconTooltip from '../Shared/info-icon-tooltip';
 import { FormMessageTranslated } from '../ui-custom/custom-form';
-import InfoIconTooltip from './info-icon-tooltip';
 import MultiDatePicker, { EnumDatePickerMode } from './multi-date-picker';
 
-export function MultiDatePickerField<T extends FieldValues, K extends FieldTypeMap>({
+export default function MultiDatePickerField<T extends FieldValues>({
 	fieldConfig,
 	form,
-}: RenderFieldProps<T, K>): JSX.Element {
+}: RenderFieldProps<T, 'multiDatePicker'>): JSX.Element {
 	const {
 		name,
 		label,
@@ -25,8 +25,8 @@ export function MultiDatePickerField<T extends FieldValues, K extends FieldTypeM
 		IconStart = datePickerMode === EnumDatePickerMode.MULTIPLE
 			? CalendarDaysIcon
 			: datePickerMode === EnumDatePickerMode.RANGE
-			? CalendarRangeIcon
-			: Calendar1Icon,
+				? CalendarRangeIcon
+				: Calendar1Icon,
 	} = fieldConfig;
 
 	const { t } = useTranslation();

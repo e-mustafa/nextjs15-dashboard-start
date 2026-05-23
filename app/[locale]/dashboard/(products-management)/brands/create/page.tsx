@@ -1,20 +1,17 @@
 import { TLayoutProps } from '@/app/[locale]/layout';
 import initTranslations from '@/app/i18n';
 import BreadcrumbDashboard from '@/components/Dashboard/breadcrumb-dashboard';
-import LoaderBlock from '@/components/shard/loaders/loader-block';
-import { Button } from '@/components/ui-custom/custom-button';
+import HeadSectionCreate from '@/components/Dashboard/Shared/head-section-create-page';
+import LoaderBlock from '@/components/Shared/loaders/loader-block';
 import { EnumFormTypes } from '@/constant/enums-development';
-import { ArrowRightIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import Link from 'next/link';
 import { Suspense } from 'react';
+import { i18nNamespaces } from '../../../layout';
 import { url_segment } from '../page';
 
 const BrandForm = dynamic(() => import('@/components/Dashboard/forms/brand-form'), {
 	// ssr: false,
 });
-
-const i18nNamespaces = ['dashboard'];
 
 export default async function CreateBrandPage({ params }: TLayoutProps) {
 	const { locale } = await params;
@@ -23,14 +20,7 @@ export default async function CreateBrandPage({ params }: TLayoutProps) {
 	return (
 		<div className='page-component flex-col'>
 			<BreadcrumbDashboard lastPath={t('breadcrumbs.create_brand')} />
-			<div className='flex gap-2 items-center'>
-				<Button asChild variant='ghost' size='icon'>
-					<Link href={`/${url_segment}`}>
-						<ArrowRightIcon className='size-6 text-muted-foreground' />
-					</Link>
-				</Button>
-				{t('common.sections.create_brand')}
-			</div>
+			<HeadSectionCreate link={url_segment} title={t('common.sections.create_brand')} />
 
 			<Suspense fallback={<LoaderBlock />}>
 				<BrandForm type={EnumFormTypes.CREATE} />

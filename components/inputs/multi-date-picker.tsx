@@ -1,6 +1,10 @@
 'use client';
-
+import { TLocalesData } from '@/configs/general';
 import useLocale from '@/hooks/useLocale';
+import { cn } from '@/lib/utils';
+import '@/styles/multi-date-picker.css';
+import { useMemo, useState } from 'react';
+
 import arabic from 'react-date-object/calendars/arabic';
 import gregorian from 'react-date-object/calendars/gregorian';
 import arabic_ar from 'react-date-object/locales/arabic_ar';
@@ -8,14 +12,11 @@ import arabic_en from 'react-date-object/locales/arabic_en';
 import gregorian_ar from 'react-date-object/locales/gregorian_ar';
 import gregorian_en from 'react-date-object/locales/gregorian_en';
 
-import { Button } from '@/components/ui-custom/custom-button';
-import { TLocalesData } from '@/configs/general';
-import { cn } from '@/lib/utils';
-import '@/styles/multi-date-picker.css';
-import { useEffect, useMemo, useState } from 'react';
 import { Calendar, DateObject } from 'react-multi-date-picker';
 import highlightWeekends from 'react-multi-date-picker/plugins/highlight_weekends';
 import TimePicker from 'react-multi-date-picker/plugins/time_picker';
+
+import { Button } from '@/components/ui-custom/custom-button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
@@ -60,7 +61,7 @@ const monthsHijri_ar = [
 
 interface MultiDatePickerProps {
 	name?: string;
-	value?: string | string[] | null; // القيمة من الـ DB (gregorian format)
+	value?: string | string[] | null;
 	onChange?: (selectedDates: string | string[] | null) => void;
 	calendarType?: CalendarType;
 	language?: TLocalesData;
@@ -95,142 +96,134 @@ export default function MultiDatePicker({
 	dateOptions: { minDate, maxDate, disabledDates = [], onlyAllowedDates = [] } = {},
 }: MultiDatePickerProps) {
 	const { t, locale } = useLocale();
-	language = language || locale || 'en';
+	const activeLanguage = language || locale || 'en';
 
 	const [calenderTp, setCalenderTp] = useState(calendarType);
 	const dbFormatMode = timePicker ? dbFormatWTime : dbFormat;
-
-	// Display format for the calendar and input
 	const screenFormat = timePicker ? displayFormatWTime : displayFormat;
 
-	// Convert DB value (gregorian) to DateObject for calendar display
-	const dateObjectValue = useMemo(() => {
-		if (!value) return null;
-
-		try {
-			if (Array.isArray(value)) {
-				// Range or Multiple mode
-				return value.map((dateStr) => {
-					const dateObj = new DateObject({
-						date: dateStr,
-						format: dbFormatMode,
-						calendar: gregorian,
-						locale: gregorian_en,
-					});
-
-					// Convert to selected calendar type for display
-					if (calenderTp === CalendarType.HIJRI) {
-						return dateObj.convert(arabic, locale === 'ar' ? arabic_ar : arabic_en);
-					}
-					return dateObj.convert(gregorian, locale === 'ar' ? gregorian_ar : gregorian_en);
-				});
-			} else {
-				// Single mode
-				const dateObj = new DateObject({
-					date: value,
-					format: dbFormatMode,
-					calendar: gregorian,
-					locale: gregorian_en,
-				});
-
-				// Convert to selected calendar type for display
-				if (calenderTp === CalendarType.HIJRI) {
-					return dateObj.convert(arabic, locale === 'ar' ? arabic_ar : arabic_en);
-				}
-				return dateObj.convert(gregorian, locale === 'ar' ? gregorian_ar : gregorian_en);
-			}
-		} catch (error) {
-			console.error('Error parsing date value:', error);
-			return null;
-		}
-	}, [value, calenderTp, locale, dbFormatMode]);
-
-	// Update calendar when switching between Hijri/Gregorian
-	useEffect(() => {
-		// Force re-render when calendar type changes
-	}, [calenderTp]);
-
-	// Get display text for input field
-	const displayText = useMemo(() => {
-		if (!dateObjectValue) return '';
-
-		if (Array.isArray(dateObjectValue)) {
-			if (range) {
-				// Range mode: show "start ~ end"
-				return dateObjectValue.map((d) => d.format(screenFormat)).join(' ~ ');
-			} else {
-				// Multiple mode: show "date1, date2, date3"
-				return dateObjectValue.map((d) => d.format(screenFormat)).join(', ');
-			}
-		} else {
-			// Single mode
-			return dateObjectValue.format(screenFormat);
-		}
-	}, [dateObjectValue, screenFormat, range]);
-
-	// Calendar configuration based on locale and calendar type
+	// 1. Calendar configuration
 	const calendarConfig = useMemo(() => {
 		const config = {
 			calendar: gregorian,
 			locale: gregorian_en,
 			weekStartDayIndex: 0,
-			weekendDays: [5, 6], // Friday & Saturday for Gregorian
+			weekendDays: [5, 6],
 		};
 
 		if (calenderTp === CalendarType.HIJRI) {
 			config.calendar = arabic;
-			config.locale = locale === 'ar' ? arabic_ar : arabic_en;
-			config.weekStartDayIndex = 1; // Start with Monday
-			config.weekendDays = [6, 0]; // Saturday & Sunday for Hijri
+			config.locale = activeLanguage === 'ar' ? arabic_ar : arabic_en;
+			config.weekStartDayIndex = 1;
+			config.weekendDays = [6, 0];
 		} else {
 			config.calendar = gregorian;
-			config.locale = locale === 'ar' ? gregorian_ar : gregorian_en;
-			config.weekStartDayIndex = 0; // Start with Sunday
-			config.weekendDays = [5, 6]; // Friday & Saturday
+			config.locale = activeLanguage === 'ar' ? gregorian_ar : gregorian_en;
+			config.weekStartDayIndex = 0;
+			config.weekendDays = [5, 6];
 		}
 
-		if (locale === 'ar') {
+		if (activeLanguage === 'ar') {
 			config.locale.meridiems = meridiems_ar;
-
 			if (calenderTp === CalendarType.HIJRI) {
 				config.locale.months = monthsHijri_ar;
 			}
 		}
 		return config;
-	}, [locale, calenderTp]);
+	}, [activeLanguage, calenderTp]);
 
+	// 2. Convert DB value to DateObject
+	const dateObjectValue = useMemo(() => {
+		if (!value) return null;
+
+		try {
+			const toDateObject = (dateStr: string) => {
+				const dateObj = new DateObject({
+					date: dateStr,
+					format: dbFormatMode,
+					calendar: gregorian,
+					locale: gregorian_en,
+				});
+				return dateObj.convert(calendarConfig.calendar, calendarConfig.locale);
+			};
+
+			if (Array.isArray(value)) {
+				return value.map(toDateObject);
+			}
+			return toDateObject(value);
+		} catch (error) {
+			console.error('Error parsing date value:', error);
+			return null;
+		}
+	}, [value, dbFormatMode, calendarConfig]);
+
+	// 3. Get display text
+	const displayText = useMemo(() => {
+		if (!dateObjectValue) return '';
+		if (Array.isArray(dateObjectValue)) {
+			return dateObjectValue.map((d) => d.format(screenFormat)).join(range ? ' ~ ' : ', ');
+		}
+		return dateObjectValue.format(screenFormat);
+	}, [dateObjectValue, screenFormat, range]);
+
+	// 🔥 4. PERFORMANCE BOOST: Pre-calculate blocked/allowed dates ONCE
+	const formattedDisabledDates = useMemo(() => {
+		if (!disabledDates?.length) return [];
+		return disabledDates.map((d) =>
+			new DateObject(d).convert(calendarConfig.calendar, calendarConfig.locale).format(displayFormat),
+		);
+	}, [disabledDates, calendarConfig]);
+
+	const formattedAllowedDates = useMemo(() => {
+		if (!onlyAllowedDates?.length) return [];
+		return onlyAllowedDates.map((d) =>
+			new DateObject(d).convert(calendarConfig.calendar, calendarConfig.locale).format(displayFormat),
+		);
+	}, [onlyAllowedDates, calendarConfig]);
+
+	// 5. Memoize Plugins
+	const calendarPlugins = useMemo(() => {
+		return [
+			...(timePicker ? [<TimePicker key='time-picker' hideSeconds format='hh:mm A' position='bottom' />] : []),
+			highlightWeekends(calendarConfig.weekendDays),
+		].filter(Boolean);
+	}, [timePicker, calendarConfig.weekendDays]);
+
+	// 6. Handlers
 	function handleOnChange(selectedDates: DateObject | DateObject[] | null) {
 		if (!selectedDates) {
 			onChange?.(null);
 			return;
 		}
 
-		// Convert selected dates to gregorian format for DB storage
 		let gregorianDate: string | string[] | null = null;
 
 		if (Array.isArray(selectedDates)) {
-			// Range or Multiple mode
-			gregorianDate = selectedDates.map((dateObj) => dateObj.convert(gregorian, gregorian_en).format(dbFormatMode));
+			gregorianDate = selectedDates.map((dateObj) => {
+				const nativeDate = new Date(dateObj.valueOf());
+				if (timePicker) return nativeDate.toISOString();
+				return new DateObject(dateObj).convert(gregorian, gregorian_en).format(dbFormat);
+			});
 		} else {
-			// Single mode
-			gregorianDate = selectedDates.convert(gregorian, gregorian_en).format(dbFormatMode);
+			const nativeDate = new Date(selectedDates.valueOf());
+			if (timePicker) {
+				gregorianDate = nativeDate.toISOString();
+			} else {
+				gregorianDate = new DateObject(selectedDates).convert(gregorian, gregorian_en).format(dbFormat);
+			}
 		}
 
 		onChange?.(gregorianDate);
 	}
 
 	function handleToday() {
-		// Get today in gregorian
+		// use the current calendar configuration to prevent flashing
 		const today = new DateObject({
-			calendar: gregorian,
-			locale: gregorian_en,
+			calendar: calendarConfig.calendar,
+			locale: calendarConfig.locale,
 		});
 
-		if (range || multiple) {
-			handleOnChange([today]);
-		} else {
-			handleOnChange(today);
-		}
+		handleOnChange(range || multiple ? [today] : today);
 	}
 
 	function handleClear() {
@@ -287,47 +280,28 @@ export default function MultiDatePicker({
 							disabled={disabled}
 							minDate={minDate && new DateObject(minDate)}
 							maxDate={maxDate && new DateObject(maxDate)}
+							plugins={calendarPlugins}
 							mapDays={({ date }) => {
-								if (disabledDates && disabledDates?.length > 0) {
-									const dates = disabledDates.map((d) =>
-										new DateObject(d).convert(calendarConfig.calendar, calendarConfig.locale).format(displayFormat)
-									);
+								// map each day to check if it is disabled
+								const currentDateStr = date.format(displayFormat);
+								let isDayDisabled = false;
 
-									// const formatted = date.convert(gregorian, gregorian_en).format('YYYY-MM-DD');
-									if (dates.includes(date.format(displayFormat))) {
-										return {
-											disabled: true, // Disable the day
-											style: {
-												opacity: 0.4,
-												textDecoration: 'line-through',
-											},
-										};
-									}
+								if (formattedDisabledDates.length > 0 && formattedDisabledDates.includes(currentDateStr)) {
+									isDayDisabled = true;
 								}
 
-								if (onlyAllowedDates && onlyAllowedDates?.length > 0) {
-									const dates = onlyAllowedDates.map((d) =>
-										new DateObject(d).convert(calendarConfig.calendar, calendarConfig.locale).format(displayFormat)
-									);
+								if (formattedAllowedDates.length > 0 && !formattedAllowedDates.includes(currentDateStr)) {
+									isDayDisabled = true;
+								}
 
-									if (!dates.includes(date.format(displayFormat))) {
-										return {
-											disabled: true, // Disable the day
-											style: {
-												opacity: 0.4,
-												textDecoration: 'line-through',
-											},
-										};
-									}
+								if (isDayDisabled) {
+									return {
+										disabled: true,
+										style: { opacity: 0.4, textDecoration: 'line-through' },
+									};
 								}
 								return {};
 							}}
-							plugins={[
-								...(timePicker
-									? [<TimePicker key='time-picker' hideSeconds format='hh:mm A' position='bottom' />]
-									: []),
-								highlightWeekends(calendarConfig.weekendDays),
-							].filter(Boolean)}
 						>
 							{/* Action Buttons */}
 							<div className='flex gap-3 items-center justify-center p-2 pt-0 rtl:flex-row-reverse'>

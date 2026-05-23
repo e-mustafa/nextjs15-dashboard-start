@@ -1,8 +1,7 @@
-import { TLocalesData } from '@/configs/general';
 import { ThemeProvider } from '@/contexts/theme-provider';
 import TranslationsProvider from '@/contexts/translations-provider';
-import Link from 'next/link';
 import '@/styles/globals.css';
+import Link from 'next/link';
 import initTranslations from './i18n';
 
 const i18nNamespaces = ['general'];
@@ -10,7 +9,7 @@ export default async function NotFoundPage() {
 	const { t, locale, resources } = await initTranslations(i18nNamespaces);
 
 	return (
-		<TranslationsProvider namespaces={i18nNamespaces} locale={locale as TLocalesData} resources={resources}>
+		<TranslationsProvider namespaces={i18nNamespaces} locale={locale} resources={resources}>
 			<ThemeProvider attribute='class' defaultTheme='system' enableSystem>
 				<div className='min-h-screen flex flex-col items-center justify-center text-center px-4'>
 					<h1 className='text-4xl font-bold mb-4'>{t('error_pages.NotFound.title')}</h1>

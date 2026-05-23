@@ -1,5 +1,5 @@
 'use client';
-import { ReusableDNDSortable, SortableDNDWrapper } from '@/components/shard/dnd-kit-sortable';
+import { ReusableDNDSortable, SortableDNDWrapper } from '@/components/Shared/dnd-kit-sortable';
 import { Button } from '@/components/ui-custom/custom-button';
 import { GripIcon, PlusIcon, TablePropertiesIcon } from 'lucide-react';
 import { useId } from 'react';

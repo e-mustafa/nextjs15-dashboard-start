@@ -1,9 +1,9 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { config_env, defaultLocale, localesData } from '@/configs/general';
 import { seoData, SEODataKey } from '@/configs/SEOData';
+import useLocale from '@/hooks/useLocale';
 import { SearchIcon } from 'lucide-react';
 import Image from 'next/image';
-import { useTranslation } from 'react-i18next';
 import { Skeleton } from '../ui/skeleton';
 
 export interface SEOMockupCardData {
@@ -20,13 +20,10 @@ export interface SEOMockupCardData {
 }
 
 export default function SEOMockupCard({ data, image }: { data?: SEOMockupCardData; image?: string }) {
-	const {
-		t,
-		i18n: { language },
-	} = useTranslation();
+	const { t, locale } = useLocale();
 
-	const infos = data && data[language as SEODataKey];
-	const oLang = (Object.keys(localesData)?.find((lng) => lng !== language) || defaultLocale.short) as SEODataKey;
+	const infos = data && data[locale as SEODataKey];
+	const oLang = (Object.keys(localesData)?.find((lng) => lng !== locale) || defaultLocale.short) as SEODataKey;
 
 	return (
 		<div className='w-full mx-auto space-y-4 bg-accent/20 p-4 rounded-2xl'>
@@ -84,7 +81,7 @@ export default function SEOMockupCard({ data, image }: { data?: SEOMockupCardDat
 							className='w-auto h-12 aspect-auto object-contain'
 						/>
 						<div className='grid gap-1.5'>
-							<p className='text-sm text-foreground'>{seoData[language as SEODataKey]?.title}</p>
+							<p className='text-sm text-foreground'>{seoData[locale as SEODataKey]?.title}</p>
 							<a href='#' className='text-sm text-foreground hover:underline'>
 								{config_env.domain || 'www.example.com'}
 							</a>

@@ -88,7 +88,8 @@
 			"create_coupon": "اضافة كوبون",
 			"edit_coupon": "تعديل الكوبون",
 			"gregorian": "التقويم الميلادي",
-			"hijri": "التقويم الهجري"
+			"hijri": "التقويم الهجري",
+			"list_section": "قائمة {{name}}"
 		},
 		"messages": {
 			"processing": "جارٍ المعالجة...",

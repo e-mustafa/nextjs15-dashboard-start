@@ -1,6 +1,6 @@
 'use client';
 import { url_segment } from '@/app/[locale]/dashboard/(products-management)/discounts/page';
-import LoaderInstElement from '@/components/shard/loaders/loader-inst-element';
+import LoaderInstElement from '@/components/Shared/loaders/loader-inst-element';
 import { Form } from '@/components/ui-custom/custom-form';
 import { config_env, currenciesData } from '@/configs/general';
 import { EnumFormTypes } from '@/constant/enums-development';
@@ -107,6 +107,7 @@ export default function DiscountForm({
 							label: 'forms.labels.discount_value',
 							placeholder: 'forms.labels.discount_value',
 							parentClass: 'min-w-full xl:min-w-[calc(50%-1.5rem)]',
+							required: true,
 
 							IconEnd: () => (
 								<span className='text-base text-muted-foreground'>
@@ -138,7 +139,7 @@ export default function DiscountForm({
 										),
 										// required: true,
 									},
-							  ]
+								]
 							: []),
 						// {
 						// 	type: 'date',
@@ -223,7 +224,7 @@ export default function DiscountForm({
 					],
 				},
 			] as SectionConfig<TFormValues>[],
-		[discountType]
+		[discountType],
 	);
 
 	const [result, setResult] = useState<ActionResult<FormattedDiscount> | null>(null);

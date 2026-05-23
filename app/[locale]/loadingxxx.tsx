@@ -1,4 +1,4 @@
-import LoaderBlock from '@/components/shard/loaders/loader-block';
+import LoaderBlock from '@/components/Shared/loaders/loader-block';
 
 export default async function Loading() {
 	return <LoaderBlock />;

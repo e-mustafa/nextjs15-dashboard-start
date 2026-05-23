@@ -1,7 +1,7 @@
 import { JSX, useEffect } from 'react';
 import { FieldValues, Path, PathValue, UseFormReturn } from 'react-hook-form';
 
-import InfoIconTooltip from '@/components/inputs/info-icon-tooltip';
+import InfoIconTooltip from '@/components/Shared/info-icon-tooltip';
 import {
 	FormControl,
 	FormDescription,
@@ -35,6 +35,7 @@ export default function SlugInputField<T extends FieldValues, K extends FieldTyp
 		infoContent = 'forms.infos.slug',
 		required = true,
 		IconStart = TicketSlashIcon,
+		IconEnd,
 		locale,
 		referenceInput,
 		...fieldConfig
@@ -44,10 +45,7 @@ export default function SlugInputField<T extends FieldValues, K extends FieldTyp
 	const { t } = useTranslation();
 
 	const formatSlug = async (slug: string, form: UseFormReturn<T>) => {
-		// if (slug) return;
-
 		const formattedSlug = await slugify(slug, locale);
-
 		form.setValue(name as Path<T>, formattedSlug as PathValue<T, Path<T>>, { shouldValidate: true });
 	};
 
@@ -85,9 +83,12 @@ export default function SlugInputField<T extends FieldValues, K extends FieldTyp
 							<Input
 								type='text'
 								placeholder={t(placeholder as string)}
-								className={cn(IconStart && 'ps-10', fieldConfig.IconEnd && 'pe-10')}
+								className={cn(IconStart && 'ps-10', IconEnd && 'pe-10')}
 								{...field}
-								onChange={(event) => formatSlug(event.target.value, form)}
+								onChange={(event) => {
+									field.onChange(event);
+									formatSlug(event.target.value, form);
+								}}
 							/>
 						</FormControl>
 
@@ -97,9 +98,9 @@ export default function SlugInputField<T extends FieldValues, K extends FieldTyp
 							</div>
 						)}
 
-						{fieldConfig.IconEnd && (
+						{IconEnd && (
 							<div className='absolute top-1/2 -translate-y-1/2 end-2 ms-2 w-5 text-muted-foreground'>
-								<fieldConfig.IconEnd />
+								<IconEnd />
 							</div>
 						)}
 					</div>

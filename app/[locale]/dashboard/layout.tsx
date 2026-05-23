@@ -1,13 +1,14 @@
 import initTranslations from '@/app/i18n';
 import { AppSidebar } from '@/components/Dashboard/Sidebar/app-sidebar';
-import GlobalProgressBar from '@/components/shard/loaders/global-progress-bar';
+import GlobalProgressBar from '@/components/Shared/loaders/global-progress-bar';
 import { ScrollArea } from '@/components/ui-custom/custom-scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar-rtl';
 import TranslationsProvider from '@/contexts/translations-provider';
 import { TLayoutProps } from '../layout';
 
-const i18nNamespaces = ['dashboard'];
+export const i18nNamespaces = ['dashboard'];
+export const dash_url = '/dashboard';
 
 export default async function DashboardLayout({ children, params }: TLayoutProps) {
 	const { locale } = await params;

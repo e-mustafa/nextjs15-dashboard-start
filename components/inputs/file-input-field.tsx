@@ -1,26 +1,26 @@
 'use client';
-
 import { FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui-custom/custom-form';
 import { Button } from '@/components/ui/button';
-import { FileUploadOptions, FileWithPreview, useFileUpload } from '@/hooks/use-file-upload';
-import { FieldTypeMap, RenderFieldProps } from '@/lib/create-forms/types-create-forms';
+import { FileWithPreview, useFileUpload } from '@/hooks/use-file-upload';
+import { RenderFieldProps } from '@/lib/create-forms/types-create-forms';
 import { cn } from '@/lib/utils';
 import { ImageUpIcon, XIcon } from 'lucide-react';
 import { JSX } from 'react';
 import { FieldValues } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import InfoIconTooltip from '../Shared/info-icon-tooltip';
 import { FormMessageTranslated } from '../ui-custom/custom-form';
-import InfoIconTooltip from './info-icon-tooltip';
 
-export function FileInputField<T extends FieldValues, K extends FieldTypeMap>({
+export default function FileInputField<T extends FieldValues>({
 	fieldConfig,
 	form,
-}: RenderFieldProps<T, K>): JSX.Element {
+}: RenderFieldProps<T, 'uploadFile'>): JSX.Element {
 	const {
 		name,
 		label,
 		required,
 		description,
+		class: className,
 		file: { accept = 'image/*', maxSize = 5 * 1024 * 1024, multiple = false } = {},
 	} = fieldConfig;
 
@@ -40,23 +40,20 @@ export function FileInputField<T extends FieldValues, K extends FieldTypeMap>({
 					maxFiles: multiple ? undefined : 1,
 					multiple,
 					onFilesChange: (newFiles) => {
-						field.onChange(multiple ? newFiles : newFiles[0] ?? null);
+						field.onChange(multiple ? newFiles : (newFiles[0] ?? null));
 					},
-				} as FileUploadOptions);
+				});
 
 				const value = field.value as FileWithPreview | FileWithPreview[] | string | undefined;
-
-				console.log('value', value);
 
 				const previewUrl =
 					typeof value !== 'string' ? (Array.isArray(value) ? value[0]?.preview : value?.preview) : value;
 
 				return (
-					<FormItem className={fieldConfig.class}>
+					<FormItem className={className}>
 						{!fieldConfig.infoContent ? (
 							label && <FormLabel aria-required={!!required}>{t(label as string)}</FormLabel>
 						) : (
-							// info icon
 							<div className='relative flex items-center justify-between h-3.5'>
 								<FormLabel aria-required={!!required}>{t(label as string)}</FormLabel>
 
