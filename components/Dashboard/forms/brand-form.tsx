@@ -126,7 +126,7 @@ export default function BrandForm({
 	const [isPending, startTransition] = useTransition();
 
 	useFormResponse<TFormValues>(result!, form, {
-		redirectUrl: `/${url_segment}`,
+		redirectUrl: `${url_segment}`,
 		reset_on_success: (result?.data as TFormValues) || true,
 	});
 

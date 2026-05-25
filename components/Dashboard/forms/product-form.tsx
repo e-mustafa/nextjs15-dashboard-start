@@ -284,6 +284,7 @@ export default function ProductForm({
 	const { t } = useTranslation();
 	// for handling server response errors & messages
 	useServerResponse(response);
+	console.log('response?.data', response?.data);
 
 	const form = useForm<TFormValues>({
 		resolver: zodResolver(formSchemaProduct),
@@ -295,7 +296,7 @@ export default function ProductForm({
 	const [isPending, startTransition] = useTransition();
 
 	useFormResponse<TFormValues>(result!, form, {
-		redirectUrl: `/${url_segment}`,
+		redirectUrl: `${url_segment}`,
 		reset_on_success: (result?.data as TFormValues) || true,
 		storageKey: type === EnumFormTypes.CREATE ? 'create-product' : 'update-product-' + (defaultValues.id || ''),
 	});

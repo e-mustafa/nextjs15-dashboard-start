@@ -1,6 +1,7 @@
 'use client';
 
 import { url_segment } from '@/app/[locale]/dashboard/(products-management)/collections/page';
+import { url_segment as url_products } from '@/app/[locale]/dashboard/(products-management)/products/page';
 import LoaderInstElement from '@/components/Shared/loaders/loader-inst-element';
 import { Form } from '@/components/ui-custom/custom-form';
 import { config_env } from '@/configs/general';
@@ -98,8 +99,8 @@ export const formSections_collection: SectionConfig<TFormValues>[] = [
 				type: 'combobox',
 				name: 'products',
 				label: msg('common.actions.choose_', { item: 'common.sections.products' }),
-				placeholder: 'forms.placeholders.choose_categorys_products',
-				optionUrl: `${config_env.domainAPI}/dashboard/collections`,
+				placeholder: 'forms.placeholders.choose_collections_products',
+				optionUrl: `${config_env.domainAPI}${url_products}`,
 			},
 		],
 	},
@@ -131,7 +132,7 @@ export default function CollectionForm({
 	const [isPending, startTransition] = useTransition();
 
 	useFormResponse<TFormValues>(result!, form, {
-		redirectUrl: `/${url_segment}`,
+		redirectUrl: `${url_segment}`,
 		reset_on_success: (result?.data as TFormValues) || true,
 	});
 
