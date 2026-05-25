@@ -47,7 +47,8 @@ export function NavMain({ items }: { items: TSidebarItems[] }) {
 			return pathname.startsWith(item.url);
 		}
 
-		if (item.items) return item.items.some((sub) => sub.url && pathname === sub.url);
+		// use startsWith in children to avoid false matches in create, update :id or query params
+		if (item.items) return item.items.some((sub) => sub.url && pathname?.startsWith(sub.url));
 		return false;
 	};
 
