@@ -13,13 +13,6 @@ import { cookies } from 'next/headers';
 
 let user: { id: string; name: string } | null = null;
 
-// type DiscountWithRelations = Prisma.ProductDiscountGetPayload<{
-// 	// include: { product: { include: { translations: true } } };
-// 	include: { products: { product: select: { id: true; { include: { translations: { select: { name: true } } images: { include: { image: true } } } } } } };
-// }>;
-
-// discount.types.ts
-
 import getCurrentLocale from '@/lib/utils.server/getCurrentLocale.server';
 import { TImage } from '@/types/api';
 import { calculateDiscountedPrice } from './utils';
@@ -27,6 +20,7 @@ import { calculateDiscountedPrice } from './utils';
 // ✅ Type discount with relations
 type DiscountWithRelations = Prisma.ProductDiscountGetPayload<{
 	include: {
+		translations: true;
 		products: {
 			include: {
 				product: {
@@ -47,14 +41,15 @@ export interface DiscountProduct {
 	discountAmount: number;
 	discountPercentage: number;
 	images?: TImage[];
+	image?: string;
 }
 
 // ✅ Type formatted discount
 export interface FormattedDiscount {
 	id: string;
 	name?: string;
-	name_ar: string;
-	name_en: string;
+	// name_ar: string;
+	// name_en: string;
 	type: DiscountType;
 	value: number;
 	startDate: string;
@@ -65,7 +60,9 @@ export interface FormattedDiscount {
 	maxDiscountValue: number | null;
 	createdAt: string;
 	updatedAt: string;
-	products: DiscountProduct[];
+
+	products: string[];
+	discountProducts: DiscountProduct[];
 	totalProducts: number;
 }
 
@@ -166,10 +163,6 @@ export type Discount = {
 	updatedAt: string;
 };
 
-export type DiscountFormData = TDiscountFormValues & {
-	products: string[];
-};
-
 /** 🔹 Format Single Product for Discount */
 async function formatDiscountProduct(
 	productRelation: DiscountWithRelations['products'][0],
@@ -186,7 +179,7 @@ async function formatDiscountProduct(
 	let productName = '';
 	if (product.translations && product.translations.length > 0) {
 		const productTranslation = await mapTranslations(product.translations, {
-			accept_language: acceptLanguage && acceptLanguage !== '*' ? acceptLanguage : locale || locale,
+			accept_language: acceptLanguage && acceptLanguage !== '*' ? acceptLanguage : locale,
 			fields: ['name'],
 			enableFallback: true, // false,
 		});
@@ -208,13 +201,15 @@ async function formatDiscountProduct(
 	const discountPercentage = Math.round((discountAmount / product.basePrice) * 100);
 
 	// Get first image
-	const firstImage =
-		product.images && product.images.length > 0
-			? {
-					url: product.images[0].image?.url || '',
-					fileId: product.images[0].image?.fileId || '',
-				}
-			: undefined;
+	// const firstImage =
+	// 	product.images && product.images.length > 0
+	// 		? {
+	// 				url: product.images[0].image?.url || '',
+	// 				fileId: product.images[0].image?.fileId || '',
+	// 			}
+	// 		: undefined;
+
+	const firstImage = product.images && product.images.length > 0 ? product.images[0].image?.url || '' : undefined;
 
 	return {
 		id: product.id,
@@ -223,13 +218,14 @@ async function formatDiscountProduct(
 		finalPrice,
 		discountAmount,
 		discountPercentage,
-		images: firstImage ? [firstImage] : [],
+		// images: firstImage ? [firstImage] : [],
+		image: firstImage,
 	};
 }
 
 /** 🔹 Format Discount */
-async function formatDiscount(discount: DiscountWithRelations, acceptLanguage?: string): Promise<FormattedDiscount> {
-	const { name_ar, name_en, products, startDate, endDate, createdAt, updatedAt, ...rest } = discount;
+async function handelFormatDiscount(discount: DiscountWithRelations, acceptLanguage?: string): Promise<FormattedDiscount> {
+	const { products, startDate, endDate, createdAt, updatedAt, ...rest } = discount;
 
 	// Format all products
 	const formattedProducts = await Promise.all(
@@ -247,17 +243,49 @@ async function formatDiscount(discount: DiscountWithRelations, acceptLanguage?: 
 
 	return {
 		...rest,
-		name_ar,
-		name_en,
-		...(acceptLanguage !== '*' && {
-			name: acceptLanguage?.startsWith('ar') ? name_ar || name_en : name_en || name_ar,
-		}),
 		startDate: startDate.toISOString(),
 		endDate: endDate ? endDate.toISOString() : null,
 		createdAt: createdAt.toISOString(),
 		updatedAt: updatedAt.toISOString(),
-		products: formattedProducts,
+
+		products: products?.map((e) => e.id),
+		discountProducts: formattedProducts,
 		totalProducts: formattedProducts.length,
+	};
+}
+
+async function formatDiscount(discount: DiscountWithRelations, acceptLanguage?: string): Promise<FormattedDiscount> {
+	const translationData = await mapTranslations(discount?.translations, {
+		accept_language: acceptLanguage,
+		fields: ['name'],
+		enableFallback: true,
+	});
+
+	const discountData = await handelFormatDiscount(discount, acceptLanguage);
+
+	return {
+		...translationData,
+		...discountData,
+	};
+}
+
+async function formatDiscountForEdit(
+	discount: DiscountWithRelations,
+	acceptLanguage?: string,
+): Promise<TDiscountFormValues> {
+	const translationData = await mapTranslations(discount?.translations, {
+		accept_language: '*',
+		fields: ['name'],
+		enableFallback: true,
+	});
+
+	const discountData: FormattedDiscount = await handelFormatDiscount(discount, acceptLanguage);
+
+	return {
+		name_ar: translationData.name_ar || '',
+		name_en: translationData.name_en || '',
+		...discountData,
+		// discountProducts: discountData.discountProducts as DiscountProduct[] ,
 	};
 }
 
@@ -335,6 +363,7 @@ export async function getAllDiscounts(
 			skip,
 			take: limit,
 			include: {
+				translations: true,
 				products: {
 					include: {
 						product: {
@@ -370,12 +399,13 @@ export async function getAllDiscounts(
 }
 
 /** 🔹 Get Discount By ID */
-export async function getDiscount(id: string, locale?: string): Promise<ActionResult<FormattedDiscount>> {
+export async function getDiscount(id: string, locale?: string): Promise<ActionResult<TDiscountFormValues>> {
 	if (!id) throw new AppError('api.errors.invalid_id', 400);
 
 	const discount = await prisma_DB.productDiscount.findUnique({
 		where: { id },
 		include: {
+			translations: true,
 			products: {
 				include: {
 					product: {
@@ -392,7 +422,7 @@ export async function getDiscount(id: string, locale?: string): Promise<ActionRe
 
 	if (!discount) throw new AppError('api.discounts.errors.not_found', 404);
 	console.log('locale--', locale);
-	const data = await formatDiscount(discount, locale);
+	const data = await formatDiscountForEdit(discount, locale);
 	return { success: true, status: 200, data };
 }
 
@@ -411,6 +441,7 @@ export async function getActiveDiscountForProduct(productId: string, locale?: st
 		},
 		orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
 		include: {
+			translations: true,
 			products: {
 				include: {
 					product: {
@@ -502,14 +533,14 @@ async function checkOverlappingDiscounts(
 }
 
 /** 🟢 Create Discount (Multiple Products) */
-export async function createDiscount(data: DiscountFormData): Promise<ActionResult<FormattedDiscount>> {
+export async function createDiscount(data: TDiscountFormValues): Promise<ActionResult<TDiscountFormValues>> {
 	// try {
 	const validation = await ValidateFormAction(formSchemaDiscount, data);
 	if (!validation.success) {
 		return {
 			success: false,
 			status: 400,
-			data: {} as FormattedDiscount,
+			data: {} as TDiscountFormValues,
 			form_errors: JSON.stringify(validation.form_errors),
 			error: 'api.errors.inputs_validation',
 		};
@@ -521,7 +552,7 @@ export async function createDiscount(data: DiscountFormData): Promise<ActionResu
 		return {
 			success: false,
 			status: 400,
-			data: {} as FormattedDiscount,
+			data: {} as TDiscountFormValues,
 			form_errors: JSON.stringify({ products: [productsValidation.error] }),
 			error: 'api.errors.inputs_validation',
 		};
@@ -538,7 +569,7 @@ export async function createDiscount(data: DiscountFormData): Promise<ActionResu
 		return {
 			success: false,
 			status: 400,
-			data: {} as FormattedDiscount,
+			data: {} as TDiscountFormValues,
 			form_errors: JSON.stringify({
 				products: ['api.discounts.errors.overlapping_discount_for_products'],
 				overlappingProducts: overlapCheck.overlappingProducts,
@@ -571,6 +602,7 @@ export async function createDiscount(data: DiscountFormData): Promise<ActionResu
 			},
 		},
 		include: {
+			translations: true,
 			products: {
 				include: {
 					product: {
@@ -593,7 +625,7 @@ export async function createDiscount(data: DiscountFormData): Promise<ActionResu
 		context: 'DiscountService',
 	});
 
-	const formattedData = await formatDiscount(discount);
+	const formattedData = await formatDiscountForEdit(discount);
 
 	return {
 		success: true,
@@ -608,7 +640,10 @@ export async function createDiscount(data: DiscountFormData): Promise<ActionResu
 }
 
 /** 🟡 Update Discount */
-export async function updateDiscount(id: string, data: Partial<DiscountFormData>): Promise<ActionResult<FormattedDiscount>> {
+export async function updateDiscount(
+	id: string,
+	data: Partial<TDiscountFormValues>,
+): Promise<ActionResult<TDiscountFormValues>> {
 	if (!id) throw new AppError('api.errors.invalid_id', 400);
 
 	try {
@@ -617,7 +652,7 @@ export async function updateDiscount(id: string, data: Partial<DiscountFormData>
 			return {
 				success: false,
 				status: 400,
-				data: {} as FormattedDiscount,
+				data: {} as TDiscountFormValues,
 				form_errors: JSON.stringify(validation.form_errors),
 				error: 'api.errors.inputs_validation',
 			};
@@ -648,7 +683,7 @@ export async function updateDiscount(id: string, data: Partial<DiscountFormData>
 			return {
 				success: false,
 				status: 400,
-				data: {} as FormattedDiscount,
+				data: {} as TDiscountFormValues,
 				form_errors: JSON.stringify({ products: [productsValidation.error] }),
 				error: 'api.errors.inputs_validation',
 			};
@@ -665,7 +700,7 @@ export async function updateDiscount(id: string, data: Partial<DiscountFormData>
 			return {
 				success: false,
 				status: 400,
-				data: {} as FormattedDiscount,
+				data: {} as TDiscountFormValues,
 				form_errors: JSON.stringify({ startDate: ['api.discounts.errors.overlapping_discount'] }),
 				error: 'api.errors.inputs_validation',
 			};
@@ -698,6 +733,7 @@ export async function updateDiscount(id: string, data: Partial<DiscountFormData>
 				},
 			},
 			include: {
+				translations: true,
 				products: {
 					include: {
 						product: {
@@ -715,7 +751,7 @@ export async function updateDiscount(id: string, data: Partial<DiscountFormData>
 		revalidateTag('discounts', 'max');
 		revalidateTag('products', 'max');
 
-		const formattedData = await formatDiscount(discount);
+		const formattedData = await formatDiscountForEdit(discount);
 		logger.info(`✅ Discount updated: ${discount.id}`, { context: 'DiscountService' });
 
 		return {
@@ -889,6 +925,7 @@ export async function getDiscountsByProducts(
 				OR: [{ endDate: null }, { endDate: { gte: now } }],
 			},
 			include: {
+				translations: true,
 				products: {
 					include: {
 						product: {

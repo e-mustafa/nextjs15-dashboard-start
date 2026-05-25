@@ -88,3 +88,10 @@ export const shortDescription = z
 	.trim()
 	.min(20, { message: msg('forms.validation.short_description_min', { min: 20 }) })
 	.max(500, { message: msg('forms.validation.short_description_max', { max: 500 }) });
+
+export const dateRequired = z.union([z.date(), z.string()]).transform((val) => new Date(val));
+export const dateOptional = z
+	.union([z.date(), z.string()])
+	.transform((val) => (val ? new Date(val) : null))
+	.nullable()
+	.optional();

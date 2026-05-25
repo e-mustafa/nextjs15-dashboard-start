@@ -189,7 +189,7 @@ interface ProductVariant {
 async function formatProduct(
 	product: ProductWithRelations,
 	acceptLanguage?: string,
-	forEdit: boolean = acceptLanguage === '*'
+	forEdit: boolean = false // acceptLanguage === '*',
 ): Promise<TProductFormValues | TProduct> {
 	const {
 		translations,
@@ -201,37 +201,48 @@ async function formatProduct(
 		collections,
 		tags,
 		specifications,
-		discounts, // ← العلاقة الجديدة
+		discounts,
 		...rest
 	} = product;
 
 	const translationData = await mapTranslations(translations, {
-		accept_language: acceptLanguage,
-		fields,
+		accept_language: forEdit ? '*' : acceptLanguage,
+		fields: fields,
 		enableFallback: !forEdit,
 	});
+
+	console.log('translationData', translationData);
 
 	const locale = await getCurrentLocale();
 
 	// Format brand with translation
-	let brandData: { id: string; name: string; images?: TImage[] } | undefined;
+	let brandData: { id: string; name: string; images?: TImage[] | string } | undefined;
 	if (brand) {
 		const brandTranslation = await mapTranslations(brand.translations, {
 			accept_language: acceptLanguage !== '*' ? acceptLanguage : locale,
 			fields: ['name'],
 		});
+		// brandData = {
+		// 	id: brand.id,
+		// 	name: (brandTranslation as { name: string }).name || '',
+		// 	...(brand?.images?.length && {
+		// 		images: [
+		// 			{
+		// 				url: brand.images[0].image.url,
+		// 				fileId: brand.images[0].image.fileId,
+		// 			},
+		// 		],
+		// 	}),
+		// };
+
 		brandData = {
 			id: brand.id,
 			name: (brandTranslation as { name: string }).name || '',
 			...(brand?.images?.length && {
-				images: [
-					{
-						url: brand.images[0].image.url,
-						fileId: brand.images[0].image.fileId,
-					},
-				],
+				image: brand.images[0].image.url,
 			}),
 		};
+
 	}
 
 	// Format category with translation
@@ -275,7 +286,7 @@ async function formatProduct(
 					],
 				}),
 			};
-		})
+		}),
 	);
 
 	// Format tags
@@ -297,7 +308,7 @@ async function formatProduct(
 					value_ar: prop.value_ar || '',
 					value_en: prop.value_en || '',
 				})),
-		  }))
+			}))
 		: [];
 
 	// Format variants with translations
@@ -333,7 +344,7 @@ async function formatProduct(
 						attribute,
 						attributeValue,
 					};
-				})
+				}),
 			);
 
 			return {
@@ -351,7 +362,7 @@ async function formatProduct(
 				})),
 				options: formattedOptions,
 			};
-		})
+		}),
 	);
 
 	// ✨ Calculate discount if exists
@@ -391,7 +402,7 @@ async function formatProduct(
 				? images.map((img) => ({
 						url: img.image?.url ?? '',
 						fileId: img.image?.fileId ?? '',
-				  }))
+					}))
 				: [],
 	};
 
@@ -418,7 +429,7 @@ async function formatProduct(
 					name_en: activeDiscount.name_en,
 					startDate: activeDiscount.startDate.toISOString(),
 					endDate: activeDiscount.endDate?.toISOString() || null,
-			  }
+				}
 			: null,
 	};
 }
@@ -468,7 +479,7 @@ async function ensureAttributeExists(
 	tx: Prisma.TransactionClient,
 	titleAr: string,
 	titleEn: string,
-	type: AttributeType = 'COLOR'
+	type: AttributeType = 'COLOR',
 ): Promise<string> {
 	// Check if attribute already exists by name
 	const existing = await tx.attribute.findFirst({
@@ -516,7 +527,7 @@ async function ensureAttributeValueExists(
 	attributeId: string,
 	valueAr: string,
 	valueEn: string,
-	colorHex?: string | null
+	colorHex?: string | null,
 ): Promise<string> {
 	// Check if value exists
 	const existing = await tx.attributeValue.findFirst({
@@ -627,7 +638,7 @@ export async function getAllProducts(
 		sortBy?: string;
 		sortOrder?: 'asc' | 'desc';
 	},
-	locale?: TLocalesData
+	locale?: TLocalesData,
 ): Promise<ActionResult<TProduct>> {
 	const page = Number(params?.page) || 1;
 	const limit = Number(params?.limit) || 10;
@@ -806,7 +817,7 @@ export async function getProduct(identifier: string, locale?: TLocalesData) {
 
 	if (!product) throw new AppError('api.errors.not_found', 404);
 
-	const data = await formatProduct(product, locale);
+	const data = await formatProduct(product, locale, true);
 
 	return {
 		success: true,
@@ -973,9 +984,9 @@ export async function createProduct(data: TProductFormValues): Promise<ActionRes
 											? { connect: { id: existingImage.id } }
 											: { create: { fileId: img.fileId, url: img.url } },
 									};
-								})
+								}),
 							),
-					  }
+						}
 					: undefined,
 
 				// Translations
@@ -1029,7 +1040,7 @@ export async function createProduct(data: TProductFormValues): Promise<ActionRes
 									})),
 								},
 							})),
-					  }
+						}
 					: undefined,
 			},
 			include: {
@@ -1081,7 +1092,7 @@ export async function createProduct(data: TProductFormValues): Promise<ActionRes
 					const attributeId = await ensureAttributeExists(
 						tx,
 						attr.name_ar,
-						attr.name_en
+						attr.name_en,
 						// 'VARIANT' // or get from your enum
 					);
 
@@ -1091,7 +1102,7 @@ export async function createProduct(data: TProductFormValues): Promise<ActionRes
 						attributeId,
 						attr.value_ar,
 						attr.value_en,
-						attr.colorHex
+						attr.colorHex,
 					);
 
 					// Avoid duplicates in same variant
@@ -1138,9 +1149,9 @@ export async function createProduct(data: TProductFormValues): Promise<ActionRes
 													? { connect: { id: existingImage.id } }
 													: { create: { fileId: img.fileId, url: img.url } },
 											};
-										})
+										}),
 									),
-							  }
+								}
 							: undefined,
 
 						// ✅ use processedAttributes (Real IDs from DB)
@@ -1294,9 +1305,9 @@ export async function updateProduct(id: string, data: TProductFormValues): Promi
 											? { connect: { id: existingImage.id } }
 											: { create: { fileId: img.fileId, url: img.url } },
 									};
-								})
+								}),
 							),
-					  }
+						}
 					: undefined,
 			},
 		});
@@ -1481,7 +1492,7 @@ export async function updateProduct(id: string, data: TProductFormValues): Promi
 						attributeId,
 						attr.value_ar,
 						attr.value_en,
-						attr.colorHex
+						attr.colorHex,
 					);
 
 					if (!processedAttributes.find((a) => a.attributeId === attributeId)) {
@@ -1526,9 +1537,9 @@ export async function updateProduct(id: string, data: TProductFormValues): Promi
 													? { connect: { id: existingImage.id } }
 													: { create: { fileId: img.fileId, url: img.url } },
 											};
-										})
+										}),
 									),
-							  }
+								}
 							: undefined,
 
 						// ✅ use processedAttributes
@@ -1605,7 +1616,7 @@ export async function updateProduct(id: string, data: TProductFormValues): Promi
  */
 export async function toggleStateProduct(
 	id: string,
-	isActive: boolean
+	isActive: boolean,
 ): Promise<ActionResult<{ id: string; isActive: boolean }>> {
 	const updated = await prisma_DB.product.update({
 		where: { id },
@@ -1628,7 +1639,7 @@ export async function toggleStateProduct(
  */
 export async function toggleFeaturedProduct(
 	id: string,
-	isFeatured: boolean
+	isFeatured: boolean,
 ): Promise<ActionResult<{ id: string; isFeatured: boolean }>> {
 	const updated = await prisma_DB.product.update({
 		where: { id },
@@ -1692,7 +1703,7 @@ export async function deleteManyProducts(ids: string[]): Promise<ActionResult<nu
 export async function updateProductStock(
 	id: string,
 	quantity: number,
-	operation: 'add' | 'subtract' | 'set' = 'set'
+	operation: 'add' | 'subtract' | 'set' = 'set',
 ): Promise<ActionResult<{ id: string; stockQuantity: number }>> {
 	const product = await prisma_DB.product.findUnique({
 		where: { id },
@@ -1833,7 +1844,7 @@ export async function getFeaturedProducts(limit = 10, locale?: TLocalesData): Pr
 export async function getRelatedProducts(
 	productId: string,
 	limit = 6,
-	locale?: TLocalesData
+	locale?: TLocalesData,
 ): Promise<ActionResult<TProduct>> {
 	const product = await prisma_DB.product.findUnique({
 		where: { id: productId },
@@ -1974,7 +1985,7 @@ export async function checkSkuAvailability(sku: string, excludeId?: string): Pro
 export async function checkSlugAvailability(
 	slug: string,
 	lang: 'ar' | 'en',
-	excludeProductId?: string
+	excludeProductId?: string,
 ): Promise<ActionResult<{ available: boolean }>> {
 	const translation = await prisma_DB.productTranslation.findFirst({
 		where: {

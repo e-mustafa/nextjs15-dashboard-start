@@ -13,7 +13,6 @@ import { SectionConfig } from '@/lib/create-forms/types-create-forms';
 import { formatMoney } from '@/lib/format-money';
 import { cn, msg } from '@/lib/utils';
 import { createDiscountAction, updateDiscountAction } from '@/server/actions/discount-actions';
-import { FormattedDiscount } from '@/server/services/discount-service';
 import { TProduct } from '@/server/services/product-service';
 import { useGProgressBarStore } from '@/stores/global-progress-bar.store';
 import { ActionResult } from '@/types/api';
@@ -32,7 +31,7 @@ export default function DiscountForm({
 	defaultValues = (response?.data as TFormValues) || defaultValuesDiscount,
 }: {
 	type?: EnumFormTypes;
-	response?: ActionResult<TFormValues | FormattedDiscount>;
+	response?: ActionResult<TFormValues>;
 	defaultValues?: TFormValues & { id?: string };
 }) {
 	const { t, locale } = useLocale();
@@ -42,11 +41,17 @@ export default function DiscountForm({
 	useServerResponse(response);
 	console.log('response?.data', response);
 
-	const form = useForm<TFormValues>({
+	const form = useForm({
 		resolver: zodResolver(formSchemaDiscount),
 		defaultValues,
 		// delayError: 1000,
 	});
+
+	const initialItems = (response?.data as TFormValues)?.initialItems || defaultValues?.initialItems;
+	const discountProducts = (response?.data as TFormValues)?.discountProducts || defaultValues?.discountProducts;
+
+	console.log('initialItems', initialItems);
+	console.log('discountProducts', discountProducts);
 
 	const discountType = form.watch('type');
 
@@ -187,6 +192,8 @@ export default function DiscountForm({
 							multiple: true,
 							isProducts: true,
 							required: true,
+							initialItems: initialItems?.products || [],
+							discountProducts: discountProducts,
 							customColumn: (product: TProduct) => {
 								const type = form.watch('type');
 								const value = form.watch('value');
@@ -202,9 +209,6 @@ export default function DiscountForm({
 								});
 
 								const isDirty = form.formState.isDirty;
-								console.log('isDirty', isDirty);
-								// form.formState.dirtyFields['minDiscountValue'] ||
-								// form.formState.dirtyFields['maxDiscountValue'];
 
 								return (
 									<div className='flex items-center justify-between gap-4 px-3'>
@@ -227,12 +231,12 @@ export default function DiscountForm({
 		[discountType],
 	);
 
-	const [result, setResult] = useState<ActionResult<FormattedDiscount> | null>(null);
+	const [result, setResult] = useState<ActionResult<TFormValues> | null>(null);
 	const [isPending, startTransition] = useTransition();
 
-	useFormResponse<TFormValues>(result!, form, {
-		redirectUrl: `/${url_segment}`,
-		reset_on_success: (result?.data as FormattedDiscount) || true,
+	useFormResponse(result!, form, {
+		redirectUrl: `${url_segment}`,
+		reset_on_success: result?.data as TFormValues,
 	});
 
 	const errors = form.formState.errors;
