@@ -630,13 +630,15 @@ model Coupon {
 
   // Status
   isActive Boolean @default(true)
-  isPublic Boolean @default(true) // ظاهر للجميع أم خاص
+  isPublic Boolean @default(true)
+
+  translations CouponTranslation[]
 
   // Relations
-  products    CouponProduct[] // المنتجات المحددة
-  categories  CouponCategory[] // الفئات المحددة
-  collections CouponCollection[] // المجموعات المحددة
-  usages      CouponUsage[] // سجل الاستخدام
+  products    CouponProduct[]
+  categories  CouponCategory[]
+  collections CouponCollection[]
+  usages      CouponUsage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -646,6 +648,21 @@ model Coupon {
   @@index([startDate, endDate])
   @@index([type])
   @@index([applicableOn])
+}
+
+model CouponTranslation {
+  id          String  @id @default(cuid())
+  couponId    String
+  lang        String
+  name        String
+  description String?
+
+  // link with coupon table and delete with delete it's coupon "Cascade"
+  coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
+
+  // avoid duplicate translation for same language
+  @@unique([couponId, lang])
+  @@index([name])
 }
 
 // Junction table: Coupon - Products (Many-to-Many)
@@ -697,10 +714,10 @@ model CouponCollection {
 model CouponUsage {
   id       String  @id @default(cuid())
   couponId String
-  userId   String? // اختياري إذا كان الضيف
-  orderId  String? // ربط مع الطلب
+  userId   String? // optional for gest
+  orderId  String? // link with order
 
-  discount  Float // قيمة الخصم الفعلية
+  discount  Float // Actual discount value
   createdAt DateTime @default(now())
 
   coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)

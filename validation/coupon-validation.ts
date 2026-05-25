@@ -1,24 +1,73 @@
+import { ComboboxOption } from '@/components/ui-custom/reuseable-combobox';
 import { msg } from '@/lib/utils';
 import { CouponApplicableOn, CouponType } from '@prisma/client';
 import { z } from 'zod';
-import { integerPositiveNumber, nameArField, nameEnField, preprocessNumber } from './fields-validation';
-// import { CouponType, EnumCouponApplicableOn } from '@prisma/client';
+import {
+	dateOptional,
+	dateRequired,
+	integerPositiveNumber,
+	nameArField,
+	nameEnField,
+	preprocessNumber,
+} from './fields-validation';
 
 export const EnumCouponTypes = CouponType || {
-	FIXED: 'FIXED' as const,
-	PERCENTAGE: 'PERCENTAGE' as const,
-	FREE_SHIPPING: 'FREE_SHIPPING' as const,
+	FIXED: 'FIXED',
+	PERCENTAGE: 'PERCENTAGE',
+	FREE_SHIPPING: 'FREE_SHIPPING',
 };
 
 export const EnumCouponApplicableOn = CouponApplicableOn || {
-	ALL_PRODUCTS: 'ALL_PRODUCTS' as const,
-	SPECIFIC_PRODUCTS: 'SPECIFIC_PRODUCTS' as const,
-	SPECIFIC_CATEGORIES: 'SPECIFIC_CATEGORIES' as const,
-	SPECIFIC_COLLECTIONS: 'SPECIFIC_COLLECTIONS' as const,
-	MINIMUM_PURCHASE: 'MINIMUM_PURCHASE' as const,
+	ALL_PRODUCTS: 'ALL_PRODUCTS',
+	SPECIFIC_PRODUCTS: 'SPECIFIC_PRODUCTS',
+	SPECIFIC_CATEGORIES: 'SPECIFIC_CATEGORIES',
+	SPECIFIC_COLLECTIONS: 'SPECIFIC_COLLECTIONS',
+	MINIMUM_PURCHASE: 'MINIMUM_PURCHASE',
 };
-const couponTypes = Object.values(EnumCouponTypes);
-const couponApplicableOn = Object.values(EnumCouponApplicableOn);
+export interface IInitialItems {
+	products: ComboboxOption['products'] | [];
+	categories: ComboboxOption['categories'] | [];
+	collections: ComboboxOption['collections'] | [];
+}
+
+type TCouponFormInput = z.input<typeof formSchemaCoupon> & {
+	id?: string;
+	initialItems?: IInitialItems;
+};
+
+
+// 2. form output - be sure to return Date object after transform
+export type TCouponFormOutput = z.output<typeof formSchemaCoupon>;
+
+export type TCouponFormValues = TCouponFormInput;
+export const fields = ['name', 'description'];
+
+// Helper to set endDate 1 month from now by default
+const defaultEndDate = new Date();
+defaultEndDate.setMonth(defaultEndDate.getMonth() + 1);
+
+export const defaultValuesCoupon: TCouponFormValues = {
+	code: '',
+	name_ar: '',
+	name_en: '',
+	description_ar: '',
+	description_en: '',
+	type: CouponType.FIXED,
+	value: 0,
+	applicableOn: CouponApplicableOn.ALL_PRODUCTS, // Changed from SPECIFIC_PRODUCTS to avoid immediate validation error
+	products: [],
+	categories: [],
+	collections: [],
+	minPurchaseAmount: null, // Null instead of 0 for "No Limit"
+	maxDiscountAmount: null,
+	usageLimit: null,
+	usagePerUser: null,
+	startDate: new Date().toISOString(),
+	endDate: null, // Fixed the endDate > startDate issue on initial render
+	isActive: true,
+	isPublic: true,
+	initialItems: { products: [], categories: [], collections: [] },
+};
 
 export const formSchemaCoupon = z
 	.object({
@@ -26,179 +75,91 @@ export const formSchemaCoupon = z
 			.string()
 			.min(3, { message: msg('forms.validation.min_length', { min: 3 }) })
 			.max(50, { message: msg('forms.validation.max_length', { max: 50 }) })
-			// .regex(/^[A-Z0-9_-]+$/, 'forms.validation.invalid_code_format')
 			.transform((val) => val.toUpperCase()),
 		name_ar: nameArField,
 		name_en: nameEnField,
-		description_ar: z
-			.string()
-			.max(1000, { message: msg('forms.validation.max_length', { max: 1000 }) })
-			.nullable()
-			.optional(),
-		description_en: z
-			.string()
-			.max(1000, { message: msg('forms.validation.max_length', { max: 1000 }) })
-			.nullable()
-			.optional(),
-		type: z.enum(couponTypes!, { message: 'forms.validation.required' }),
+		description_ar: z.string().max(1000).nullable().optional(),
+		description_en: z.string().max(1000).nullable().optional(),
+
+		// Using nativeEnum makes it strictly typed with Prisma
+		type: z.enum(CouponType, { message: 'forms.validation.required' }),
 		value: preprocessNumber(
-			z.number({ message: msg('forms.validation.integer') }).positive(msg('forms.validation.positive')),
+			z.number({ message: msg('forms.validation.integer') }).nonnegative(msg('forms.validation.positive')), // nonnegative allows 0 for free shipping
 		),
-		applicableOn: z.enum(couponApplicableOn!, { message: 'forms.validation.required' }),
+		applicableOn: z.enum(CouponApplicableOn, { message: 'forms.validation.required' }),
 
 		// Arrays for relations
 		products: z.array(z.cuid2({ message: 'forms.validation.invalid_id' })),
 		categories: z.array(z.cuid2({ message: 'forms.validation.invalid_id' })),
 		collections: z.array(z.cuid2({ message: 'forms.validation.invalid_id' })),
 
-		// Constraints
-		minPurchaseAmount: integerPositiveNumber.nullable(),
-		maxDiscountAmount: integerPositiveNumber.nullable(),
+		// Constraints (Nullable by default represents "No Limit")
+		minPurchaseAmount: integerPositiveNumber.nullable().optional(),
+		maxDiscountAmount: integerPositiveNumber.nullable().optional(),
 		usageLimit: integerPositiveNumber.nullable().optional(),
 		usagePerUser: integerPositiveNumber.nullable().optional(),
 
-		// Dates
-		startDate: z.date({ message: 'forms.validation.invalid_date' }),
-		endDate: z.date({ message: 'forms.validation.invalid_date' }),
-		// .nullable()
-		// .optional()
-		// .transform((val) => (val === '' ? null : val)),
-		// Status
-		isActive: z.boolean(),
-		isPublic: z.boolean(),
+		startDate: dateRequired,
+		endDate: dateOptional,
+
+		isActive: z.boolean().default(true),
+		isPublic: z.boolean().default(true),
 	})
 	.refine(
 		(data) => {
-			// Validate percentage value (must be between 0 and 100)
-			if (data.type === EnumCouponTypes.PERCENTAGE) {
-				return data.value > 0 && data.value <= 100;
-			}
+			if (data.type === CouponType.PERCENTAGE) return data.value > 0 && data.value <= 100;
 			return true;
 		},
-		{
-			message: 'forms.validation.invalid_percentage',
-			path: ['value'],
-		},
+		{ message: 'forms.validation.invalid_percentage', path: ['value'] },
 	)
 	.refine(
 		(data) => {
-			// Free shipping must have value = 0
-			if (data.type === EnumCouponTypes.FREE_SHIPPING) {
-				return data.value === 0;
-			}
+			if (data.type === CouponType.FREE_SHIPPING) return data.value === 0;
 			return true;
 		},
-		{
-			message: 'forms.validation.required',
-			path: ['value'],
-		},
+		{ message: 'forms.validation.required', path: ['value'] },
 	)
 	.refine(
 		(data) => {
-			// Validate end date is after start date
-			if (data.endDate && data.endDate !== null) {
-				const start = new Date(data.startDate);
-				const end = new Date(data.endDate);
-				return end > start;
+			// Fixed: Only validate if endDate exists
+			if (data.endDate) {
+				return data.endDate > data.startDate;
 			}
 			return true;
 		},
-		{
-			message: 'forms.validation.end_date_before_start_date',
-			path: ['endDate'],
-		},
+		{ message: 'forms.validation.end_date_before_start_date', path: ['endDate'] },
 	)
 	.refine(
 		(data) => {
-			// If applicable on specific products, must have products
-			if (data.applicableOn === EnumCouponApplicableOn.SPECIFIC_PRODUCTS) {
-				return data.products && data.products.length > 0;
+			if (data.applicableOn === CouponApplicableOn.SPECIFIC_PRODUCTS) return data.products.length > 0;
+			return true;
+		},
+		{ message: 'forms.validation.no_products_selected', path: ['products'] },
+	)
+	.refine(
+		(data) => {
+			if (data.applicableOn === CouponApplicableOn.SPECIFIC_CATEGORIES) return data.categories.length > 0;
+			return true;
+		},
+		{ message: 'forms.validation.no_categories_selected', path: ['categories'] },
+	)
+	.refine(
+		(data) => {
+			if (data.applicableOn === CouponApplicableOn.SPECIFIC_COLLECTIONS) return data.collections.length > 0;
+			return true;
+		},
+		{ message: 'forms.validation.no_collections_selected', path: ['collections'] },
+	)
+	.refine(
+		(data) => {
+			if (data.applicableOn === CouponApplicableOn.MINIMUM_PURCHASE) {
+				return data.minPurchaseAmount !== null && data.minPurchaseAmount !== undefined && data.minPurchaseAmount > 0;
 			}
 			return true;
 		},
-		{
-			message: 'forms.validation.no_products_selected',
-			path: ['products'],
-		},
-	)
-	.refine(
-		(data) => {
-			// If applicable on specific categories, must have categories
-			if (data.applicableOn === EnumCouponApplicableOn.SPECIFIC_CATEGORIES) {
-				return data.categories && data.categories.length > 0;
-			}
-			return true;
-		},
-		{
-			message: 'forms.validation.no_categories_selected',
-			path: ['categories'],
-		},
-	)
-	.refine(
-		(data) => {
-			// If applicable on specific collections, must have collections
-			if (data.applicableOn === EnumCouponApplicableOn.SPECIFIC_COLLECTIONS) {
-				return data.collections && data.collections.length > 0;
-			}
-			return true;
-		},
-		{
-			message: 'forms.validation.no_collections_selected',
-			path: ['collections'],
-		},
-	)
-	.refine(
-		(data) => {
-			// If minimum purchase, must have minPurchaseAmount
-			if (data.applicableOn === EnumCouponApplicableOn.MINIMUM_PURCHASE) {
-				return data.minPurchaseAmount !== null && (data.minPurchaseAmount || 0) > 0;
-			}
-			return true;
-		},
-		{
-			message: 'forms.validation.min_purchase_required',
-			path: ['minPurchaseAmount'],
-		},
-	)
-	.refine(
-		(data) => {
-			// Validate start date is not in the past (allow today and future dates)
-			const start = new Date(data.startDate);
-			const today = new Date();
-			today.setHours(0, 0, 0, 0);
-			return start >= today;
-		},
-		{
-			message: 'forms.validation.start_date_in_past',
-			path: ['startDate'],
-		},
+		{ message: 'forms.validation.min_purchase_required', path: ['minPurchaseAmount'] },
 	);
 
-// export type TCouponFormValues = z.infer<typeof formSchemaCoupon>;
-export type TCouponFormValues = z.infer<typeof formSchemaCoupon> & { id?: string }; // & { id?: string; productId?: string };
-// Fields used for translation mapping
-export const fields = ['name_ar', 'name_en', 'description_ar', 'description_en'] as const;
-
-// Default values for creating new coupon
-// export const defaultValuesCoupon: Partial<TCouponFormValues> = {
-export const defaultValuesCoupon = {
-	code: '',
-	name_ar: '',
-	name_en: '',
-	description_ar: '',
-	description_en: '',
-	type: EnumCouponTypes.FIXED,
-	value: 0,
-	applicableOn: EnumCouponApplicableOn.SPECIFIC_PRODUCTS,
-	products: [],
-	categories: [],
-	collections: [],
-	minPurchaseAmount: 0,
-	maxDiscountAmount: 0,
-	usageLimit: 0,
-	usagePerUser: 0,
-	startDate: new Date().toISOString(),
-	endDate: '',
-	isActive: true,
-	isPublic: true,
-} satisfies TCouponFormValues;
+// Notice: I removed the startDate >= today from the main schema.
+// Best practice is to check this in the backend controller or a specific "Create" schema wrap,
+// so you don't block users from editing old active coupons.

@@ -1,5 +1,17 @@
 'use client';
+import {
+	tags as tags_categories,
+	url_segment as url_categories,
+} from '@/app/[locale]/dashboard/(products-management)/categories/page';
+import {
+	tags as tags_collections,
+	url_segment as url_collections,
+} from '@/app/[locale]/dashboard/(products-management)/collections/page';
 import { url_segment } from '@/app/[locale]/dashboard/(products-management)/coupons/page';
+import {
+	tags as tags_products,
+	url_segment as url_products,
+} from '@/app/[locale]/dashboard/(products-management)/products/page';
 import CopyButton from '@/components/copy-button';
 import LoaderInstElement from '@/components/Shared/loaders/loader-inst-element';
 import { Form } from '@/components/ui-custom/custom-form';
@@ -12,7 +24,6 @@ import { renderField } from '@/lib/create-forms/input-registry';
 import { SectionConfig } from '@/lib/create-forms/types-create-forms';
 import { cn, msg } from '@/lib/utils';
 import { createCouponAction, updateCouponAction } from '@/server/actions/coupon-actions';
-import { FormattedCoupon } from '@/server/services/coupon-service';
 import { useGProgressBarStore } from '@/stores/global-progress-bar.store';
 import { ActionResult } from '@/types/api';
 import {
@@ -36,27 +47,36 @@ export default function CouponForm({
 	defaultValues = (response?.data as TFormValues) || defaultValuesCoupon,
 }: {
 	type?: EnumFormTypes;
-	response?: ActionResult<TFormValues | FormattedCoupon>;
-	defaultValues?: TFormValues & { id?: string };
+	response?: ActionResult<TFormValues>;
+	defaultValues?: (TFormValues & { id?: string }) | TFormValues;
 }) {
 	const { t, locale } = useLocale();
 	const { setProcessing } = useGProgressBarStore();
-
+	console.log('response?.data', response?.data);
 	// for handling server response errors & messages
 	useServerResponse(response);
-	console.log('response?.data', response);
 
-	const form = useForm<TFormValues>({
+	const initialItems = (response?.data as TFormValues)?.initialItems || defaultValues?.initialItems;
+
+	console.log('defaultValues', defaultValues);
+
+	const form = useForm({
 		resolver: zodResolver(formSchemaCoupon), // as Resolver<TFormValues>,
-		defaultValues,
+		// defaultValues,
 		// delayError: 1000,
+		defaultValues: {
+			...defaultValues,
+			// ✅ Ensure we're using IDs only for form values
+			products: defaultValues.products || [],
+			categories: defaultValues.categories || [],
+			collections: defaultValues.collections || [],
+		},
 	});
-
-	console.log('form data: ', form.getValues());
 
 	const couponTypes = form.watch('type');
 	const couponApplicableOn = form.watch('applicableOn');
 
+	// descriptions for applicable on options
 	const applicableOnDescription = {
 		ALL_PRODUCTS: 'forms.descriptions.coupon.apply_on_all_products',
 		SPECIFIC_PRODUCTS: 'forms.descriptions.coupon.apply_on_specific_products',
@@ -244,10 +264,10 @@ export default function CouponForm({
 							name: 'applicableOn',
 							label: 'forms.labels.elements_apply_coupon',
 							placeholder: 'forms.labels.elements_apply_coupon',
-							parentClass: 'min-w-full xl:min-w-[calc(50%-1.5rem)]',
+							// parentClass: 'min-w-full xl:min-w-[calc(50%-1.5rem)]',
+							parentClass: 'min-w-[calc(100%-1.125rem)]',
 							required: true,
 							noneItem: false,
-							// description: applicableOnDescription[couponApplicableOn as keyof typeof applicableOnDescription],
 							description: applicableOnDescription[couponApplicableOn],
 
 							options: [
@@ -273,9 +293,9 @@ export default function CouponForm({
 								},
 							],
 						},
-						{
-							type: 'empty',
-						},
+						// {
+						// 	type: 'empty',
+						// },
 
 						...(couponApplicableOn === EnumCouponApplicableOn.SPECIFIC_PRODUCTS
 							? [
@@ -284,12 +304,13 @@ export default function CouponForm({
 										name: 'products',
 										label: msg('common.actions.choose_', { item: 'common.sections.products' }),
 										placeholder: 'forms.placeholders.choose_products_to_coupon',
-										optionUrl: `${config_env.domainAPI}/dashboard/products`,
-										linkHref: '/dashboard/products',
-										revalidateTags: ['products'],
+										optionUrl: `${config_env.domainAPI}${url_products}`,
+										linkHref: url_products,
+										revalidateTags: tags_products,
 										multiple: true,
 										isProducts: true,
 										required: true,
+										initialItems: initialItems?.products || [],
 									},
 								]
 							: couponApplicableOn === EnumCouponApplicableOn.SPECIFIC_CATEGORIES
@@ -299,12 +320,14 @@ export default function CouponForm({
 											name: 'categories',
 											label: msg('common.actions.choose_', { item: 'common.sections.categories' }),
 											placeholder: 'forms.placeholders.choose_categories_to_coupon',
-											optionUrl: `${config_env.domainAPI}/dashboard/categories`,
-											linkHref: '/dashboard/categories',
-											revalidateTags: ['categories'],
+											optionUrl: `${config_env.domainAPI}${url_categories}`,
+											linkHref: url_categories,
+											revalidateTags: tags_categories,
 											multiple: true,
 											isProducts: true,
 											required: true,
+											// initialItems: addInitialItems('categories'),
+											initialItems: initialItems?.categories || [],
 										},
 									]
 								: couponApplicableOn === EnumCouponApplicableOn.SPECIFIC_COLLECTIONS
@@ -314,12 +337,14 @@ export default function CouponForm({
 												name: 'collections',
 												label: msg('common.actions.choose_', { item: 'common.sections.collections' }),
 												placeholder: 'forms.placeholders.choose_collections_to_coupon',
-												optionUrl: `${config_env.domainAPI}/dashboard/collections`,
-												linkHref: '/dashboard/collections',
-												revalidateTags: ['collections'],
+												optionUrl: `${config_env.domainAPI}${url_collections}`,
+												linkHref: url_collections,
+												revalidateTags: tags_collections,
 												multiple: true,
-												// isProducts: false,
+												isProducts: true,
 												required: true,
+												// initialItems: addInitialItems('collections'),
+												initialItems: initialItems?.collections || [],
 											},
 										]
 									: []),
@@ -329,12 +354,12 @@ export default function CouponForm({
 		[couponTypes, couponApplicableOn],
 	);
 
-	const [result, setResult] = useState<ActionResult<FormattedCoupon> | null>(null);
+	const [result, setResult] = useState<ActionResult<TFormValues> | null>(null);
 	const [isPending, startTransition] = useTransition();
 
-	useFormResponse(result!, form, {
-		redirectUrl: `/${url_segment}`,
-		reset_on_success: result?.data || true,
+	useFormResponse(result, form, {
+		redirectUrl: url_segment,
+		reset_on_success: result?.data as TFormValues,
 	});
 
 	useEffect(() => {
@@ -343,12 +368,12 @@ export default function CouponForm({
 
 	async function onSubmit(data: TFormValues) {
 		startTransition(async () => {
-			const result =
+			const actionResult =
 				type == EnumFormTypes.CREATE
 					? await createCouponAction(data)
 					: await updateCouponAction(defaultValues.id || '', data);
 
-			setResult(result);
+			setResult(actionResult as ActionResult<TFormValues>);
 		});
 	}
 
