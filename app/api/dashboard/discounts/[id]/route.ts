@@ -1,5 +1,6 @@
 import { HandlerContext, errorHandler } from '@/lib/error-handler/error-handler-route';
 import { AppError } from '@/lib/error-handler/error-handler.server';
+import getCurrentLocale from '@/lib/utils.server/getCurrentLocale.server';
 import { deleteDiscount, getDiscount, updateDiscount } from '@/server/services/discount-service';
 
 // GET /api/discounts/:id
@@ -7,7 +8,8 @@ import { deleteDiscount, getDiscount, updateDiscount } from '@/server/services/d
 async function getDiscountAction(_req: Request, ctx?: HandlerContext) {
 	const { id } = (await ctx?.params) ?? {};
 	if (!id) throw new AppError('api.errors.invalid_id', 400);
-	return getDiscount(id);
+	const locale = _req.headers.get('accept-language') || (await getCurrentLocale());
+	return getDiscount(id, locale);
 }
 
 async function updateDiscountAction(req: Request, ctx?: HandlerContext) {
