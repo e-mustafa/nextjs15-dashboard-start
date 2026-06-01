@@ -50,8 +50,6 @@ export async function getDataInServer<T>({
 
 	const useCache = !id && tags.length > 0;
 
-	console.log('tags--', tags);
-
 	console.log('🔗 Fetching from:', url.toString());
 	// console.log('🧾 Headers:', headers);
 

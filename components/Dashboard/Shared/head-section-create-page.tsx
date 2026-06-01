@@ -12,7 +12,7 @@ interface IHeadSectionCreate {
 
 export default function HeadSectionCreate({ link, title, name }: IHeadSectionCreate) {
 	const { dir } = useLocale();
-	console.log('dir()', dir);
+
 	return (
 		<div className='flex gap-2 items-center'>
 			<Button asChild variant='ghost' size='icon'>

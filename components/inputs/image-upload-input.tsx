@@ -46,8 +46,6 @@ export default function ImageUploadInput({
 	// init images from form value
 	const [images, setImages] = useState<TImage[]>([]);
 
-	console.log('images-', images);
-
 	const [open, setOpen] = useState(false);
 
 	// useRef is used to track if the change is internal
@@ -85,8 +83,6 @@ export default function ImageUploadInput({
 			onChange?.(images);
 		}
 	}, [images, onChange]);
-
-	console.log('images-', images);
 
 	function handleManagerChange(files: ImageKitFile[] | TImage[]) {
 		const data = files.map((file) => ({ fileId: file?.fileId, url: file?.url }));
