@@ -25,9 +25,11 @@ export const EnumCouponApplicableOn = CouponApplicableOn || {
 	MINIMUM_PURCHASE: 'MINIMUM_PURCHASE',
 };
 export interface IInitialItems {
-	products: ComboboxOption['products'] | [];
-	categories: ComboboxOption['categories'] | [];
-	collections: ComboboxOption['collections'] | [];
+	products?: ComboboxOption['products'] | [];
+	categories?: ComboboxOption['categories'] | [];
+	collections?: ComboboxOption['collections'] | [];
+	brands?: ComboboxOption['brands'] | [];
+	tags?: ComboboxOption['tags'] | [];
 }
 
 type TCouponFormInput = z.input<typeof formSchemaCoupon> & {

@@ -117,6 +117,7 @@ export default function TagForm({ defaultValue = '', onSuccess }: Props) {
 				<Button
 					type='button'
 					form='tag-form'
+					className='self-end'
 					onClick={() => form.handleSubmit(handleSubmit)()}
 					disabled={isPending || form.formState.isSubmitting}
 				>

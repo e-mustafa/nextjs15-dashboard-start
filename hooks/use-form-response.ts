@@ -28,15 +28,15 @@ import { renderErrorMessage } from '../lib/utils';
  * It will also remove the form data from local storage if a storageKey is given.
  */
 export function useFormResponse<T extends FieldValues>(
-	res: ActionResult | null,
+	res: ActionResult<T> | null | undefined,
 	form: UseFormReturn<T>,
 	options: {
 		redirectUrl?: string;
-		reset_on_success?: boolean | DefaultValues<T>; // T | T[];
+		reset_on_success?: DefaultValues<T>;
 		storageKey?: string;
-	}
+	},
 ) {
-	const { redirectUrl, reset_on_success, storageKey } = options || {};
+	const { redirectUrl, reset_on_success = undefined, storageKey } = options || {};
 	const { t } = useTranslation();
 	const router = useRouter();
 	const pathname = usePathname();
@@ -114,9 +114,8 @@ export function useFormResponse<T extends FieldValues>(
 		}
 
 		if (res.success && res.message) {
-			if (reset_on_success) {
-				form.reset(reset_on_success === true ? undefined : reset_on_success);
-			}
+			// if (reset_on_success) { }
+			form.reset(reset_on_success);
 
 			if (storageKey) localStorage.removeItem(storageKey);
 

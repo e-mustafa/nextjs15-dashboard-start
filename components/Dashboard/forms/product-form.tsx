@@ -1,4 +1,7 @@
 'use client';
+import { url_segment as url_brands } from '@/app/[locale]/dashboard/(products-management)/brands/page';
+import { url_segment as url_categories } from '@/app/[locale]/dashboard/(products-management)/categories/page';
+import { url_segment as url_collections } from '@/app/[locale]/dashboard/(products-management)/collections/page';
 import { url_segment } from '@/app/[locale]/dashboard/(products-management)/products/page';
 import LoaderInstElement from '@/components/Shared/loaders/loader-inst-element';
 import { Form } from '@/components/ui-custom/custom-form';
@@ -140,18 +143,25 @@ export const formSections_product: SectionConfig<TFormValues>[] = [
 				placeholder: 'forms.placeholders.unit',
 			},
 			{
+				type: 'checkbox',
+				name: 'trackInventory',
+				label: 'forms.labels.track_inventory',
+				placeholder: 'forms.placeholders.track_inventory',
+				// items: [{ name: 'trackInventory', label: 'forms.labels.compare_at_price', checked: false }],
+			},
+			{
 				type: 'number',
 				name: 'lowStockAlert',
 				label: 'forms.labels.low_stock_Alert',
 				placeholder: 'forms.placeholders.low_stock_Alert',
 			},
-			{
-				type: 'checkbox',
-				name: 'keepSelling',
-				label: 'forms.labels.keep_selling',
-				placeholder: 'forms.placeholders.keep_selling',
-				// items: [{ name: 'trackInventory', label: 'forms.labels.compare_at_price', checked: false }],
-			},
+			// {
+			// 	type: 'checkbox',
+			// 	name: 'keepSelling',
+			// 	label: 'forms.labels.keep_selling',
+			// 	placeholder: 'forms.placeholders.keep_selling',
+			// 	// items: [{ name: 'trackInventory', label: 'forms.labels.compare_at_price', checked: false }],
+			// },
 			{
 				type: 'text',
 				name: 'sku',
@@ -228,50 +238,8 @@ export const formSections_product: SectionConfig<TFormValues>[] = [
 	formSectionSEO as SectionConfig<TFormValues>,
 ];
 
-export const formSections_product2: SectionConfig<TFormValues> = {
-	// title: 'forms.sections.product_info',
-	fields: [
-		{
-			type: 'switch',
-			name: 'isActive',
-			label: 'forms.labels.is_active',
-			placeholder: 'forms.placeholders.is_active',
-			required: true,
-			// variants: 'input', // 'switch',
-		},
-		{
-			type: 'combobox',
-			name: 'brand',
-			label: msg('common.actions.choose_', { item: 'common.sections.the_brand' }),
-			placeholder: 'forms.placeholders.choose_products_brand',
-			optionUrl: `${config_env.domainAPI}/dashboard/brands`,
-		},
-		{
-			type: 'combobox',
-			name: 'category',
-			label: msg('common.actions.choose_', { item: 'common.sections.the_category' }),
-			placeholder: 'forms.placeholders.choose_products_category',
-			optionUrl: `${config_env.domainAPI}/dashboard/categories`,
-		},
-		{
-			type: 'combobox',
-			name: 'collections',
-			label: msg('common.actions.choose_', { item: 'common.sections.collections' }),
-			placeholder: 'forms.placeholders.choose_products_collection',
-			optionUrl: `${config_env.domainAPI}/dashboard/collections`,
-			multiple: true,
-		},
-		{
-			type: 'combobox',
-			name: 'tags',
-			label: msg('common.actions.choose_', { item: 'common.sections.tags' }),
-			placeholder: 'forms.placeholders.choose_products_tags',
-			optionUrl: `${config_env.domainAPI}/dashboard/tags`,
-			isTags: true,
-		},
-	],
-};
 type TFormValues = TProductFormValues;
+
 export default function ProductForm({
 	type = EnumFormTypes.CREATE,
 	response,
@@ -291,6 +259,60 @@ export default function ProductForm({
 		defaultValues,
 		delayError: 300,
 	});
+
+	const initialItems = (response?.data as TFormValues)?.initialItems || defaultValues?.initialItems;
+	
+	const formSections_product2: SectionConfig<TFormValues> = {
+		// title: 'forms.sections.product_info',
+		fields: [
+			{
+				type: 'switch',
+				name: 'isActive',
+				label: 'forms.labels.is_active',
+				placeholder: 'forms.placeholders.is_active',
+				required: true,
+				// variants: 'input', // 'switch',
+			},
+			{
+				type: 'combobox',
+				name: 'brand',
+				label: msg('common.actions.choose_', { item: 'common.sections.the_brand' }),
+				placeholder: 'forms.placeholders.choose_products_brand',
+				optionUrl: `${config_env.domainAPI}${url_brands}`,
+				initialItems: initialItems?.brands || [],
+			},
+			{
+				type: 'combobox',
+				name: 'category',
+				label: msg('common.actions.choose_', { item: 'common.sections.the_category' }),
+				placeholder: 'forms.placeholders.choose_products_category',
+				optionUrl: `${config_env.domainAPI}${url_categories}`,
+				initialItems: initialItems?.categories || [],
+			},
+			{
+				type: 'combobox',
+				name: 'collections',
+				label: msg('common.actions.choose_', { item: 'common.sections.collections' }),
+				placeholder: 'forms.placeholders.choose_products_collection',
+				optionUrl: `${config_env.domainAPI}${url_collections}`,
+				multiple: true,
+				initialItems: initialItems?.collections || [],
+			},
+			{
+				type: 'combobox',
+				name: 'tags',
+				label: msg('common.actions.choose_', { item: 'common.sections.tags' }),
+				placeholder: 'forms.placeholders.choose_products_tags',
+				optionUrl: `${config_env.domainAPI}/dashboard/tags`,
+				isTags: true,
+				initialItems: initialItems?.tags || [],
+			},
+		],
+	};
+
+
+	console.log('form errors', form.formState.errors);
+	console.log('form errors', form.getValues());
 
 	const [result, setResult] = useState<ActionResult<TFormValues> | null>(null);
 	const [isPending, startTransition] = useTransition();

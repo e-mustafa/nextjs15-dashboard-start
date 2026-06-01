@@ -344,7 +344,7 @@ model Product {
   seoImageId     String?
   height         Float?
   length         Float?
-  type           String?
+  type           ProductType              @default(SIMPLE)
   weight         Float?
   width          Float?
   collections    CollectionProduct[]

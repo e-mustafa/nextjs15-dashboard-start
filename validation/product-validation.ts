@@ -1,10 +1,12 @@
 import { msg } from '@/lib/utils';
 // import z from 'zod';
+import { ProductType } from '@prisma/client';
 import z from 'zod';
 import { imagesField, intNotNegativeField, preprocessNumber } from './fields-validation';
 import { specificationSectionSchema } from './product-specification-validation';
 import { combinationSchema, variantFormSchema } from './product-variant-validation';
 import { SEODefaultValues, SEOFormSchema } from './seo-validation';
+import { IInitialItems } from './coupon-validation.js';
 
 // export type TProductFormValues = z.output<typeof formSchemaProduct> & { id?: string };
 // export type TProductFormValues = z.input<typeof formSchemaProduct> & { id?: string };
@@ -190,7 +192,13 @@ export const defaultAttributes = [
 	},
 ];
 
-export type TProductFormValues = z.infer<typeof formSchemaProduct> & { id?: string };
+// export type TProductFormValues = z.infer<typeof formSchemaProduct> & { id?: string };
+export type TProductFormValues = z.input<typeof formSchemaProduct> & {
+	id?: string;
+	initialItems?: IInitialItems;
+};
+export type TProductFormValuesOut = z.output<typeof formSchemaProduct>;
+
 /** ✅ Unified fields using camelCase naming */
 export const fields = ['name', 'description', 'shortDescription', 'slug', 'seoTitle', 'seoDescription', 'seoKeywords'];
 
@@ -239,7 +247,7 @@ export const formSchemaProduct = z
 		// ).optional(),
 
 		compareAtPrice: preprocessNumber(
-			z.number().nonnegative({ message: msg('forms.validation.price_nonnegative') })
+			z.number().nonnegative({ message: msg('forms.validation.price_nonnegative') }),
 		).optional(),
 
 		cost: preprocessNumber(z.number().nonnegative({ message: msg('forms.validation.nonnegative') })).optional(),
@@ -254,7 +262,7 @@ export const formSchemaProduct = z
 		lowStockAlert: intNotNegativeField.optional(),
 
 		trackInventory: z.boolean(),
-		keepSelling: z.boolean(),
+		// keepSelling: z.boolean(),
 
 		unit: z.string().trim().optional(),
 
@@ -265,7 +273,7 @@ export const formSchemaProduct = z
 		combinations: z.array(combinationSchema).optional(),
 		specifications: z.array(specificationSectionSchema).optional(),
 
-		type: z.string().optional(),
+		type: z.enum(ProductType),
 
 		weight: preprocessNumber(z.number().nonnegative()).optional(),
 		length: preprocessNumber(z.number().nonnegative()).optional(),
@@ -304,7 +312,7 @@ export const defaultValuesProduct: TProductFormValues = {
 	trackInventory: true,
 
 	unit: '',
-	keepSelling: false,
+	// keepSelling: false,
 
 	sortOrder: 0,
 
@@ -317,7 +325,7 @@ export const defaultValuesProduct: TProductFormValues = {
 	combinations: [],
 	specifications: [],
 
-	type: '',
+	type: ProductType.SIMPLE,
 
 	weight: 0,
 	length: 0,

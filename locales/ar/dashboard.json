@@ -148,7 +148,7 @@
 			"abandoned_carts": "السلات المتروكة",
 			"products": "المنتجات",
 			"coupons": "الكوبونات",
-			"categories": "الفئات",
+			"categories": "التصنيفات",
 			"brands": "الماركات",
 			"collections": "المجموعات",
 			"customers": "العملاء",
@@ -296,7 +296,8 @@
 			"stock_quantity": "كمية المخزون",
 			"unit": "الوحدة",
 			"low_stock_Alert": "التنبيه بانخفاض المخزون",
-			"keep_selling": "تتبع المخزون",
+			"track_inventory":"تتبع المخزون",
+			"keep_selling": "استمر في البيع",
 			"product_type": "نوع المنتج",
 			"weight": "الوزن",
 			"length": "الطول",
@@ -429,6 +430,7 @@
 			"stock_quantity": "ادخل كمية المخزون",
 			"unit": "ادخل الوحدة",
 			"low_stock_Alert": "ادخل الحد الادنى للتنبيه بانخفاض المخزون",
+			"track_inventory": "تتبع المخزون",
 			"keep_selling": "استمر في البيع بعد انتهاء المخزون",
 			"weight": "ادخل الوزن",
 			"length": "ادخل الطول",
@@ -762,7 +764,8 @@
 			"duplicate_entry": "قيمة مكررة في قاعدة البيانات في الحقل {{field}}",
 			"update_status": "فشل تحديث الحالة",
 			"Failed_fetch_list": "فشل في جلب قائمة البيانات",
-			"empty_ids": "لم يتم تحديد عناصر"
+			"empty_ids": "لم يتم تحديد عناصر",
+			"sku_exists":"رمز المنتج (SKU) مستخدم سابقا"
 		},
 		"brands": {
 			"success": {
@@ -873,6 +876,7 @@
 				"delete": "فشل حذف الكوبون",
 				"not_found": "الكوبون غير موجود",
 				"exists": "الكوبون موجود بالفعل",
+				"fetch_failed": "فشل جلب الكوبون",
 
 				"apply_failed": "فشل تطبيق الكوبون",
 				"usage_record_failed": "فشل تسجيل استخدام الكوبون",
