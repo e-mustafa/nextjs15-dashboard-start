@@ -3,16 +3,26 @@
 import { localesData, TLocalesData } from '@/configs/general';
 import { AppError } from '@/lib/error-handler/error-handler.server';
 import { logger } from '@/lib/logs/logger';
+import { parseListParams } from '@/lib/utils.server/query';
 import { ValidateFormAction } from '@/lib/utils.server/validate-data-server';
 import { prisma_DB } from '@/prisma/prisma.db';
 import { ActionResult } from '@/types/api';
 import { formSchemaProduct, TProductFormValues } from '@/validation/product-validation';
 import { ProductType } from '@prisma/client';
 import { revalidateTag } from 'next/cache';
-import { ProductWithRelations, TProduct } from './types';
-import { buildProductWhereClause, createVariantsForProduct, formatProduct, prepareProductImages, profile, revalidateProductCache, tag, validateUniqueSku, validateUniqueSlugs } from './utils';
 import { PRODUCT_COMPLETE_INCLUDE } from './prisma-includes';
-
+import { ProductWithRelations, TProduct } from './types';
+import {
+	buildProductWhereClause,
+	createVariantsForProduct,
+	formatProduct,
+	prepareProductImages,
+	profile,
+	revalidateProductCache,
+	tag,
+	validateUniqueSku,
+	validateUniqueSlugs,
+} from './utils';
 
 /////////////////////////
 // MAIN SERVICES
@@ -37,19 +47,17 @@ export async function getAllProducts(
 	},
 	locale?: TLocalesData,
 ): Promise<ActionResult<TProduct>> {
-	const page = Number(params?.page) || 1;
-	const limit = Number(params?.limit) || 10;
-	const skip = (page - 1) * limit;
+	const { page, limit, skip, search, sortBy, sortOrder } = parseListParams(params, {
+		sortableFields: ['name', 'slug', 'basePrice', 'stockQuantity', 'createdAt', 'sortOrder'],
+		defaultSortOrder: 'asc',
+	});
 
-	const sortableFields = ['name', 'slug', 'basePrice', 'stockQuantity', 'createdAt', 'sortOrder'];
-	const sortBy = sortableFields.includes(params?.sortBy || '') ? params?.sortBy : undefined;
-	const sortOrder = params?.sortOrder === 'desc' ? 'desc' : 'asc';
 	const localeKey = (locale?.split('-')[0] as 'ar' | 'en') || 'en';
 
 	const orderBy = sortBy ? { [`${sortBy}_${localeKey}`]: sortOrder } : { sortOrder: 'asc' as const };
 
 	const where = buildProductWhereClause({
-		search: params?.search?.trim() || '',
+		search,
 		brandId: params?.brandId,
 		categoryId: params?.categoryId,
 		collectionId: params?.collectionId,
@@ -64,6 +72,7 @@ export async function getAllProducts(
 			skip,
 			take: limit,
 			include: PRODUCT_COMPLETE_INCLUDE,
+			orderBy,
 		}),
 		prisma_DB.product.count({ where }),
 	]);
