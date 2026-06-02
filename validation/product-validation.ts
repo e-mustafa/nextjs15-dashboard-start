@@ -6,7 +6,7 @@ import { imagesField, intNotNegativeField, preprocessNumber } from './fields-val
 import { specificationSectionSchema } from './product-specification-validation';
 import { combinationSchema, variantFormSchema } from './product-variant-validation';
 import { SEODefaultValues, SEOFormSchema } from './seo-validation';
-import { IInitialItems } from './coupon-validation.js';
+import { IInitialItems } from './coupon-validation';
 
 // export type TProductFormValues = z.output<typeof formSchemaProduct> & { id?: string };
 // export type TProductFormValues = z.input<typeof formSchemaProduct> & { id?: string };

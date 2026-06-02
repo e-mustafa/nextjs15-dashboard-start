@@ -2,9 +2,9 @@
 import { msg } from '@/lib/utils';
 import { DiscountType } from '@prisma/client';
 import z from 'zod';
-import { IInitialItems } from './coupon-validation.js';
+import { IInitialItems } from './coupon-validation';
 import { intNotNegativeField, nameArField, nameEnField, preprocessNumber } from './fields-validation';
-import { DiscountProduct } from '@/server/services/discount-service';
+import { DiscountProduct } from '@/server/services/discount-service/types';
 
 export type TDiscountFormInput = z.input<typeof formSchemaDiscount> & {
 	id?: string;
