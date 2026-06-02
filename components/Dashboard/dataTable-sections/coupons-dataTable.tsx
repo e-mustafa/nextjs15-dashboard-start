@@ -30,7 +30,7 @@ export default function CouponDataTable({ result, locale }: { result: ActionResu
 	// ✅ Optimistic UI state
 	const [optimisticData, setOptimisticData] = useOptimistic<TFormValues[]>((result.data as TFormValues[]) ?? []);
 	const [meta, setMeta] = useState<ApiMeta>(result.meta as ApiMeta);
-	
+
 	// ---------------------------------------------------------
 	// URL Query Parameters
 	// ---------------------------------------------------------

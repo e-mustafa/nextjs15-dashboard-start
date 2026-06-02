@@ -4,7 +4,6 @@ import { imagesPlaceholder, TLocalesData } from '@/configs/general';
 import { useServerResponse } from '@/hooks/use-server-response';
 import { getDataInPage } from '@/lib/utils.server/api.server';
 import { deleteManyProductsAction, deleteProductAction, toggleStateProductAction } from '@/server/actions/product-actions';
-import { TProduct } from '@/server/services/product-service';
 import { ActionResult, ApiMeta, TImage, TQueryParams } from '@/types/api';
 import { ColumnDef } from '@tanstack/react-table';
 import Image from 'next/image';
@@ -13,6 +12,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useOptimistic, useState, useTransition } from 'react';
 import { Switch } from '../../ui/switch';
 import ReusableDataTable from '../dataTable/reusable-data-table';
+import { TProduct } from '@/server/services/product-service/types';
 
 type sectionType = TProduct;
 

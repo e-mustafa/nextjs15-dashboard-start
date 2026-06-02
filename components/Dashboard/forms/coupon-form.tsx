@@ -22,8 +22,11 @@ import { useServerResponse } from '@/hooks/use-server-response';
 import useLocale from '@/hooks/useLocale';
 import { renderField } from '@/lib/create-forms/input-registry';
 import { SectionConfig } from '@/lib/create-forms/types-create-forms';
+import { formatMoney } from '@/lib/format-money';
 import { cn, msg } from '@/lib/utils';
 import { createCouponAction, updateCouponAction } from '@/server/actions/coupon-actions';
+import { TProduct } from '@/server/services/product-service/types';
+import { calculateCouponDiscount } from '@/server/services/utils';
 import { useGProgressBarStore } from '@/stores/global-progress-bar.store';
 import { ActionResult } from '@/types/api';
 import {
@@ -311,6 +314,40 @@ export default function CouponForm({
 										isProducts: true,
 										required: true,
 										initialItems: initialItems?.products || [],
+										customColumn: (product: TProduct) => {
+											const type = form.watch('type');
+											const value = form.watch('value');
+											// const min = form.watch('minPurchaseAmount');
+											const max = form.watch('maxDiscountAmount');
+
+											const total = calculateCouponDiscount(
+												{
+													type,
+													value,
+													maxDiscountAmount: max,
+												},
+												product.basePrice,
+											);
+
+											const isDirty = form.formState.isDirty;
+
+											return (
+												<div className='flex items-center justify-between gap-4 px-3'>
+													<span className={cn('text-xs', { 'line-through': value > 0 })}>
+														{product.basePrice.toLocaleString('en')}
+													</span>
+													<span className='text-xs text-destructive whitespace-nowrap'>{`(-${total})`}</span>
+													<span className='text-sm text-foreground whitespace-nowrap [&_svg]:size-5' dir='ltr'>
+														{value > 0
+															? formatMoney(
+																	!isDirty ? product.finalPrice || 0 : (product.finalPrice || 0) - total,
+																	'EGP',
+																)
+															: '-'}
+													</span>
+												</div>
+											);
+										},
 									},
 								]
 							: couponApplicableOn === EnumCouponApplicableOn.SPECIFIC_CATEGORIES
