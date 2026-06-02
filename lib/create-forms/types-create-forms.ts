@@ -1,6 +1,6 @@
 import { EnumDatePickerMode } from '@/components/inputs/multi-date-picker';
 import { ComboboxOption, PaginatedResponse } from '@/components/ui-custom/reuseable-combobox';
-import { TImage } from '@/types/api.js';
+import { TImage } from '@/types/api';
 import { ChangeEvent, ComponentType, ElementType, ReactNode } from 'react';
 import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
 

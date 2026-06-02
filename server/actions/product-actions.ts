@@ -1,8 +1,6 @@
 'use server';
-
 import { TLocalesData } from '@/configs/general';
 import { runAction } from '@/lib/error-handler/error-handler.server';
-// import * as productService from '@/server/services/product-service';
 import { TProductFormValues } from '@/validation/product-validation';
 import {
 	bulkUpdateProductStatus,
@@ -39,7 +37,7 @@ export async function getAllProductsAction(
 		sortBy?: string;
 		sortOrder?: 'asc' | 'desc';
 	},
-	locale?: TLocalesData
+	locale?: TLocalesData,
 ) {
 	return runAction(() => getAllProducts(params, locale));
 }
@@ -138,6 +136,6 @@ export async function checkSkuAvailabilityAction(sku: string, excludeId?: string
 /**
  * Check slug availability
  */
-export async function checkSlugAvailabilityAction(slug: string, lang: 'ar' | 'en', excludeProductId?: string) {
+export async function checkSlugAvailabilityAction(slug: string, lang: TLocalesData, excludeProductId?: string) {
 	return runAction(() => checkSlugAvailability(slug, lang, excludeProductId));
 }

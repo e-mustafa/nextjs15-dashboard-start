@@ -261,7 +261,7 @@ export default function ProductForm({
 	});
 
 	const initialItems = (response?.data as TFormValues)?.initialItems || defaultValues?.initialItems;
-	
+
 	const formSections_product2: SectionConfig<TFormValues> = {
 		// title: 'forms.sections.product_info',
 		fields: [
@@ -310,10 +310,6 @@ export default function ProductForm({
 		],
 	};
 
-
-	console.log('form errors', form.formState.errors);
-	console.log('form errors', form.getValues());
-
 	const [result, setResult] = useState<ActionResult<TFormValues> | null>(null);
 	const [isPending, startTransition] = useTransition();
 
@@ -337,7 +333,7 @@ export default function ProductForm({
 	const resetForm = () => {
 		form.reset(defaultValues);
 		localStorage.removeItem(
-			type === EnumFormTypes.CREATE ? 'create-product' : 'update-product-' + (defaultValues.id || '')
+			type === EnumFormTypes.CREATE ? 'create-product' : 'update-product-' + (defaultValues.id || ''),
 		);
 	};
 
