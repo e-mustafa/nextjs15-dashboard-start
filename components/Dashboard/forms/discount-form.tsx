@@ -1,5 +1,6 @@
 'use client';
 import { url_segment } from '@/app/[locale]/dashboard/(products-management)/discounts/page';
+import { url_segment as url_products } from '@/app/[locale]/dashboard/(products-management)/products/page';
 import LoaderInstElement from '@/components/Shared/loaders/loader-inst-element';
 import { Form } from '@/components/ui-custom/custom-form';
 import { config_env, currenciesData } from '@/configs/general';
@@ -13,7 +14,7 @@ import { SectionConfig } from '@/lib/create-forms/types-create-forms';
 import { formatMoney } from '@/lib/format-money';
 import { cn, msg } from '@/lib/utils';
 import { createDiscountAction, updateDiscountAction } from '@/server/actions/discount-actions';
-import { TProduct } from '@/server/services/product-service';
+import { TProduct } from '@/server/services/product-service/types';
 import { useGProgressBarStore } from '@/stores/global-progress-bar.store';
 import { ActionResult } from '@/types/api';
 import { defaultValuesDiscount, formSchemaDiscount, TDiscountFormValues } from '@/validation/discount-validation';
@@ -186,13 +187,13 @@ export default function DiscountForm({
 							name: 'products',
 							label: msg('common.actions.choose_', { item: 'common.sections.products' }),
 							placeholder: 'forms.placeholders.choose_products_to_discount',
-							optionUrl: `${config_env.domainAPI}/dashboard/products`,
+							optionUrl: `${config_env.domainAPI}${url_products}`,
 							linkHref: '/dashboard/products',
 							revalidateTags: ['products'],
 							multiple: true,
 							isProducts: true,
 							required: true,
-							initialItems: initialItems?.products || [],
+							initialItems: initialItems?.products || discountProducts || [],
 							discountProducts: discountProducts,
 							customColumn: (product: TProduct) => {
 								const type = form.watch('type');
