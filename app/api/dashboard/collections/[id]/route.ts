@@ -6,11 +6,11 @@ import { deleteCollection, getCollection, updateCollection } from '@/server/serv
 
 // GET /api/collections/:id
 
-async function getCollectionAction(_req: Request, ctx?: HandlerContext) {
+async function getCollectionAction(req: Request, ctx?: HandlerContext) {
 	const { id } = (await ctx?.params) ?? {};
 	if (!id) throw new AppError('api.errors.invalid_id', 400);
-	const locale = _req.headers.get('accept-language') || (await getCurrentLocale());
-	return getCollection(id, locale as TLocalesData);
+	const locale = req.headers.get('accept-language') as TLocalesData || (await getCurrentLocale());
+	return getCollection(id, locale);
 }
 
 async function updateCollectionAction(req: Request, ctx?: HandlerContext) {
