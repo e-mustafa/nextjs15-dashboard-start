@@ -35,8 +35,14 @@ export async function getAllDiscounts(
 
 	const { page, limit, skip, search, sortBy, sortOrder } = parseListParams(params, {
 		sortableFields: ['name_ar', 'name_en', 'startDate', 'endDate', 'priority', 'isActive', 'createdAt'],
-		defaultSortOrder: 'asc',
+		// defaultSortOrder: 'asc',
 	});
+
+	const localeKey = (locale?.split('-')[0] as 'ar' | 'en') || 'en';
+	const localizedFields = ['name', 'slug'];
+	const finalSortKey = localizedFields.includes(sortBy) ? `${sortBy}_${localeKey}` : sortBy;
+
+	const orderBy = { [finalSortKey]: sortOrder };
 
 	const where: Prisma.ProductDiscountWhereInput = {
 		...(search && {
@@ -80,7 +86,8 @@ export async function getAllDiscounts(
 			skip,
 			take: limit,
 			include: discountWithRelationsInclude, // ✅ Clean and Reusable include
-			orderBy: { [sortBy]: sortOrder },
+			// orderBy: { [sortBy || 'createdAt']: sortOrder },
+			orderBy,
 		}),
 		prisma_DB.productDiscount.count({ where }),
 	]);

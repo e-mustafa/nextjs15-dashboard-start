@@ -32,9 +32,15 @@ export async function getAllCoupons(
 ): Promise<ActionResult<FormattedCoupon>> {
 	try {
 		const { page, limit, skip, search, sortBy, sortOrder } = parseListParams(params, {
-			sortableFields: ['code', 'startDate', 'endDate', 'usedCount', 'createdAt'],
-			defaultSortOrder: 'asc',
+			sortableFields: ['code', 'name', 'startDate', 'endDate', 'usedCount', 'createdAt'],
+			// defaultSortOrder: 'asc',
+			// defaultSortBy: 'createdAt',
 		});
+		const localeKey = (locale?.split('-')[0] as 'ar' | 'en') || 'en';
+		const localizedFields = ['name'];
+		const finalSortKey = localizedFields.includes(sortBy) ? `${sortBy}_${localeKey}` : sortBy;
+
+		const orderBy = { [finalSortKey]: sortOrder };
 
 		const now = new Date();
 
@@ -59,7 +65,8 @@ export async function getAllCoupons(
 				skip,
 				take: limit,
 				include: couponWithRelationsInclude,
-				orderBy: { [sortBy as string]: sortOrder },
+				// orderBy: { [sortBy||'createdAt']: sortOrder },
+				orderBy,
 			}),
 			prisma_DB.coupon.count({ where }),
 		]);
@@ -72,7 +79,7 @@ export async function getAllCoupons(
 			data,
 			meta: {
 				pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-				sort: { by: sortBy!, order: sortOrder },
+				sort: { by: sortBy, order: sortOrder },
 			},
 		};
 	} catch (error) {

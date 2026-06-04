@@ -49,12 +49,16 @@ export async function getAllProducts(
 ): Promise<ActionResult<TProduct>> {
 	const { page, limit, skip, search, sortBy, sortOrder } = parseListParams(params, {
 		sortableFields: ['name', 'slug', 'basePrice', 'stockQuantity', 'createdAt', 'sortOrder'],
-		defaultSortOrder: 'asc',
+		// defaultSortBy: 'createdAt',
+		// defaultSortOrder: 'asc',
 	});
 
 	const localeKey = (locale?.split('-')[0] as 'ar' | 'en') || 'en';
 
-	const orderBy = sortBy ? { [`${sortBy}_${localeKey}`]: sortOrder } : { sortOrder: 'asc' as const };
+	const localizedFields = ['name', 'slug'];
+	const finalSortKey = localizedFields.includes(sortBy) ? `${sortBy}_${localeKey}` : sortBy;
+
+	const orderBy = { [finalSortKey]: sortOrder }  
 
 	const where = buildProductWhereClause({
 		search,
@@ -85,7 +89,7 @@ export async function getAllProducts(
 		data: data as TProduct[],
 		meta: {
 			pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-			sort: sortBy ? { by: sortBy, order: sortOrder } : undefined,
+			sort: { by: sortBy, order: sortOrder },
 		},
 	};
 }

@@ -3,6 +3,7 @@ import { localesData, TLocalesData } from '@/configs/general';
 import { AppError } from '@/lib/error-handler/error-handler.server';
 import { logger } from '@/lib/logs/logger';
 import { mapTranslations } from '@/lib/utils.server/mapTranslations.server';
+import { parseListParams } from '@/lib/utils.server/query';
 import { ValidateFormAction } from '@/lib/utils.server/validate-data-server';
 import { prisma_DB } from '@/prisma/prisma.db';
 import { ActionResult, TImage } from '@/types/api';
@@ -102,9 +103,16 @@ export async function getAllCategories(
 	const sortableFields = ['name', 'slug', 'createdAt'];
 	const sortBy = sortableFields.includes(params?.sortBy || '') ? params?.sortBy : undefined;
 	const sortOrder = params?.sortOrder === 'desc' ? 'desc' : 'asc';
-	const localeKey = locale?.split('-')[0] || 'en';
+	const { page, limit, skip, search, sortBy, sortOrder } = parseListParams(params, {
+		sortableFields: ['name', 'slug', 'createdAt'],
+		defaultSortOrder: 'asc',
+	});
 
-	const orderBy = sortBy ? { [`${sortBy}_${localeKey}`]: sortOrder } : undefined;
+	const localeKey = (locale?.split('-')[0] as 'ar' | 'en') || 'en';
+	const localizedFields = ['name', 'slug'];
+	const finalSortKey = localizedFields.includes(sortBy) ? `${sortBy}_${localeKey}` : sortBy;
+
+	const orderBy = { [finalSortKey]: sortOrder };
 
 	const where: Prisma.CategoryWhereInput = search
 		? {
@@ -140,7 +148,7 @@ export async function getAllCategories(
 		data: data as Category[],
 		meta: {
 			pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-			sort: sortBy ? { by: sortBy, order: sortOrder } : undefined,
+			sort: { by: sortBy, order: sortOrder },
 		},
 	};
 }

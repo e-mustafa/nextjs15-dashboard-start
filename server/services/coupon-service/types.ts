@@ -1,5 +1,5 @@
 import { CouponApplicableOn, CouponType, Prisma } from '@prisma/client';
-import { couponWithRelationsInclude } from './prisma-includes.js';
+import { couponWithRelationsInclude } from './prisma-includes';
 
 // ✅ Updated Types with Translations
 export type CouponWithRelations = Prisma.CouponGetPayload<{
