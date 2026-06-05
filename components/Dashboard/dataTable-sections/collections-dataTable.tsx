@@ -8,7 +8,7 @@ import {
 	deleteManyCollectionsAction,
 	toggleStateCollectionAction,
 } from '@/server/actions/collection-actions';
-import { Collection } from '@/server/services/collection-service';
+import { Collection } from '@/server/services/collection-service/types';
 import { ActionResult, ApiMeta, TImage, TQueryParams } from '@/types/api';
 import { ColumnDef } from '@tanstack/react-table';
 import Image from 'next/image';
@@ -29,7 +29,7 @@ export default function CollectionDataTable({ result, locale }: { result: Action
 	// ✅ Optimistic UI state
 	const [optimisticData, setOptimisticData] = useOptimistic<Collection[]>((result.data as Collection[]) ?? []);
 	const [meta, setMeta] = useState<ApiMeta>(result.meta as ApiMeta);
-	
+
 	// ---------------------------------------------------------
 	// URL Query Parameters
 	// ---------------------------------------------------------

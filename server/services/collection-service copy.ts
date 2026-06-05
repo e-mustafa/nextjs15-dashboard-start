@@ -10,14 +10,43 @@ import { ActionResult, TImage } from '@/types/api';
 import { fields, formSchemaCollection, TCollectionFormValues } from '@/validation/collection-validation';
 import { Prisma } from '@prisma/client';
 import { revalidatePath, revalidateTag } from 'next/cache';
-import { cookies } from 'next/headers';
 
 type TFormValues = TCollectionFormValues;
 
+// temporarily
 let user: { id: string; name: string } | null = null;
 
+const PATH = '/dashboard/collections';
+const TAG = 'collections';
+const PROFILE = 'max';
+
+const COLLECTION_COMPLETE_INCLUDE = {
+	translations: true,
+	images: {
+		include: { image: true },
+		orderBy: { sortOrder: 'asc' },
+	},
+	seoImage: true,
+	products: {
+		select: {
+			sortOrder: true,
+			product: {
+				select: {
+					id: true,
+					translations: { select: { lang: true, name: true } },
+					images: {
+						include: { image: true },
+						orderBy: { sortOrder: 'asc' },
+						take: 1,
+					},
+				},
+			},
+		},
+	},
+} as const;
+
 type CollectionWithRelations = Prisma.CollectionGetPayload<{
-	include: { translations: true; images: { include: { image: true } }; seoImage: true };
+	include: typeof COLLECTION_COMPLETE_INCLUDE;
 }>;
 
 export type Collection = {
@@ -35,18 +64,59 @@ export type Collection = {
 	updatedAt?: string;
 	images?: TImage[];
 	seoImage?: TImage;
+	products: string[];
 };
+
+export type CollectionProduct = {
+	id: string;
+	name: string;
+	image?: string;
+};
+
+export async function formatCollectionProduct(
+	productRelation: CollectionWithRelations['products'][0],
+	locale?: string,
+): Promise<CollectionProduct> {
+	console.log('productRelation--', productRelation);
+	const {
+		product: { id, translations, images },
+	} = productRelation;
+
+	let productName = '';
+	if (translations?.length > 0) {
+		const productTranslation = await mapTranslations(translations, {
+			accept_language: locale,
+			fields: ['name'],
+			enableFallback: true,
+		});
+		productName = productTranslation.name || '';
+	}
+
+	const firstImage = images?.[0]?.image?.url || undefined;
+
+	return {
+		id,
+		name: productName,
+		image: firstImage,
+	};
+}
 
 async function formatCollection(
 	collection: CollectionWithRelations,
-	acceptLanguage?: string
+	acceptLanguage?: string,
+	forEdit: boolean = false,
 ): Promise<TFormValues | Collection> {
-	const { translations, images, seoImage, ...rest } = collection;
+	console.log('collection*', collection);
+	const { translations, products, images, seoImage, ...rest } = collection;
+
+	console.log('products--', products);
 
 	const translationData = await mapTranslations(translations, {
-		accept_language: acceptLanguage,
+		accept_language: forEdit ? '*' : acceptLanguage,
 		fields,
 	});
+
+	const formattedProducts = await Promise.all(products?.map((p) => formatCollectionProduct(p, acceptLanguage)));
 
 	return {
 		...rest,
@@ -55,7 +125,13 @@ async function formatCollection(
 			fileId: img.image?.fileId ?? '',
 		})),
 		seoImage: seoImage ? [{ url: seoImage?.url, fileId: seoImage?.fileId }] : [],
+
 		...(translationData as TFormValues),
+
+		products: formattedProducts?.map((p) => p.id) || [],
+		initialItems: {
+			products: formattedProducts,
+		},
 	};
 }
 
@@ -85,17 +161,17 @@ async function validateUniqueSlugs(id?: string, slug_ar?: string, slug_en?: stri
 /** 🔹 Get All Collections */
 export async function getAllCollections(
 	params?: { page?: number; limit?: number; search?: string; sortBy?: string; sortOrder?: 'asc' | 'desc' },
-	locale?: TLocalesData
+	locale?: TLocalesData,
 ): Promise<ActionResult<Collection>> {
-	const cookiesStore = await cookies();
-	const userCookie = cookiesStore.get('user')?.value;
-	if (userCookie) {
-		try {
-			user = JSON.parse(userCookie);
-		} catch {
-			user = null;
-		}
-	}
+	// const cookiesStore = await cookies();
+	// const userCookie = cookiesStore.get('user')?.value;
+	// if (userCookie) {
+	// 	try {
+	// 		user = JSON.parse(userCookie);
+	// 	} catch {
+	// 		user = null;
+	// 	}
+	// }
 
 	const { page, limit, skip, search, sortBy, sortOrder } = parseListParams(params, {
 		sortableFields: ['name', 'slug', 'createdAt', 'sortOrder'],
@@ -115,7 +191,7 @@ export async function getAllCollections(
 					{ translations: { some: { slug: { contains: search, mode: 'insensitive' } } } },
 					{ translations: { some: { description: { contains: search, mode: 'insensitive' } } } },
 				],
-		  }
+			}
 		: {};
 
 	const [collections, total] = await Promise.all([
@@ -123,17 +199,14 @@ export async function getAllCollections(
 			where,
 			skip,
 			take: limit,
-			include: {
-				translations: true,
-				images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
-				seoImage: true,
-			},
+			include: COLLECTION_COMPLETE_INCLUDE,
 			orderBy,
 		}),
 		prisma_DB.collection.count({ where }),
 	]);
+	console.log('collections--', collections);
 
-	const data = await Promise.all(collections.map((c) => formatCollection(c, locale)));
+	const data = await Promise.all(collections?.map((c) => formatCollection(c, locale)));
 	return {
 		success: true,
 		status: 200,
@@ -146,17 +219,17 @@ export async function getAllCollections(
 }
 
 /** 🔹 Get Collection By ID */
-export async function getCollection(id: string) {
+export async function getCollection(id: string, locale?: TLocalesData) {
 	if (!id) throw new AppError('api.errors.invalid_id', 404);
 
 	const collection = await prisma_DB.collection.findUnique({
 		where: { id },
-		include: { translations: true, images: { include: { image: true }, orderBy: { sortOrder: 'asc' } }, seoImage: true },
+		include: COLLECTION_COMPLETE_INCLUDE,
 	});
 
 	if (!collection) throw new AppError('api.collections.errors.not_found', 404);
 
-	const data = await formatCollection(collection);
+	const data = await formatCollection(collection, locale, true);
 	return { success: true, status: 200, data };
 }
 
@@ -189,9 +262,9 @@ export async function createCollection(data: TFormValues): Promise<ActionResult<
 										? { connect: { id: existingImage.id } }
 										: { create: { fileId: img.fileId, url: img.url } },
 								};
-							})
+							}),
 						),
-				  }
+					}
 				: undefined,
 
 			seoImage: data.seoImage?.length
@@ -223,10 +296,10 @@ export async function createCollection(data: TFormValues): Promise<ActionResult<
 				],
 			},
 		},
-		include: { translations: true, images: { include: { image: true }, orderBy: { sortOrder: 'asc' } }, seoImage: true },
+		include: COLLECTION_COMPLETE_INCLUDE,
 	});
 
-	revalidatePath('/dashboard/collections');
+	revalidatePath(PATH);
 	const formattedData = await formatCollection(collection as CollectionWithRelations);
 	logger.info(`✅ Collection created: ${collection.id}`, { context: 'CollectionService' });
 
@@ -267,9 +340,9 @@ export async function updateCollection(id: string, data: TFormValues): Promise<A
 											? { connect: { id: existingImage.id } }
 											: { create: { fileId: img.fileId, url: img.url } },
 									};
-								})
+								}),
 							),
-					  }
+						}
 					: undefined,
 				seoImage: data.seoImage?.length
 					? existingSeoImage
@@ -304,12 +377,12 @@ export async function updateCollection(id: string, data: TFormValues): Promise<A
 
 	const collection = await prisma_DB.collection.findUnique({
 		where: { id },
-		include: { translations: true, images: { include: { image: true }, orderBy: { sortOrder: 'asc' } }, seoImage: true },
+		include: COLLECTION_COMPLETE_INCLUDE,
 	});
 
 	if (!collection) throw new AppError('api.collections.errors.not_found', 404);
 
-	revalidateTag('collections', 'max');
+	revalidateTag(TAG, PROFILE);
 	const formattedData = await formatCollection(collection as CollectionWithRelations);
 	logger.info(`✅ Collection updated: ${collection.id}`, { context: 'CollectionService' });
 
@@ -323,7 +396,7 @@ export async function toggleStateCollection(id: string, isActive: boolean) {
 		data: { isActive },
 		select: { id: true, isActive: true },
 	});
-	revalidateTag('collections', 'max');
+	revalidateTag(TAG, PROFILE);
 	return { success: true, status: 200, data: updated, message: 'api.success.update_status' };
 }
 
@@ -334,14 +407,14 @@ export async function toggleFeaturedCollection(id: string, isFeatured: boolean) 
 		data: { isFeatured },
 		select: { id: true, isFeatured: true },
 	});
-	revalidateTag('collections', 'max');
+	revalidateTag(TAG, PROFILE);
 	return { success: true, status: 200, data: updated, message: 'api.success.update_status' };
 }
 
 /** 🔴 Delete */
 export async function deleteCollection(id: string) {
 	await prisma_DB.collection.delete({ where: { id } });
-	revalidateTag('collections', 'max');
+	revalidateTag(TAG, PROFILE);
 	logger.info(`✅ Collection deleted: ${id}`, { context: 'CollectionService' });
 	return { success: true, status: 200, data: null, message: 'api.collections.success.delete' };
 }
@@ -349,10 +422,11 @@ export async function deleteCollection(id: string) {
 /** 🔴 Delete Many */
 export async function deleteManyCollections(ids: string[]) {
 	if (!ids?.length) throw new AppError('api.errors.empty_ids', 400);
+
 	const deleted = await prisma_DB.collection.deleteMany({ where: { id: { in: ids } } });
 	if (!deleted.count) throw new AppError('api.collections.errors.delete', 404);
 
-	revalidateTag('collections', 'max');
+	revalidateTag(TAG, PROFILE);
 	logger.info(`✅ ${deleted.count} collections deleted`, { context: 'CollectionService' });
 	return { success: true, status: 200, data: null, message: 'api.collections.success.delete_many' };
 }

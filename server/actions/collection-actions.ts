@@ -17,13 +17,13 @@ export async function getAllCollectionsAction(
 		sortBy?: string;
 		sortOrder?: 'asc' | 'desc';
 	},
-	locale?: TLocalesData
+	locale?: TLocalesData,
 ) {
 	return runAction(() => collectionService.getAllCollections(params, locale));
 }
 
-export async function getCollectionAction(id: string) {
-	return runAction(() => collectionService.getCollection(id));
+export async function getCollectionAction(id: string, locale?: TLocalesData) {
+	return runAction(() => collectionService.getCollection(id, locale));
 }
 
 export async function createCollectionAction(data: TCollectionFormValues) {
