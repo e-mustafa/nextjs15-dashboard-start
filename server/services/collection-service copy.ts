@@ -317,6 +317,8 @@ export async function updateCollection(id: string, data: TFormValues): Promise<A
 	const unique = await validateUniqueSlugs(id, data.slug_ar, data.slug_en);
 	if (!unique.success) return unique as unknown as ActionResult<TFormValues>;
 
+	const langs = Object.keys(localesData) as TLocalesData[];
+
 	await prisma_DB.$transaction(async (tx) => {
 		const existingSeoImage = data.seoImage?.length
 			? await tx.image.findFirst({ where: { fileId: data.seoImage[0].fileId } })
@@ -349,30 +351,32 @@ export async function updateCollection(id: string, data: TFormValues): Promise<A
 						? { connect: { id: existingSeoImage.id } }
 						: { create: { fileId: data.seoImage[0].fileId, url: data.seoImage[0].url } }
 					: undefined,
+
+				// For translations, we can use upsert with a unique constraint on (collectionId, lang)
+				translations: {
+					upsert: (Object.keys(localesData) as TLocalesData[]).map((lang: TLocalesData) => ({
+						where: { collectionId_lang: { collectionId: id, lang } }, // this requires a unique constraint in the Prisma schema
+						update: {
+							slug: data[`slug_${lang}`],
+							name: data[`name_${lang}`],
+							description: data[`description_${lang}`],
+							seoTitle: data[`seoTitle_${lang}`],
+							seoDescription: data[`seoDescription_${lang}`],
+							seoKeywords: data[`seoKeywords_${lang}`],
+						},
+						create: {
+							lang,
+							slug: data[`slug_${lang}`],
+							name: data[`name_${lang}`],
+							description: data[`description_${lang}`],
+							seoTitle: data[`seoTitle_${lang}`],
+							seoDescription: data[`seoDescription_${lang}`],
+							seoKeywords: data[`seoKeywords_${lang}`],
+						},
+					})),
+				},
 			},
 		});
-
-		const langs = Object.keys(localesData) as TLocalesData[];
-		for (const lang of langs) {
-			const slug = data[`slug_${lang}`];
-			const name = data[`name_${lang}`];
-			const description = data[`description_${lang}`];
-			const seoTitle = data[`seoTitle_${lang}`];
-			const seoDescription = data[`seoDescription_${lang}`];
-			const seoKeywords = data[`seoKeywords_${lang}`];
-
-			const existing = await tx.collectionTranslation.findFirst({ where: { collectionId: id, lang } });
-			if (existing) {
-				await tx.collectionTranslation.update({
-					where: { id: existing.id },
-					data: { slug, name, description, seoTitle, seoDescription, seoKeywords },
-				});
-			} else {
-				await tx.collectionTranslation.create({
-					data: { collectionId: id, lang, slug, name, description, seoTitle, seoDescription, seoKeywords },
-				});
-			}
-		}
 	});
 
 	const collection = await prisma_DB.collection.findUnique({
