@@ -9,7 +9,7 @@ import {
 	deleteManyDiscountsAction,
 	toggleStateDiscountAction,
 } from '@/server/actions/discount-actions';
-import { FormattedDiscount } from '@/server/services/discount-service';
+import { FormattedDiscount } from '@/server/services/discount-service/types';
 import { ActionResult, ApiMeta, TQueryParams } from '@/types/api';
 import { DiscountType } from '@prisma/client';
 import { ColumnDef } from '@tanstack/react-table';
@@ -118,7 +118,7 @@ export default function DiscountDataTable({ result, locale }: { result: ActionRe
 					className='font-medium hover:underline text-primary'
 					onClick={(e) => e.stopPropagation()}
 				>
-					{row.original?.name || row.original?.name_ar || row.original?.name_en}
+					{row.original?.name}
 				</Link>
 			),
 		},

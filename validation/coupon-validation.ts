@@ -1,10 +1,10 @@
-import { ComboboxOption } from '@/components/ui-custom/reuseable-combobox';
 import { msg } from '@/lib/utils';
 import { CouponApplicableOn, CouponType } from '@prisma/client';
 import { z } from 'zod';
 import {
 	dateOptional,
 	dateRequired,
+	IInitialItems,
 	integerPositiveNumber,
 	nameArField,
 	nameEnField,
@@ -24,19 +24,11 @@ export const EnumCouponApplicableOn = CouponApplicableOn || {
 	SPECIFIC_COLLECTIONS: 'SPECIFIC_COLLECTIONS',
 	MINIMUM_PURCHASE: 'MINIMUM_PURCHASE',
 };
-export interface IInitialItems {
-	products?: ComboboxOption['products'] | [];
-	categories?: ComboboxOption['categories'] | [];
-	collections?: ComboboxOption['collections'] | [];
-	brands?: ComboboxOption['brands'] | [];
-	tags?: ComboboxOption['tags'] | [];
-}
 
 type TCouponFormInput = z.input<typeof formSchemaCoupon> & {
 	id?: string;
 	initialItems?: IInitialItems;
 };
-
 
 // 2. form output - be sure to return Date object after transform
 export type TCouponFormOutput = z.output<typeof formSchemaCoupon>;

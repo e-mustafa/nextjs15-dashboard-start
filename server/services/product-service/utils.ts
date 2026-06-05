@@ -238,8 +238,8 @@ export async function formatProduct(
 		tags: formattedTags?.map((e) => e.id),
 
 		initialItems: {
-			brands: brandData,
-			categories: categoryData,
+			brands: [brandData],
+			categories: [categoryData],
 			collections: formattedCollections,
 			tags: formattedTags,
 		},

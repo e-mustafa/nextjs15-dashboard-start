@@ -1,10 +1,7 @@
 import { mapTranslations } from '@/lib/utils.server/mapTranslations.server';
 import { TCouponFormValues, fields } from '@/validation/coupon-validation';
-import { CouponCategory, CouponCollection, CouponProduct, CouponValidation, CouponWithRelations, FormattedCoupon } from './types';
-import { logger } from '@/lib/logs/logger.js';
-import { AppError } from '@/lib/error-handler/error-handler.server.js';
 import { CouponApplicableOn } from '@prisma/client';
-import { ActionResult } from '@/types/api.js';
+import { CouponCategory, CouponCollection, CouponProduct, CouponWithRelations, FormattedCoupon } from './types';
 
 /** 🔹 Format Single Product for Coupon */
 export async function formatCouponProduct(
@@ -168,31 +165,30 @@ export async function formatCouponForEdit(coupon: CouponWithRelations, locale?: 
 	};
 }
 
-
 /** 🔹 Check Coupon Applicability */
 export async function checkCouponApplicability(
-   coupon: {
-      applicableOn: CouponApplicableOn;
-      products: { productId: string }[];
-      categories: { categoryId: string }[];
-      collections: { collectionId: string }[];
-   },
-   cartItems: { productId: string; categoryId?: string; collectionIds?: string[] }[],
+	coupon: {
+		applicableOn: CouponApplicableOn;
+		products: { productId: string }[];
+		categories: { categoryId: string }[];
+		collections: { collectionId: string }[];
+	},
+	cartItems: { productId: string; categoryId?: string; collectionIds?: string[] }[],
 ): Promise<boolean> {
-   switch (coupon.applicableOn) {
-      case CouponApplicableOn.ALL_PRODUCTS:
-         return true;
-      case CouponApplicableOn.SPECIFIC_PRODUCTS:
-         return cartItems.some((item) => coupon.products.some((p) => p.productId === item.productId));
-      case CouponApplicableOn.SPECIFIC_CATEGORIES:
-         return cartItems.some((item) => item.categoryId && coupon.categories.some((c) => c.categoryId === item.categoryId));
-      case CouponApplicableOn.SPECIFIC_COLLECTIONS:
-         return cartItems.some((item) =>
-            item.collectionIds?.some((cid) => coupon.collections.some((c) => c.collectionId === cid)),
-         );
-      case CouponApplicableOn.MINIMUM_PURCHASE:
-         return true;
-      default:
-         return false;
-   }
+	switch (coupon.applicableOn) {
+		case CouponApplicableOn.ALL_PRODUCTS:
+			return true;
+		case CouponApplicableOn.SPECIFIC_PRODUCTS:
+			return cartItems.some((item) => coupon.products.some((p) => p.productId === item.productId));
+		case CouponApplicableOn.SPECIFIC_CATEGORIES:
+			return cartItems.some((item) => item.categoryId && coupon.categories.some((c) => c.categoryId === item.categoryId));
+		case CouponApplicableOn.SPECIFIC_COLLECTIONS:
+			return cartItems.some((item) =>
+				item.collectionIds?.some((cid) => coupon.collections.some((c) => c.collectionId === cid)),
+			);
+		case CouponApplicableOn.MINIMUM_PURCHASE:
+			return true;
+		default:
+			return false;
+	}
 }

@@ -1,6 +1,6 @@
 import { TImage } from '@/types/api';
 import { DiscountType, Prisma } from '@prisma/client';
-import { discountWithRelationsInclude } from './prisma-includes.js';
+import { discountWithRelationsInclude } from './prisma-includes';
 
 // Extract the typescript type directly from Prisma payload based on the share include
 export type DiscountWithRelations = Prisma.ProductDiscountGetPayload<{

@@ -1,8 +1,11 @@
 import z from 'zod';
-import { imagesField, nameArField, nameEnField } from './fields-validation';
+import { IInitialItems, imagesField, nameArField, nameEnField } from './fields-validation';
 import { SEODefaultValues, SEOFormSchema } from './seo-validation';
 
-export type TCollectionFormValues = z.infer<typeof formSchemaCollection> & { id?: string };
+export type TCollectionFormValues = z.infer<typeof formSchemaCollection> & {
+	id?: string;
+	initialItems?: IInitialItems;
+};
 
 /** ✅ Unified fields using camelCase naming */
 export const fields = ['name', 'description', 'slug', 'seoTitle', 'seoDescription', 'seoKeywords'];
@@ -15,6 +18,8 @@ export const defaultValuesCollection = {
 	isActive: true,
 	isFeatured: false,
 	images: [],
+
+	products: [],
 
 	...SEODefaultValues,
 };
@@ -31,6 +36,6 @@ export const formSchemaCollection = z
 
 		images: imagesField.optional(),
 
-		products: z.array(z.string()).optional(),
+		products: z.array(z.string()),
 	})
 	.extend(SEOFormSchema.shape);

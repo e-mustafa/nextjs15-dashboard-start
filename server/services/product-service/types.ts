@@ -1,6 +1,7 @@
 import { TImage } from '@/types/api';
 import { DiscountType, Prisma, ProductType } from '@prisma/client';
 import { PRODUCT_COMPLETE_INCLUDE } from './prisma-includes';
+import { IInitialItems } from '@/validation/fields-validation.js';
 
 /////////////////////////
 // TYPES
@@ -80,12 +81,14 @@ export interface TProduct {
 	specifications?: SpecificationSection[];
 
 	// for preload item in
-	initialItems: {
-		brands?: { id: string; name: string; image?: string };
-		categories?: { id: string; name: string; image?: string };
-		collections?: Array<{ id: string; name: string; image?: string }>;
-		tags: Array<{ id: string; name: string }>;
-	};
+	initialItems: IInitialItems;
+	
+	// {
+	// 	brands?: Array<{ id: string; name: string; image?: string }>;
+	// 	categories?: Array<{ id: string; name: string; image?: string }>;
+	// 	collections?: Array<{ id: string; name: string; image?: string }>;
+	// 	tags: Array<{ id: string; name: string }>;
+	// };
 
 	discounts?: TDiscount[];
 

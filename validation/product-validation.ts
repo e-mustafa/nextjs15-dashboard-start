@@ -2,11 +2,10 @@ import { msg } from '@/lib/utils';
 // import z from 'zod';
 import { ProductType } from '@prisma/client';
 import z from 'zod';
-import { imagesField, intNotNegativeField, preprocessNumber } from './fields-validation';
+import { IInitialItems, imagesField, intNotNegativeField, preprocessNumber } from './fields-validation';
 import { specificationSectionSchema } from './product-specification-validation';
 import { combinationSchema, variantFormSchema } from './product-variant-validation';
 import { SEODefaultValues, SEOFormSchema } from './seo-validation';
-import { IInitialItems } from './coupon-validation';
 
 // export type TProductFormValues = z.output<typeof formSchemaProduct> & { id?: string };
 // export type TProductFormValues = z.input<typeof formSchemaProduct> & { id?: string };
