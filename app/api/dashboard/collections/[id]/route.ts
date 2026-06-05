@@ -9,7 +9,7 @@ import { deleteCollection, getCollection, updateCollection } from '@/server/serv
 async function getCollectionAction(req: Request, ctx?: HandlerContext) {
 	const { id } = (await ctx?.params) ?? {};
 	if (!id) throw new AppError('api.errors.invalid_id', 400);
-	const locale = req.headers.get('accept-language') as TLocalesData || (await getCurrentLocale());
+	const locale = (req.headers.get('accept-language') as TLocalesData) || (await getCurrentLocale());
 	return getCollection(id, locale);
 }
 

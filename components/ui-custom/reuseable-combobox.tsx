@@ -142,7 +142,8 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 		const objectsFromValue = valueArray.filter((v) => typeof v === 'object' && v.id) as T[];
 
 		// Merge with initialItems (from backend)
-		const combined = [...initialItems, ...objectsFromValue];
+		const initialItemsArray = Array.isArray(initialItems) ? initialItems : [initialItems];
+		const combined = [...initialItemsArray, ...objectsFromValue];
 
 		// Remove duplicates by ID
 		const uniqueMap = new Map(combined.map((opt) => [opt.id, opt]));

@@ -4,7 +4,7 @@ import { imagesPlaceholder, TLocalesData } from '@/configs/general';
 import { useServerResponse } from '@/hooks/use-server-response';
 import { getDataInPage } from '@/lib/utils.server/api.server';
 import { deleteBrandAction, deleteManyBrandsAction, toggleStateBrandAction } from '@/server/actions/brand-actions';
-import { Brand } from '@/server/services/brand-service';
+import { Brand } from '@/server/services/brand-service/types';
 import { ActionResult, ApiMeta, TImage, TQueryParams } from '@/types/api';
 import { ColumnDef } from '@tanstack/react-table';
 import Image from 'next/image';

@@ -1,6 +1,15 @@
+import { ComboboxOption } from '@/components/ui-custom/reuseable-combobox';
 import { TLocalesData } from '@/configs/general';
 import { msg } from '@/lib/utils';
 import z from 'zod';
+
+export interface IInitialItems {
+	products?: ComboboxOption['products'] ;
+	categories?: ComboboxOption['categories'];
+	collections?: ComboboxOption['collections'];
+	brands?: ComboboxOption['brands'];
+	tags?: ComboboxOption['tags'];
+}
 
 export const preprocessNumber = (ctx: z.ZodNumber) =>
 	z.preprocess((val) => {
