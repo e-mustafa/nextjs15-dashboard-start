@@ -1,8 +1,11 @@
 import z from 'zod';
-import { imagesField, nameArField, nameEnField } from './fields-validation';
+import { IInitialItems, imagesField, nameArField, nameEnField } from './fields-validation';
 import { SEODefaultValues, seoFields, SEOFormSchema } from './seo-validation';
 
-export type TCategoryFormValues = z.infer<typeof formSchemaCategory> & { id?: string };
+export type TCategoryFormValues = z.infer<typeof formSchemaCategory> & {
+	id?: string;
+	initialItems?: IInitialItems;
+};
 
 export const fields = ['name', 'description', ...seoFields];
 
@@ -13,6 +16,9 @@ export const defaultValuesCategory = {
 	description_en: '',
 	isActive: true,
 	images: [],
+
+	products: [],
+	initialItems: { products: [] },
 
 	...SEODefaultValues,
 };
