@@ -1,5 +1,6 @@
+import { calculateSingleProductDiscount, MinimalCouponData } from '@/lib/calculate-coupon-discounted-price';
 import { mapTranslations } from '@/lib/utils.server/mapTranslations.server';
-import { TCouponFormValues, fields } from '@/validation/coupon-validation';
+import { fields, TCouponFormValues } from '@/validation/coupon-validation';
 import { CouponApplicableOn } from '@prisma/client';
 import { CouponCategory, CouponCollection, CouponProduct, CouponWithRelations, FormattedCoupon } from './types';
 
@@ -7,6 +8,7 @@ import { CouponCategory, CouponCollection, CouponProduct, CouponWithRelations, F
 export async function formatCouponProduct(
 	productRelation: CouponWithRelations['products'][0],
 	locale?: string,
+	couponData?: MinimalCouponData,
 ): Promise<CouponProduct> {
 	const { product } = productRelation;
 
@@ -22,11 +24,20 @@ export async function formatCouponProduct(
 
 	const firstImage = product.images?.[0]?.image?.url || undefined;
 
+	let discountInfo = {};
+	if (couponData) {
+		discountInfo = calculateSingleProductDiscount(product.basePrice, couponData);
+	}
+
+	console.log('product.id', product.id);
+
 	return {
 		id: product.id,
 		name: productName,
 		basePrice: product.basePrice,
 		image: firstImage,
+		stockQuantity: product.stockQuantity,
+		...discountInfo,
 	};
 }
 
@@ -83,12 +94,36 @@ export async function formatCouponCollection(
 }
 
 export async function handleCouponData(coupon: CouponWithRelations, locale?: string) {
-	const { products, categories, collections, startDate, endDate, createdAt, updatedAt, ...rest } = coupon;
+	const {
+		products,
+		categories,
+		collections,
+		translations,
+		startDate,
+		endDate,
+		createdAt,
+		updatedAt,
+		type,
+		value,
+		maxDiscountAmount,
+		...rest
+	} = coupon;
 
 	// Format products, categories, collections (full objects for initialItems)
-	const formattedProducts = await Promise.all(products.map((p) => formatCouponProduct(p, locale)));
-	const formattedCategories = await Promise.all(categories.map((c) => formatCouponCategory(c, locale)));
-	const formattedCollections = await Promise.all(collections.map((c) => formatCouponCollection(c, locale)));
+	let formattedProducts: CouponProduct[] = [];
+	let formattedCategories: CouponCategory[] = [];
+	let formattedCollections: CouponCollection[] = [];
+	if (products) {
+		formattedProducts = await Promise.all(
+			products.map((p) => formatCouponProduct(p, locale, { type, value, maxDiscountAmount })),
+		);
+	}
+	if (categories) {
+		formattedCategories = await Promise.all(categories.map((c) => formatCouponCategory(c, locale)));
+	}
+	if (collections) {
+		formattedCollections = await Promise.all(collections.map((c) => formatCouponCollection(c, locale)));
+	}
 
 	// Check validity
 	const now = new Date();
@@ -100,6 +135,9 @@ export async function handleCouponData(coupon: CouponWithRelations, locale?: str
 
 	return {
 		...rest,
+		type,
+		value,
+		maxDiscountAmount,
 		startDate: startDate.toISOString(),
 		endDate: endDate ? endDate.toISOString() : null,
 		createdAt: createdAt.toISOString(),
@@ -108,13 +146,13 @@ export async function handleCouponData(coupon: CouponWithRelations, locale?: str
 		isValid,
 		isExpired,
 		// ✅ IDs for form values
-		products: formattedProducts.map((p) => p.id),
-		categories: formattedCategories.map((c) => c.id),
-		collections: formattedCollections.map((c) => c.id),
-		totalProducts: formattedProducts.length,
-		totalCategories: formattedCategories.length,
-		totalCollections: formattedCollections.length,
-		// ✅ Full objects for display
+		products: products?.map((p) => p.product.id),
+		categories: categories?.map((c) => c.category.id),
+		collections: collections?.map((c) => c.collection.id),
+		totalProducts: products?.length || 0,
+		totalCategories: categories?.length || 0,
+		totalCollections: collections?.length || 0,
+		// ✅ Full objects for display and initial form values in combobox
 		initialItems: {
 			products: formattedProducts,
 			categories: formattedCategories,
@@ -144,8 +182,6 @@ export async function formatCoupon(coupon: CouponWithRelations, locale?: string)
 /** 🔹 Format Coupon for Edit Form */
 export async function formatCouponForEdit(coupon: CouponWithRelations, locale?: string): Promise<TCouponFormValues> {
 	const { translations } = coupon;
-
-	console.log('translations--', translations);
 
 	// Get translations for edit (both languages)
 	const translationData = await mapTranslations(translations, {

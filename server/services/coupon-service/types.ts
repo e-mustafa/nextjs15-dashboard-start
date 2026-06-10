@@ -11,6 +11,9 @@ export interface CouponProduct {
 	name: string;
 	basePrice: number;
 	image?: string;
+	stockQuantity?: number;
+	discountAmount?: number; // discount amount for this product based on the coupon
+	priceAfterDiscount?: number; // price after applying the discount for this product
 }
 
 export interface CouponCategory {
@@ -66,7 +69,7 @@ export interface CouponValidation {
 export interface ApplyCouponRequest {
 	couponCode: string;
 	userId?: string;
-	cartItems: { productId: string; categoryId?: string; collectionIds?: string[] }[];
+	cartItems: CartItem[];
 	subtotal: number;
 }
 
@@ -78,4 +81,17 @@ export interface CouponStatistics {
 	totalDiscount: number;
 	averageDiscountPerUse: number;
 	mostUsedCoupon: { code: string; usages: number } | undefined;
+}
+
+export interface CartItem {
+	productId: string;
+	price: number;
+	quantity: number;
+	categoryId?: string;
+	collectionIds?: string[];
+}
+
+export interface AdvancedCouponValidation extends CouponValidation {
+	isFreeShipping: boolean;
+	applicableSubtotal?: number; // المبلغ الذي تم تطبيق الخصم عليه
 }

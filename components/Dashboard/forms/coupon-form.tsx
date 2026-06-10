@@ -20,13 +20,13 @@ import { EnumFormTypes } from '@/constant/enums-development';
 import { useFormResponse } from '@/hooks/use-form-response';
 import { useServerResponse } from '@/hooks/use-server-response';
 import useLocale from '@/hooks/useLocale';
+import { calculateSingleProductDiscount } from '@/lib/calculate-coupon-discounted-price';
 import { renderField } from '@/lib/create-forms/input-registry';
 import { SectionConfig } from '@/lib/create-forms/types-create-forms';
 import { formatMoney } from '@/lib/format-money';
 import { cn, msg } from '@/lib/utils';
 import { createCouponAction, updateCouponAction } from '@/server/actions/coupon-actions';
-import { TProduct } from '@/server/services/product-service/types';
-import { calculateCouponDiscount } from '@/server/services/utils';
+import { CouponProduct } from '@/server/services/coupon-service/types.js';
 import { useGProgressBarStore } from '@/stores/global-progress-bar.store';
 import { ActionResult } from '@/types/api';
 import {
@@ -60,8 +60,6 @@ export default function CouponForm({
 	useServerResponse(response);
 
 	const initialItems = (response?.data as TFormValues)?.initialItems || defaultValues?.initialItems;
-
-	console.log('defaultValues', defaultValues);
 
 	const form = useForm({
 		resolver: zodResolver(formSchemaCoupon), // as Resolver<TFormValues>,
@@ -306,44 +304,69 @@ export default function CouponForm({
 										type: 'combobox',
 										name: 'products',
 										label: msg('common.actions.choose_', { item: 'common.sections.products' }),
-										placeholder: 'forms.placeholders.choose_products_to_coupon',
-										optionUrl: `${config_env.domainAPI}${url_products}`,
+										placeholder: 'forms.placeholders.choose_products_to_discount',
+										optionUrl: `${config_env.domainAPI}${url_products}/options`,
 										linkHref: url_products,
 										revalidateTags: tags_products,
 										multiple: true,
 										isProducts: true,
 										required: true,
 										initialItems: initialItems?.products || [],
-										customColumn: (product: TProduct) => {
+										customColumn: (product: CouponProduct) => {
+											// get values from form
 											const type = form.watch('type');
-											const value = form.watch('value');
-											// const min = form.watch('minPurchaseAmount');
-											const max = form.watch('maxDiscountAmount');
+											const value = +(form.watch('value') || 0);
+											const maxDiscountAmount = form.watch('maxDiscountAmount');
+											const isDirty = form.formState.isDirty;
 
-											const total = calculateCouponDiscount(
-												{
+											// use server data if exist and before change form data
+											let discountAmount = product.discountAmount || 0;
+											let priceAfterDiscount = product.priceAfterDiscount || product.basePrice;
+
+											// calculate discount if any value in form changed
+											if (!discountAmount || !priceAfterDiscount || (isDirty && value > 0)) {
+												const calculated = calculateSingleProductDiscount(product.basePrice, {
 													type,
 													value,
-													maxDiscountAmount: max,
-												},
-												product.basePrice,
-											);
+													maxDiscountAmount,
+												});
+												discountAmount = calculated.discountAmount;
+												priceAfterDiscount = calculated.priceAfterDiscount;
+											}
 
-											const isDirty = form.formState.isDirty;
+											// check if discount exist to show line-through and details
+											const hasDiscount = value > 0 || discountAmount > 0;
 
 											return (
 												<div className='flex items-center justify-between gap-4 px-3'>
-													<span className={cn('text-xs', { 'line-through': value > 0 })}>
-														{product.basePrice.toLocaleString('en')}
+													{/* stock */}
+													<span className={'text-xs text-muted-foreground transition-all'}>
+														{t('common.messages.stock')} {product?.stockQuantity}
 													</span>
-													<span className='text-xs text-destructive whitespace-nowrap'>{`(-${total})`}</span>
-													<span className='text-sm text-foreground whitespace-nowrap [&_svg]:size-5' dir='ltr'>
-														{value > 0
-															? formatMoney(
-																	!isDirty ? product.finalPrice || 0 : (product.finalPrice || 0) - total,
-																	'EGP',
-																)
-															: '-'}
+
+													{/* base price */}
+													<span
+														className={cn('text-xs text-muted-foreground transition-all', {
+															'line-through opacity-70': hasDiscount,
+														})}
+													>
+														{formatMoney(product.basePrice, 'EGP')}
+													</span>
+
+													{/* discountAmount */}
+													{hasDiscount && (
+														<span className='flex text-xs font-medium text-destructive whitespace-nowrap animate-in fade-in duration-200'>
+															<span>(-</span>
+															<span>{formatMoney(discountAmount, 'EGP')}</span>
+															<span>)</span>
+														</span>
+													)}
+
+													{/* price After Discount */}
+													<span className='text-sm font-semibold text-foreground whitespace-nowrap'>
+														{hasDiscount
+															? formatMoney(priceAfterDiscount, 'EGP')
+															: formatMoney(product.basePrice, 'EGP')}
 													</span>
 												</div>
 											);

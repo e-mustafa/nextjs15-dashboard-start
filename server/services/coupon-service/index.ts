@@ -11,7 +11,15 @@ import { CouponApplicableOn, CouponType, Prisma } from '@prisma/client';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { calculateCouponDiscount } from '../utils';
 import { couponWithRelationsInclude } from './prisma-includes';
-import { ApplyCouponRequest, CouponStatistics, CouponValidation, FormattedCoupon } from './types';
+import {
+	AdvancedCouponValidation,
+	ApplyCouponRequest,
+	CartItem,
+	CouponStatistics,
+	CouponValidation,
+	CouponWithRelations,
+	FormattedCoupon,
+} from './types';
 import { checkCouponApplicability, formatCoupon, formatCouponForEdit } from './utils';
 
 /** 🔹 Get All Coupons */
@@ -633,4 +641,165 @@ export async function getUserCouponUsage(userId: string, couponId: string): Prom
 		logger.error('Error fetching user coupon usage', { error, context: 'CouponService' });
 		throw new AppError('api.coupons.errors.usage_fetch_failed', 500);
 	}
+}
+
+/**
+ * 🟢 دالة احترافية متكاملة لفحص وصلاحية الكوبون وحساب قيمة الخصم بدقة
+ * @param coupon الكوبون المسترجع من قاعدة البيانات مع العلاقات كاملة
+ * @param cartItems عناصر السلة (يجب أن تحتوي على السعر والكمية من السيرفر)
+ * @param userUsageCount عدد مرات استخدام هذا المستخدم تحديداً لهذا الكوبون سابقاً
+ */
+export async function validateAndApplyCoupon(
+	coupon: CouponWithRelations,
+	cartItems: CartItem[],
+	userUsageCount: number = 0,
+): Promise<AdvancedCouponValidation> {
+	const now = new Date();
+
+	// ---------------------------------------------------------
+	// 1️⃣ أولاً: التحقق من الصلاحية القياسية والتاريخ والحدود
+	// ---------------------------------------------------------
+	if (!coupon.isActive) {
+		return {
+			isValid: false,
+			message: 'api.coupons.errors.inactive',
+			errors: ['INACTIVE'],
+			isFreeShipping: false,
+			applicableSubtotal: 0,
+		};
+	}
+
+	if (now < coupon.startDate) {
+		return { isValid: false, message: 'api.coupons.errors.not_started', errors: ['NOT_STARTED'], isFreeShipping: false };
+	}
+
+	if (coupon.endDate && now > coupon.endDate) {
+		return { isValid: false, message: 'api.coupons.errors.expired', errors: ['EXPIRED'], isFreeShipping: false };
+	}
+
+	// التحقق من الحد الأقصى للاستخدام العام (Global Limit)
+	if (coupon.usageLimit !== null && coupon.usedCount >= coupon.usageLimit) {
+		return {
+			isValid: false,
+			message: 'api.coupons.errors.global_limit_reached',
+			errors: ['GLOBAL_LIMIT_REACHED'],
+			isFreeShipping: false,
+		};
+	}
+
+	// التحقق من الحد الأقصى للاستخدام لكل مستخدم (Per User Limit)
+	if (coupon.usagePerUser !== null && userUsageCount >= coupon.usagePerUser) {
+		return {
+			isValid: false,
+			message: 'api.coupons.errors.user_limit_reached',
+			errors: ['USER_LIMIT_REACHED'],
+			isFreeShipping: false,
+		};
+	}
+
+	// ---------------------------------------------------------
+	// 2️⃣ ثانياً: حساب إجمالي السلة الحقيقي لضمان الأمان البيرمجي
+	// ---------------------------------------------------------
+	const totalCartSubtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+	// التحقق من الحد الأدنى للمشتريات المطلوبة لتفعيل الكوبون
+	if (coupon.minPurchaseAmount && totalCartSubtotal < coupon.minPurchaseAmount) {
+		return {
+			isValid: false,
+			message: 'api.coupons.errors.min_purchase_not_met',
+			errors: ['MIN_PURCHASE_NOT_MET'],
+			isFreeShipping: false,
+		};
+	}
+
+	// ---------------------------------------------------------
+	// 3️⃣ ثالثاً: تصفية المنتجات المشمولة بالخصم وحساب إجماليها الجزئي
+	// ---------------------------------------------------------
+	const couponProductIds = new Set(coupon.products.map((p) => p.productId));
+	const couponCategoryIds = new Set(coupon.categories.map((c) => c.categoryId));
+	const couponCollectionIds = new Set(coupon.collections.map((c) => c.collectionId));
+
+	const applicableItems = cartItems.filter((item) => {
+		switch (coupon.applicableOn) {
+			case CouponApplicableOn.ALL_PRODUCTS:
+			case CouponApplicableOn.MINIMUM_PURCHASE:
+				return true;
+
+			case CouponApplicableOn.SPECIFIC_PRODUCTS:
+				return couponProductIds.has(item.productId);
+
+			case CouponApplicableOn.SPECIFIC_CATEGORIES:
+				return item.categoryId ? couponCategoryIds.has(item.categoryId) : false;
+
+			case CouponApplicableOn.SPECIFIC_COLLECTIONS:
+				return item.collectionIds?.some((cid) => couponCollectionIds.has(cid)) || false;
+
+			default:
+				return false;
+		}
+	});
+
+	// إذا لم يكن هناك أي منتج في السلة ينطبق عليه الكوبون
+	if (applicableItems.length === 0) {
+		return {
+			isValid: false,
+			message: 'api.coupons.errors.no_applicable_items',
+			errors: ['NO_APPLICABLE_ITEMS'],
+			isFreeShipping: false,
+		};
+	}
+
+	// حساب الإجمالي الجزئي للمنتجات الخاضعة للخصم فقط
+	const applicableSubtotal = applicableItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+	// ---------------------------------------------------------
+	// 4️⃣ رابعاً: حساب قيمة الخصم بناءً على نوع الكوبون
+	// ---------------------------------------------------------
+	let discountAmount = 0;
+	let isFreeShipping = false;
+
+	switch (coupon.type) {
+		case CouponType.FIXED:
+			// في الخصم الثابت، لا يجوز أن يتخطى الخصم إجمالي المنتجات المشمولة به
+			discountAmount = coupon.value;
+			break;
+
+		case CouponType.PERCENTAGE:
+			// احتساب النسبة المئوية من المجموع الجزئي الخاضع للخصم وليس إجمالي السلة
+			discountAmount = (applicableSubtotal * coupon.value) / 100;
+			break;
+
+		case CouponType.FREE_SHIPPING:
+			isFreeShipping = true;
+			discountAmount = 0; // يتم تصفير قيمة الخصم المالي المباشر ومعالجتها بالشحن لاحقاً
+			break;
+
+		default:
+			discountAmount = 0;
+	}
+
+	// ---------------------------------------------------------
+	// 5️⃣ خامساً: تطبيق القيود المتقدمة والتقريب الرياضي الآمن
+	// ---------------------------------------------------------
+
+	// تطبيق الحد الأعلى للخصم (Max Discount Amount) إن وجد (خاصة مع النسبة المئوية)
+	if (coupon.maxDiscountAmount && coupon.maxDiscountAmount > 0 && discountAmount > coupon.maxDiscountAmount) {
+		discountAmount = coupon.maxDiscountAmount;
+	}
+
+	// حماية: لضمان عدم تخطي الخصم قيمة المنتجات المؤهلة بأي حال من الأحوال
+	discountAmount = Math.min(discountAmount, applicableSubtotal);
+
+	// معالجة مشاكل الفاصلة العائمة في جافاسكريبت (Floating Point Precision) التقريب لأقرب خانتين
+	discountAmount = Math.round(discountAmount * 100) / 100;
+	const finalAmount = Math.round((totalCartSubtotal - discountAmount) * 100) / 100;
+
+	return {
+		isValid: true,
+		message: 'api.coupons.success.applied',
+		discount: discountAmount,
+		finalAmount: Math.max(0, finalAmount), // حماية إضافية لضمان عدم وجود قيمة سالبة
+		isFreeShipping,
+		applicableSubtotal,
+	};
 }
