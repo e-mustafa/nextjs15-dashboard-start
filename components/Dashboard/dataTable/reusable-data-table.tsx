@@ -174,8 +174,6 @@ export default function ReusableDataTable<T extends { id: string }>({
 		},
 	]);
 
-	console.log('meta table --', meta);
-
 	const [pagination, setPagination] = useState<PaginationState>(() => ({
 		pageIndex: meta?.pagination?.page ? meta.pagination.page - 1 : 0,
 		pageSize: meta?.pagination?.limit || 10,

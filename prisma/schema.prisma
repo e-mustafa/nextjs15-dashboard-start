@@ -344,7 +344,7 @@ model Product {
   seoImageId     String?
   height         Float?
   length         Float?
-  type           String?
+  type           ProductType              @default(SIMPLE)
   weight         Float?
   width          Float?
   collections    CollectionProduct[]
@@ -554,25 +554,38 @@ model ProductSpecificationProperty {
 }
 
 model ProductDiscount {
-  id               String                    @id @default(cuid())
+  id               String       @id @default(cuid())
   type             DiscountType
   value            Float
   startDate        DateTime
   endDate          DateTime?
-  isActive         Boolean                   @default(true)
-  priority         Int                       @default(0)
-  createdAt        DateTime                  @default(now())
-  updatedAt        DateTime                  @default(now()) @updatedAt
+  isActive         Boolean      @default(true)
+  priority         Int          @default(0)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @default(now()) @updatedAt
   maxDiscountValue Float?
   minDiscountValue Float?
-  name_ar          String
-  name_en          String
-  products         ProductDiscountRelation[]
+
+  // Relations
+  translations ProductDiscountTranslation[]
+  products     ProductDiscountRelation[]
 
   @@index([startDate, endDate])
   @@index([isActive])
   @@index([priority])
   @@index([type])
+}
+
+model ProductDiscountTranslation {
+  id                String          @id @default(cuid())
+  productDiscountId String
+  lang              String
+  name              String // Example: Summer Sale 2026 / خصومات الصيف ٢٠٢٦
+  description       String? // Example: 10% off on all summer collections
+  productDiscount   ProductDiscount @relation(fields: [productDiscountId], references: [id], onDelete: Cascade)
+
+  @@unique([productDiscountId, lang])
+  @@index([name])
 }
 
 model ProductDiscountRelation {
@@ -607,22 +620,18 @@ enum CouponApplicableOn {
 }
 
 model Coupon {
-  id             String             @id @default(cuid())
-  code           String             @unique // كود الكوبون (مثل: SUMMER2024)
-  name_ar        String
-  name_en        String
-  description_ar String?
-  description_en String?
-  type           CouponType
-  value          Float // القيمة (50 للثابت، 20 للنسبة)
-  applicableOn   CouponApplicableOn @default(ALL_PRODUCTS)
+  id           String             @id @default(cuid())
+  code         String             @unique
+  type         CouponType
+  value        Float
+  applicableOn CouponApplicableOn @default(ALL_PRODUCTS)
 
   // Constraints
-  minPurchaseAmount Float? // حد أدنى لقيمة الطلب
-  maxDiscountAmount Float? // حد أقصى للخصم (للنسبة المئوية)
-  usageLimit        Int? // عدد مرات الاستخدام الكلي
-  usagePerUser      Int? // عدد مرات الاستخدام لكل مستخدم
-  usedCount         Int    @default(0) // عدد مرات الاستخدام الفعلي
+  minPurchaseAmount Float?
+  maxDiscountAmount Float?
+  usageLimit        Int?
+  usagePerUser      Int?
+  usedCount         Int    @default(0)
 
   // Dates
   startDate DateTime
@@ -630,13 +639,15 @@ model Coupon {
 
   // Status
   isActive Boolean @default(true)
-  isPublic Boolean @default(true) // ظاهر للجميع أم خاص
+  isPublic Boolean @default(true)
+
+  translations CouponTranslation[]
 
   // Relations
-  products    CouponProduct[] // المنتجات المحددة
-  categories  CouponCategory[] // الفئات المحددة
-  collections CouponCollection[] // المجموعات المحددة
-  usages      CouponUsage[] // سجل الاستخدام
+  products    CouponProduct[]
+  categories  CouponCategory[]
+  collections CouponCollection[]
+  usages      CouponUsage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -646,6 +657,21 @@ model Coupon {
   @@index([startDate, endDate])
   @@index([type])
   @@index([applicableOn])
+}
+
+model CouponTranslation {
+  id          String  @id @default(cuid())
+  couponId    String
+  lang        String
+  name        String
+  description String?
+
+  // link with coupon table and delete with delete it's coupon "Cascade"
+  coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
+
+  // avoid duplicate translation for same language
+  @@unique([couponId, lang])
+  @@index([name])
 }
 
 // Junction table: Coupon - Products (Many-to-Many)
@@ -697,10 +723,10 @@ model CouponCollection {
 model CouponUsage {
   id       String  @id @default(cuid())
   couponId String
-  userId   String? // اختياري إذا كان الضيف
-  orderId  String? // ربط مع الطلب
+  userId   String? // optional for gest
+  orderId  String? // link with order
 
-  discount  Float // قيمة الخصم الفعلية
+  discount  Float // Actual discount value
   createdAt DateTime @default(now())
 
   coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)

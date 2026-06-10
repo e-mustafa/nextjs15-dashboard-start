@@ -1,8 +1,8 @@
 import z from 'zod';
-import { imagesField, nameArField, nameEnField } from './fields-validation';
+import { IInitialItems, imagesField, nameArField, nameEnField } from './fields-validation';
 import { SEODefaultValues, SEOFormSchema } from './seo-validation';
 
-export type TBrandFormValues = z.infer<typeof formSchemaBrand> & { id?: string };
+export type TBrandFormValues = z.infer<typeof formSchemaBrand> & { id?: string; initialItems?: IInitialItems };
 
 /** ✅ Unified fields using camelCase naming */
 export const fields = ['name', 'description', 'slug', 'seoTitle', 'seoDescription', 'seoKeywords'];
@@ -14,6 +14,8 @@ export const defaultValuesBrand = {
 	description_en: '',
 	isActive: true,
 	images: [],
+
+	products: [],
 
 	...SEODefaultValues,
 };

@@ -3,21 +3,49 @@ import { localesData, TLocalesData } from '@/configs/general';
 import { AppError } from '@/lib/error-handler/error-handler.server';
 import { logger } from '@/lib/logs/logger';
 import { mapTranslations } from '@/lib/utils.server/mapTranslations.server';
+import { parseListParams } from '@/lib/utils.server/query';
 import { ValidateFormAction } from '@/lib/utils.server/validate-data-server';
 import { prisma_DB } from '@/prisma/prisma.db';
 import { ActionResult, TImage } from '@/types/api';
 import { fields, formSchemaBrand, TBrandFormValues } from '@/validation/brand-validation';
 import { Prisma } from '@prisma/client';
-import { revalidatePath, revalidateTag, updateTag } from 'next/cache';
-import { cookies } from 'next/headers';
+import { revalidatePath, revalidateTag } from 'next/cache';
 
 type TFormValues = TBrandFormValues;
 
+// temporarily
 let user: { id: string; name: string } | null = null;
 
+const PATH = '/dashboard/brands';
+const TAG = 'brands';
+const PROFILE = 'max';
+
+export const BRAND_COMPLETE_INCLUDE = {
+	translations: true,
+	images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
+	seoImage: true,
+	products: {
+		select: {
+			id: true,
+			translations: { select: { lang: true, name: true } },
+			images: {
+				include: { image: true },
+				orderBy: { sortOrder: 'asc' },
+				take: 1,
+			},
+		},
+	},
+} as const;
+
 type BrandWithRelations = Prisma.BrandGetPayload<{
-	include: { translations: true; images: { include: { image: true } }; seoImage: true };
+	include: typeof BRAND_COMPLETE_INCLUDE;
 }>;
+
+type BrandProduct = {
+	id: string;
+	name: string;
+	image?: string;
+};
 
 export type Brand = {
 	id: string;
@@ -32,15 +60,50 @@ export type Brand = {
 	updatedAt?: string;
 	images?: TImage[];
 	seoImage?: TImage;
+	products: BrandProduct[];
 };
 
-async function formatBrand(brand: BrandWithRelations, acceptLanguage?: string): Promise<TFormValues | Brand> {
-	const { translations, images, seoImage, imageId, seoImageId, ...rest } = brand;
+export async function formatBrandProduct(
+	productRelation: BrandWithRelations['products'][0],
+	locale?: string,
+): Promise<BrandProduct> {
+	const { id, translations, images } = productRelation;
+
+	let productName = '';
+	if (translations?.length > 0) {
+		const productTranslation = await mapTranslations(translations, {
+			accept_language: locale,
+			fields: ['name'],
+			enableFallback: true,
+		});
+		productName = productTranslation.name || '';
+	}
+
+	const firstImage = images?.[0]?.image?.url || undefined;
+
+	return {
+		id,
+		name: productName,
+		image: firstImage,
+	};
+}
+
+async function formatBrand(
+	brand: BrandWithRelations,
+	acceptLanguage?: string,
+	forEdit: boolean = false,
+): Promise<TFormValues | Brand> {
+	const { translations, products, images, seoImage, imageId, seoImageId, ...rest } = brand;
 
 	const translationData = await mapTranslations(translations, {
-		accept_language: acceptLanguage,
+		accept_language: forEdit ? '*' : acceptLanguage,
 		fields,
 	});
+
+	let formattedProducts: BrandProduct[] = [];
+	if (forEdit && products) {
+		formattedProducts = await Promise.all(brand.products.map((p) => formatBrandProduct(p, acceptLanguage)));
+	}
 
 	return {
 		...rest,
@@ -53,6 +116,12 @@ async function formatBrand(brand: BrandWithRelations, acceptLanguage?: string): 
 		seoImage: seoImage ? [{ url: seoImage?.url, fileId: seoImage?.fileId }] : [],
 
 		...(translationData as TFormValues),
+
+		...(forEdit && {
+			initialItems: {
+				products: formattedProducts,
+			},
+		}),
 	};
 }
 
@@ -82,29 +151,28 @@ async function validateUniqueSlugs(id?: string, slug_ar?: string, slug_en?: stri
 /** 🔹 Get All Brands */
 export async function getAllBrands(
 	params?: { page?: number; limit?: number; search?: string; sortBy?: string; sortOrder?: 'asc' | 'desc' },
-	locale?: TLocalesData
+	locale?: TLocalesData,
 ): Promise<ActionResult<Brand>> {
-	const cookiesStore = await cookies();
-	const userCookie = cookiesStore.get('user')?.value;
-	if (userCookie) {
-		try {
-			user = JSON.parse(userCookie);
-		} catch {
-			user = null;
-		}
-	}
+	// const cookiesStore = await cookies();
+	// const userCookie = cookiesStore.get('user')?.value;
+	// if (userCookie) {
+	// 	try {
+	// 		user = JSON.parse(userCookie);
+	// 	} catch {
+	// 		user = null;
+	// 	}
+	// }
 
-	const page = Number(params?.page) || 1;
-	const limit = Number(params?.limit) || 10;
-	const search = params?.search?.trim() || '';
-	const skip = (page - 1) * limit;
+	const { page, limit, skip, search, sortBy, sortOrder } = parseListParams(params, {
+		sortableFields: ['name', 'slug', 'createdAt'],
+		defaultSortOrder: 'asc',
+	});
 
-	const sortableFields = ['name', 'slug', 'createdAt'];
-	const sortBy = sortableFields.includes(params?.sortBy || '') ? params?.sortBy : undefined;
-	const sortOrder = params?.sortOrder === 'desc' ? 'desc' : 'asc';
-	const localeKey = locale?.split('-')[0] || 'en';
+	const localeKey = (locale?.split('-')[0] as 'ar' | 'en') || 'en';
+	const localizedFields = ['name', 'slug'];
+	const finalSortKey = localizedFields.includes(sortBy) ? `${sortBy}_${localeKey}` : sortBy;
 
-	const orderBy = sortBy ? { [`${sortBy}_${localeKey}`]: sortOrder } : undefined;
+	const orderBy = { [finalSortKey]: sortOrder };
 
 	const where: Prisma.BrandWhereInput = search
 		? {
@@ -113,7 +181,7 @@ export async function getAllBrands(
 					{ translations: { some: { slug: { contains: search, mode: 'insensitive' } } } },
 					{ translations: { some: { description: { contains: search, mode: 'insensitive' } } } },
 				],
-		  }
+			}
 		: {};
 
 	const [brands, total] = await Promise.all([
@@ -121,11 +189,7 @@ export async function getAllBrands(
 			where,
 			skip,
 			take: limit,
-			include: {
-				translations: true,
-				images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
-				seoImage: true,
-			},
+			include: BRAND_COMPLETE_INCLUDE,
 			orderBy,
 		}),
 		prisma_DB.brand.count({ where }),
@@ -140,7 +204,7 @@ export async function getAllBrands(
 		data: data as Brand[],
 		meta: {
 			pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-			sort: sortBy ? { by: sortBy, order: sortOrder } : undefined,
+			sort: { by: sortBy, order: sortOrder },
 		},
 	};
 }
@@ -151,7 +215,7 @@ export async function getBrand(id: string) {
 
 	const brand = await prisma_DB.brand.findUnique({
 		where: { id },
-		include: { translations: true, images: { include: { image: true }, orderBy: { sortOrder: 'asc' } }, seoImage: true },
+		include: BRAND_COMPLETE_INCLUDE,
 	});
 
 	if (!brand) throw new AppError('api.brands.errors.not_found', 404);
@@ -188,9 +252,9 @@ export async function createBrand(data: TFormValues): Promise<ActionResult<TForm
 										? { connect: { id: existingImage.id } }
 										: { create: { fileId: img.fileId, url: img.url } },
 								};
-							})
+							}),
 						),
-				  }
+					}
 				: undefined,
 
 			seoImage: data.seoImage?.length
@@ -222,11 +286,11 @@ export async function createBrand(data: TFormValues): Promise<ActionResult<TForm
 				],
 			},
 		},
-		include: { translations: true, images: { include: { image: true }, orderBy: { sortOrder: 'asc' } }, seoImage: true },
+		include: BRAND_COMPLETE_INCLUDE,
 	});
 
-	revalidatePath('/dashboard/brands');
-	revalidateTag('brands', 'max');
+	revalidatePath(PATH);
+	revalidateTag(TAG, PROFILE);
 	// updateTag('brands');
 	const formattedData = await formatBrand(brand as BrandWithRelations);
 	logger.info(`✅ Brand created: ${brand.id}`, { context: 'BrandService' });
@@ -268,15 +332,40 @@ export async function updateBrand(id: string, data: TFormValues): Promise<Action
 											? { connect: { id: existingImage.id } }
 											: { create: { fileId: img.fileId, url: img.url } },
 									};
-								})
+								}),
 							),
-					  }
+						}
 					: undefined,
 				seoImage: data.seoImage?.length
 					? existingSeoImage
 						? { connect: { id: existingSeoImage.id } }
 						: { create: { fileId: data.seoImage[0].fileId, url: data.seoImage[0].url } }
 					: undefined,
+
+				// 🔹 update translations
+				// For translations, we can use upsert with a unique constraint on (brandId, lang)
+				translations: {
+					upsert: (Object.keys(localesData) as TLocalesData[]).map((lang: TLocalesData) => ({
+						where: { brandId_lang: { brandId: id, lang } }, // this requires a unique constraint in the Prisma schema
+						update: {
+							slug: data[`slug_${lang}`],
+							name: data[`name_${lang}`],
+							description: data[`description_${lang}`],
+							seoTitle: data[`seoTitle_${lang}`],
+							seoDescription: data[`seoDescription_${lang}`],
+							seoKeywords: data[`seoKeywords_${lang}`],
+						},
+						create: {
+							lang,
+							slug: data[`slug_${lang}`],
+							name: data[`name_${lang}`],
+							description: data[`description_${lang}`],
+							seoTitle: data[`seoTitle_${lang}`],
+							seoDescription: data[`seoDescription_${lang}`],
+							seoKeywords: data[`seoKeywords_${lang}`],
+						},
+					})),
+				},
 			},
 		});
 
@@ -307,12 +396,12 @@ export async function updateBrand(id: string, data: TFormValues): Promise<Action
 	// 🔄 get updated data after update
 	const brand = await prisma_DB.brand.findUnique({
 		where: { id },
-		include: { translations: true, images: { include: { image: true }, orderBy: { sortOrder: 'asc' } }, seoImage: true },
+		include: BRAND_COMPLETE_INCLUDE,
 	});
 
 	if (!brand) throw new AppError('api.brands.errors.not_found', 404);
 
-	revalidateTag('brands', 'max');
+	revalidateTag(TAG, PROFILE);
 	// updateTag('brands');
 
 	const formattedData = await formatBrand(brand as BrandWithRelations);
@@ -332,7 +421,7 @@ export async function toggleStateBrand(id: string, isActive: boolean) {
 
 	if (!updated) throw new AppError('api.errors.update_status', 404);
 
-	revalidateTag('brands', 'max');
+	revalidateTag(TAG, PROFILE);
 	// updateTag('brands');
 	logger.info(`✅ Brand updated: ${updated.id}`, { context: 'BrandService' });
 	return { success: true, status: 200, data: updated, message: 'api.success.update_status' };
@@ -342,8 +431,13 @@ export async function toggleStateBrand(id: string, isActive: boolean) {
 export async function deleteBrand(id: string) {
 	if (!id) throw new AppError('api.errors.invalid_id', 404);
 
+	// const cookiesStore = await cookies();
+	// const userCookie = cookiesStore.get('user')?.value;
+	// let user: { id: string; name: string } | null = null;
+	// if (userCookie) user = JSON.parse(userCookie);
+
 	await prisma_DB.brand.delete({ where: { id } });
-	revalidateTag('brands', 'max');
+	revalidateTag(TAG, PROFILE);
 	// updateTag('brands');
 	logger.info(`✅ Brand deleted: ${id} by ${user?.name}`, { context: 'BrandService' });
 
@@ -353,10 +447,15 @@ export async function deleteBrand(id: string) {
 export async function deleteManyBrands(ids: string[]) {
 	if (!ids?.length) throw new AppError('api.errors.empty_ids', 400);
 
+	// const cookiesStore = await cookies();
+	// const userCookie = cookiesStore.get('user')?.value;
+	// let user: { id: string; name: string } | null = null;
+	// if (userCookie) user = JSON.parse(userCookie);
+
 	const deleted = await prisma_DB.brand.deleteMany({ where: { id: { in: ids } } });
 	if (!deleted.count) throw new AppError('api.brands.errors.delete', 404);
 
-	revalidateTag('brands', 'max');
+	revalidateTag(TAG, PROFILE);
 	// updateTag('brands');
 	logger.info(`✅ ${deleted.count} brands deleted by ${user?.name}`, { context: 'BrandService' });
 	return { success: true, status: 200, data: null, message: 'api.brands.success.delete_many' };

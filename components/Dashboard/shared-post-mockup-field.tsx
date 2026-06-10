@@ -32,7 +32,7 @@ export default function SharedPostMockupField<T extends FieldValues, K extends F
 			render={() => (
 				<FormItem className={fieldConfig.class}>
 					<FormLabel aria-required={!!required}>{t(label as string)}</FormLabel>
-					<SharedPostMockupCard data={data} image={image} />;
+					<SharedPostMockupCard data={data} image={image} />
 					{description && <FormDescription>{t(description as string)}</FormDescription>}
 					<FormMessageTranslated />
 				</FormItem>

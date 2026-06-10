@@ -13,13 +13,13 @@ export async function getAllCategoriesAction(
 		sortBy?: string;
 		sortOrder?: 'asc' | 'desc';
 	},
-	locale?: TLocalesData
+	locale?: TLocalesData,
 ) {
 	return runAction(() => categoryService.getAllCategories(params, locale));
 }
 
-export async function getCategoryAction(id: string) {
-	return runAction(() => categoryService.getCategory(id));
+export async function getCategoryAction(id: string, locale?: TLocalesData) {
+	return runAction(() => categoryService.getCategory(id, locale));
 }
 
 export async function createCategoryAction(data: TCategoryFormValues) {

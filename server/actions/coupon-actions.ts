@@ -3,14 +3,20 @@ import { TLocalesData } from '@/configs/general';
 import { runAction } from '@/lib/error-handler/error-handler.server';
 import { TCouponFormValues } from '@/validation/coupon-validation';
 import {
+	applyCoupon,
 	createCoupon,
 	deleteCoupon,
 	deleteManyCoupons,
 	getAllCoupons,
 	getCoupon,
+	getCouponStatistics,
+	getUserCouponUsage,
+	recordCouponUsage,
 	toggleStateCoupon,
 	updateCoupon,
+	validateCoupon,
 } from '../services/coupon-service';
+import { ApplyCouponRequest } from '../services/coupon-service/types';
 
 export async function getAllCouponsAction(
 	params?: {
@@ -47,4 +53,34 @@ export async function deleteCouponAction(id: string) {
 
 export async function deleteManyCouponsAction(ids: string[]) {
 	return runAction(() => deleteManyCoupons(ids));
+}
+
+// -------------------------------------------------------
+export async function validateCouponAction(
+	code: string,
+	userId?: string,
+	cartItems?: { productId: string; categoryId?: string; collectionIds?: string[] }[],
+	subtotal?: number,
+) {
+	return runAction(() => validateCoupon(code, userId, cartItems, subtotal));
+}
+
+export async function applyCouponAction(request: ApplyCouponRequest, locale?: string) {
+	return runAction(() => applyCoupon(request, locale));
+}
+export async function recordCouponUsageAction(
+	couponCode: string,
+	userId: string | null,
+	orderId: string,
+	discountAmount: number,
+) {
+	return runAction(() => recordCouponUsage(couponCode, userId, orderId, discountAmount));
+}
+
+export async function getCouponStatisticsAction() {
+	return runAction(() => getCouponStatistics());
+}
+
+export async function getUserCouponUsageAction(userId: string, couponId: string) {
+	return runAction(() => getUserCouponUsage(userId, couponId));
 }

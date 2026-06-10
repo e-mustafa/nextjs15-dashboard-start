@@ -9,46 +9,63 @@ import { ValidateFormAction } from '@/lib/utils.server/validate-data-server';
 import { prisma_DB } from '@/prisma/prisma.db';
 import { ActionResult, TImage } from '@/types/api';
 import { fields, formSchemaProduct, TProductFormValues } from '@/validation/product-validation';
-import { $Enums, AttributeType, DiscountType, Prisma } from '@prisma/client';
+import { AttributeType, DiscountType, Prisma, ProductType } from '@prisma/client';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { calculateDiscountedPrice } from './utils';
+
+
+const cacheTag = 'products';
+const cacheProfile = 'max'
 
 /////////////////////////
 // TYPES
 /////////////////////////
 
-type ProductWithRelations = Prisma.ProductGetPayload<{
-	include: {
-		discounts: { include: { discount: true } };
-		translations: true;
-		brand: { include: { translations: true; images: { include: { image: true } } } };
-		category: { include: { translations: true; images: { include: { image: true } } } };
-		seoImage: true;
-		images: { include: { image: true } };
-		variants: {
-			include: {
-				image: true;
-				images: { include: { image: true } };
-				options: {
-					include: {
-						attribute: { include: { translations: true } };
-						attributeValue: { include: { translations: true } };
-					};
-				};
-			};
-		};
-		attributes: {
-			include: {
-				attribute: { include: { translations: true } };
-				attributeValue: { include: { translations: true } };
-			};
-		};
-		tags: { include: { tag: true } };
-		collections: { include: { collection: { include: { translations: true; images: { include: { image: true } } } } } };
-		specifications: { include: { properties: true } };
-		// discounts: { include: { discount: true } };
-	};
-}>;
+const PRODUCT_COMPLETE_INCLUDE = {
+	translations: true,
+	brand: { include: { translations: true, images: { include: { image: true } } } },
+	category: { include: { translations: true, images: { include: { image: true } } } },
+	seoImage: true,
+	images: { include: { image: true }, orderBy: { sortOrder: 'asc' as const } },
+	variants: {
+		include: {
+			image: true,
+			images: { include: { image: true }, orderBy: { sortOrder: 'asc' as const } },
+			options: {
+				include: {
+					attribute: { include: { translations: true } },
+					attributeValue: { include: { translations: true } },
+				},
+			},
+		},
+		orderBy: { sortOrder: 'asc' as const },
+	},
+	attributes: {
+		include: {
+			attribute: { include: { translations: true } },
+			attributeValue: { include: { translations: true } },
+		},
+	},
+	tags: { include: { tag: true } },
+	collections: { include: { collection: { include: { translations: true, images: { include: { image: true } } } } } },
+	specifications: {
+		include: { properties: { orderBy: { sortOrder: 'asc' as const } } },
+		orderBy: { sortOrder: 'asc' as const },
+	},
+	discounts: {
+		where: {
+			discount: {
+				isActive: true,
+				startDate: { lte: new Date() },
+				OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
+			},
+		},
+		include: { discount: true },
+		orderBy: { discount: { priority: 'desc' as const } },
+		take: 1,
+	},
+};
+type ProductWithRelations = Prisma.ProductGetPayload<{ include: typeof PRODUCT_COMPLETE_INCLUDE }>;
 
 export interface SpecificationProperty {
 	id?: string;
@@ -71,9 +88,9 @@ export interface TDiscount {
 	isActive: boolean;
 	createdAt: Date;
 	updatedAt: Date;
-	type: $Enums.DiscountType;
-	name_ar: string;
-	name_en: string;
+	type: DiscountType;
+	// name_ar: string;
+	// name_en: string;
 	value: number;
 	startDate: Date;
 	endDate: Date | null;
@@ -96,10 +113,11 @@ export interface TProduct {
 	stockQuantity: number;
 	lowStockAlert?: number | null;
 	trackInventory: boolean;
+	// keepSelling: boolean;
 	isActive: boolean;
 	isFeatured: boolean;
 	sortOrder: number;
-	type?: string | null;
+	type: ProductType;
 	weight?: number | null;
 	length?: number | null;
 	width?: number | null;
@@ -111,12 +129,22 @@ export interface TProduct {
 	seoKeywords?: string;
 	createdAt?: string | Date;
 	updatedAt?: string | Date;
-	brand?: { id: string; name: string; image?: TImage };
-	category?: { id: string; name: string; image?: TImage };
+	// brand?: { id: string; name: string; image?: TImage };
+	// category?: { id: string; name: string; image?: TImage };
+	// collections?: Array<{ id: string; name: string; image?: TImage }>;
+	brand?: string;
+	category?: string;
+	collections?: string[];
 	variants?: ProductVariant[];
 	specifications?: SpecificationSection[];
-	collections?: Array<{ id: string; name: string; image?: TImage }>;
-	tags?: Array<{ id: string; name: string }>;
+
+	// for preload item in
+	initialItems: {
+		brands?: { id: string; name: string; image?: string };
+		categories?: { id: string; name: string; image?: string };
+		collections?: Array<{ id: string; name: string; image?: string }>;
+		tags: Array<{ id: string; name: string }>;
+	};
 
 	discounts?: TDiscount[];
 
@@ -128,8 +156,8 @@ export interface TProduct {
 		id: string;
 		type: DiscountType;
 		value: number;
-		name_ar: string;
-		name_en: string;
+		// name_ar: string;
+		// name_en: string;
 		startDate: string;
 		endDate: string | null;
 	} | null;
@@ -153,32 +181,6 @@ interface ProductVariant {
 	}>;
 }
 
-// get locale from cookies or headers
-
-// const getLocaleFromHeaders = async () => {
-// 	const headerStore = await headers();
-// 	let locale = headerStore.get('x-url') || headerStore.get('NEXT_LOCALE');
-
-// 	if (!locale) {
-// 		const cookies = headerStore.get('cookie');
-// 		if (cookies) {
-// 			const cookieStore = cookies.split('; ');
-// 			const localeCookie = cookieStore.find((cookie) => cookie.startsWith('NEXT_LOCALE='));
-// 			if (localeCookie) {
-// 				locale = localeCookie.split('=')[1];
-// 			}
-// 		}
-// 	}
-
-// 	if (!locale) {
-// 		locale = defaultLocale.short;
-// 	}
-
-// 	return locale;
-// };
-
-// const frontLocale = await getLocaleFromHeaders();
-
 /////////////////////////
 // HELPERS
 /////////////////////////
@@ -189,7 +191,7 @@ interface ProductVariant {
 async function formatProduct(
 	product: ProductWithRelations,
 	acceptLanguage?: string,
-	forEdit: boolean = acceptLanguage === '*'
+	forEdit: boolean = false, // acceptLanguage === '*',
 ): Promise<TProductFormValues | TProduct> {
 	const {
 		translations,
@@ -201,41 +203,49 @@ async function formatProduct(
 		collections,
 		tags,
 		specifications,
-		discounts, // ← العلاقة الجديدة
+		discounts,
 		...rest
 	} = product;
 
 	const translationData = await mapTranslations(translations, {
-		accept_language: acceptLanguage,
-		fields,
+		accept_language: forEdit ? '*' : acceptLanguage,
+		fields: fields,
 		enableFallback: !forEdit,
 	});
 
 	const locale = await getCurrentLocale();
 
 	// Format brand with translation
-	let brandData: { id: string; name: string; images?: TImage[] } | undefined;
+	let brandData: { id: string; name: string; image?: string } | undefined;
 	if (brand) {
 		const brandTranslation = await mapTranslations(brand.translations, {
 			accept_language: acceptLanguage !== '*' ? acceptLanguage : locale,
 			fields: ['name'],
 		});
+		// brandData = {
+		// 	id: brand.id,
+		// 	name: (brandTranslation as { name: string }).name || '',
+		// 	...(brand?.images?.length && {
+		// 		images: [
+		// 			{
+		// 				url: brand.images[0].image.url,
+		// 				fileId: brand.images[0].image.fileId,
+		// 			},
+		// 		],
+		// 	}),
+		// };
+
 		brandData = {
 			id: brand.id,
 			name: (brandTranslation as { name: string }).name || '',
 			...(brand?.images?.length && {
-				images: [
-					{
-						url: brand.images[0].image.url,
-						fileId: brand.images[0].image.fileId,
-					},
-				],
+				image: brand.images[0].image.url,
 			}),
 		};
 	}
 
 	// Format category with translation
-	let categoryData: { id: string; name: string; images?: TImage[] } | undefined;
+	let categoryData: { id: string; name: string; image?: string } | undefined;
 	if (category) {
 		const categoryTranslation = await mapTranslations(category.translations, {
 			accept_language: acceptLanguage !== '*' ? acceptLanguage : locale,
@@ -244,13 +254,17 @@ async function formatProduct(
 		categoryData = {
 			id: category.id,
 			name: (categoryTranslation as { name: string }).name || '',
+			// ...(category.images?.length && {
+			// 	images: [
+			// 		{
+			// 			url: category.images[0].image?.url || '',
+			// 			fileId: category.images[0].image?.fileId || '',
+			// 		},
+			// 	],
+			// }),
+
 			...(category.images?.length && {
-				images: [
-					{
-						url: category.images[0].image?.url || '',
-						fileId: category.images[0].image?.fileId || '',
-					},
-				],
+				image: category.images[0].image?.url || '',
 			}),
 		};
 	}
@@ -266,16 +280,19 @@ async function formatProduct(
 			return {
 				id: c.collection.id,
 				name: (collectionTranslation as { name: string }).name || '',
+				// ...(c.collection.images?.length && {
+				// 	images: [
+				// 		{
+				// 			url: c.collection.images[0].image?.url || '',
+				// 			fileId: c.collection.images[0].image?.fileId || '',
+				// 		},
+				// 	],
+				// }),
 				...(c.collection.images?.length && {
-					images: [
-						{
-							url: c.collection.images[0].image?.url || '',
-							fileId: c.collection.images[0].image?.fileId || '',
-						},
-					],
+					image: c.collection.images[0].image?.url || '',
 				}),
 			};
-		})
+		}),
 	);
 
 	// Format tags
@@ -297,7 +314,7 @@ async function formatProduct(
 					value_ar: prop.value_ar || '',
 					value_en: prop.value_en || '',
 				})),
-		  }))
+			}))
 		: [];
 
 	// Format variants with translations
@@ -333,7 +350,7 @@ async function formatProduct(
 						attribute,
 						attributeValue,
 					};
-				})
+				}),
 			);
 
 			return {
@@ -351,7 +368,7 @@ async function formatProduct(
 				})),
 				options: formattedOptions,
 			};
-		})
+		}),
 	);
 
 	// ✨ Calculate discount if exists
@@ -361,6 +378,8 @@ async function formatProduct(
 	let discountAmount = 0;
 	let discountPercentage = 0;
 	let hasDiscount = false;
+
+	console.log('activeDiscountRelation', activeDiscountRelation);
 
 	if (activeDiscount && !forEdit) {
 		finalPrice = calculateDiscountedPrice(rest.basePrice, {
@@ -377,11 +396,24 @@ async function formatProduct(
 
 	const baseProduct = {
 		...rest,
+		// type: rest.type,
 		seoImage: seoImage ? [{ url: seoImage.url, fileId: seoImage.fileId }] : [],
-		brand: brandData,
-		category: categoryData,
-		collections: formattedCollections,
-		tags: formattedTags,
+		// brand: brandData,
+		brand: brandData?.id || '',
+		// category: categoryData,
+		category: categoryData?.id || '',
+		// collections: formattedCollections,
+		collections: formattedCollections?.map((e) => e.id),
+		// tags: formattedTags,
+		tags: formattedTags?.map((e) => e.id),
+
+		initialItems: {
+			brands: brandData,
+			categories: categoryData,
+			collections: formattedCollections,
+			tags: formattedTags,
+		},
+
 		variants: formattedVariants,
 		specifications: formattedSpecifications,
 		...translationData,
@@ -391,7 +423,7 @@ async function formatProduct(
 				? images.map((img) => ({
 						url: img.image?.url ?? '',
 						fileId: img.image?.fileId ?? '',
-				  }))
+					}))
 				: [],
 	};
 
@@ -414,11 +446,11 @@ async function formatProduct(
 					id: activeDiscount.id,
 					type: activeDiscount.type,
 					value: activeDiscount.value,
-					name_ar: activeDiscount.name_ar,
-					name_en: activeDiscount.name_en,
+					// name_ar: activeDiscount.name_ar,
+					// name_en: activeDiscount.name_en,
 					startDate: activeDiscount.startDate.toISOString(),
 					endDate: activeDiscount.endDate?.toISOString() || null,
-			  }
+				}
 			: null,
 	};
 }
@@ -468,7 +500,7 @@ async function ensureAttributeExists(
 	tx: Prisma.TransactionClient,
 	titleAr: string,
 	titleEn: string,
-	type: AttributeType = 'COLOR'
+	type: AttributeType = 'COLOR',
 ): Promise<string> {
 	// Check if attribute already exists by name
 	const existing = await tx.attribute.findFirst({
@@ -516,7 +548,7 @@ async function ensureAttributeValueExists(
 	attributeId: string,
 	valueAr: string,
 	valueEn: string,
-	colorHex?: string | null
+	colorHex?: string | null,
 ): Promise<string> {
 	// Check if value exists
 	const existing = await tx.attributeValue.findFirst({
@@ -606,6 +638,87 @@ async function validateUniqueSlugs(id?: string, slug_ar?: string, slug_en?: stri
 	return { success: true, status: 200, data: null };
 }
 
+// 2. Helper function for handle and link images to avoid duplication
+async function prepareProductImages(tx: any, images?: Array<{ fileId: string; url: string }>) {
+	if (!images?.length) return undefined;
+
+	const imageIds = await Promise.all(
+		images.map(async (img) => {
+			const existing = await tx.image.findFirst({ where: { fileId: img.fileId } });
+			if (existing) return { id: existing.id, isNew: false };
+			const created = await tx.image.create({ data: { fileId: img.fileId, url: img.url } });
+			return { id: created.id, isNew: true };
+		}),
+	);
+
+	return {
+		create: imageIds.map((img, idx) => ({
+			sortOrder: idx,
+			isPrimary: idx === 0,
+			image: { connect: { id: img.id } },
+		})),
+	};
+}
+
+// 3. helper function to create Variants
+async function createVariantsForProduct(tx: any, productId: string, baseSku: string, combinations: any[]) {
+	for (const combination of combinations) {
+		if (!combination.checked) continue;
+
+		const processedAttributes: Array<{ attributeId: string; attributeValueId: string }> = [];
+
+		for (const attr of combination.attributes) {
+			const attributeId = await ensureAttributeExists(tx, attr.name_ar, attr.name_en);
+			const attributeValueId = await ensureAttributeValueExists(
+				tx,
+				attributeId,
+				attr.value_ar,
+				attr.value_en,
+				attr.colorHex,
+			);
+
+			if (!processedAttributes.find((a) => a.attributeId === attributeId)) {
+				processedAttributes.push({ attributeId, attributeValueId });
+			}
+		}
+
+		const variantImages = combination.images || [];
+		const existingVariantImage = combination.imageId
+			? await tx.image.findUnique({ where: { id: combination.imageId } })
+			: null;
+		const formattedImages = await prepareProductImages(tx, variantImages);
+
+		await tx.productVariant.create({
+			data: {
+				productId,
+				sku: combination.sku || `${baseSku}-${combination.id}`,
+				price: typeof combination.price === 'string' ? parseFloat(combination.price) : combination.price,
+				compareAtPrice: combination.compareAtPrice
+					? typeof combination.compareAtPrice === 'string'
+						? parseFloat(combination.compareAtPrice)
+						: combination.compareAtPrice
+					: null,
+				cost: combination.cost
+					? typeof combination.cost === 'string'
+						? parseFloat(combination.cost)
+						: combination.cost
+					: null,
+				stockQuantity: combination.qty || 0,
+				isActive: true,
+				imageId: existingVariantImage?.id || null,
+				images: formattedImages,
+				options: { create: processedAttributes },
+			},
+		});
+	}
+}
+
+// 4. helper function revalidate cache
+function revalidateProductCache(path = '/dashboard/products', tag = cacheTag, profile = cacheProfile) {
+	revalidatePath(path);
+	revalidateTag(tag, profile);
+}
+
 /////////////////////////
 // MAIN SERVICES
 /////////////////////////
@@ -627,7 +740,7 @@ export async function getAllProducts(
 		sortBy?: string;
 		sortOrder?: 'asc' | 'desc';
 	},
-	locale?: TLocalesData
+	locale?: TLocalesData,
 ): Promise<ActionResult<TProduct>> {
 	const page = Number(params?.page) || 1;
 	const limit = Number(params?.limit) || 10;
@@ -655,61 +768,7 @@ export async function getAllProducts(
 			where,
 			skip,
 			take: limit,
-			include: {
-				translations: true,
-				brand: { include: { translations: true, images: { include: { image: true } } } },
-				category: { include: { translations: true, images: { include: { image: true } } } },
-				image: true,
-				seoImage: true,
-				images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
-				variants: {
-					include: {
-						image: true,
-						images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
-						options: {
-							include: {
-								attribute: { include: { translations: true } },
-								attributeValue: { include: { translations: true } },
-							},
-						},
-					},
-					orderBy: { sortOrder: 'asc' },
-				},
-				attributes: {
-					include: {
-						attribute: { include: { translations: true } },
-						attributeValue: { include: { translations: true } },
-					},
-				},
-				tags: { include: { tag: true } },
-				collections: {
-					include: { collection: { include: { translations: true, images: { include: { image: true } } } } },
-				},
-				specifications: {
-					include: { properties: { orderBy: { sortOrder: 'asc' } } },
-					orderBy: { sortOrder: 'asc' },
-				},
-				// ✅ تحديث العلاقة مع الخصومات (many-to-many)
-				discounts: {
-					where: {
-						discount: {
-							isActive: true,
-							startDate: { lte: new Date() },
-							OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
-						},
-					},
-					include: {
-						discount: true,
-					},
-					orderBy: {
-						discount: {
-							priority: 'desc',
-						},
-					},
-					take: 1,
-				},
-			},
-			orderBy,
+			include: PRODUCT_COMPLETE_INCLUDE,
 		}),
 		prisma_DB.product.count({ where }),
 	]);
@@ -749,64 +808,12 @@ export async function getProduct(identifier: string, locale?: TLocalesData) {
 				},
 			],
 		},
-		include: {
-			translations: true,
-			brand: { include: { translations: true, images: { include: { image: true } } } },
-			category: { include: { translations: true, images: { include: { image: true } } } },
-			seoImage: true,
-			images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
-			variants: {
-				include: {
-					image: true,
-					images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
-					options: {
-						include: {
-							attribute: { include: { translations: true } },
-							attributeValue: { include: { translations: true } },
-						},
-					},
-				},
-				orderBy: { sortOrder: 'asc' },
-			},
-			attributes: {
-				include: {
-					attribute: { include: { translations: true } },
-					attributeValue: { include: { translations: true } },
-				},
-			},
-			tags: { include: { tag: true } },
-			collections: {
-				include: { collection: { include: { translations: true, images: { include: { image: true } } } } },
-			},
-			specifications: {
-				include: { properties: { orderBy: { sortOrder: 'asc' } } },
-				orderBy: { sortOrder: 'asc' },
-			},
-			// ✅ تحديث العلاقة مع الخصومات
-			discounts: {
-				where: {
-					discount: {
-						isActive: true,
-						startDate: { lte: new Date() },
-						OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
-					},
-				},
-				include: {
-					discount: true,
-				},
-				orderBy: {
-					discount: {
-						priority: 'desc',
-					},
-				},
-				take: 1,
-			},
-		},
+		include: PRODUCT_COMPLETE_INCLUDE,
 	});
 
 	if (!product) throw new AppError('api.errors.not_found', 404);
 
-	const data = await formatProduct(product, locale);
+	const data = await formatProduct(product, locale, true);
 
 	return {
 		success: true,
@@ -815,117 +822,29 @@ export async function getProduct(identifier: string, locale?: TLocalesData) {
 	};
 }
 
-// export async function getProduct(
-// 	identifier: string,
-// 	locale?: TLocalesData
-// ): Promise<ActionResult<TProduct | TProductFormValues>> {
-// 	if (!identifier) throw new AppError('api.errors.invalid_identifier', 404);
-
-// 	let product: ProductWithRelations | null = null;
-
-// 	// Find product by ID, SKU, or Slug (check both languages)
-// 	if (!product) {
-// 		product = await prisma_DB.product.findFirst({
-// 			where: {
-// 				OR: [
-// 					{ id: identifier },
-// 					{ sku: identifier },
-// 					{
-// 						translations: {
-// 							some: {
-// 								slug: identifier,
-// 							},
-// 						},
-// 					},
-// 				],
-// 			},
-// 			include: {
-// 				translations: true,
-// 				brand: { include: { translations: true, images: { include: { image: true } } } },
-// 				category: { include: { translations: true, images: { include: { image: true } } } },
-// 				// image: true,
-// 				seoImage: true,
-// 				images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
-// 				variants: {
-// 					include: {
-// 						image: true,
-// 						images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
-// 						options: {
-// 							include: {
-// 								attribute: { include: { translations: true } },
-// 								attributeValue: { include: { translations: true } },
-// 							},
-// 						},
-// 					},
-// 					orderBy: { sortOrder: 'asc' },
-// 				},
-// 				attributes: {
-// 					include: {
-// 						attribute: { include: { translations: true } },
-// 						attributeValue: { include: { translations: true } },
-// 					},
-// 				},
-// 				tags: { include: { tag: true } },
-// 				collections: {
-// 					include: { collection: { include: { translations: true, images: { include: { image: true } } } } },
-// 				},
-// 				specifications: { include: { properties: { orderBy: { sortOrder: 'asc' } } }, orderBy: { sortOrder: 'asc' } },
-// 				discounts: {
-// 					where: {
-// 						isActive: true,
-// 						startDate: { lte: new Date() },
-// 						OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
-// 					},
-// 					orderBy: { priority: 'desc' },
-// 				},
-// 			},
-// 		});
-// 	}
-
-// 	if (!product) throw new AppError('api.errors.not_found', 404);
-
-// 	const data = await formatProduct(product, locale);
-
-// 	return {
-// 		success: true,
-// 		status: 200,
-// 		data: data as TProduct | TProductFormValues,
-// 	};
-// }
-
 /**
  * 🟢 Create Product
  */
 export async function createProduct(data: TProductFormValues): Promise<ActionResult<TProductFormValues>> {
 	const validation = await ValidateFormAction(formSchemaProduct, data);
 	if (!validation.success) {
-		return {
-			...validation,
-			form_errors: JSON.stringify(validation.form_errors),
-			error: 'api.errors.inputs_validation',
-		};
+		return { ...validation, form_errors: JSON.stringify(validation.form_errors), error: 'api.errors.inputs_validation' };
 	}
 
-	// Validate unique SKU
 	const skuCheck = await validateUniqueSku(data.sku);
 	if (!skuCheck.success) return skuCheck as unknown as ActionResult<TProductFormValues>;
 
-	// Validate unique slugs
 	const slugCheck = await validateUniqueSlugs(undefined, data.slug_ar, data.slug_en);
 	if (!slugCheck.success) return slugCheck as unknown as ActionResult<TProductFormValues>;
 
-	// Find or create SEO image
 	const existingSeoImage = data.seoImage?.length
 		? await prisma_DB.image.findFirst({ where: { fileId: data.seoImage[0].fileId } })
 		: null;
-
-	// Find or create main image
 	const existingMainImage = data.images?.length
 		? await prisma_DB.image.findFirst({ where: { fileId: data.images[0].fileId } })
 		: null;
 
 	const product = await prisma_DB.$transaction(async (tx) => {
-		// Ensure SEO image exists in the transaction (create if missing) and get its id
 		let seoImageId: string | null = existingSeoImage?.id || null;
 		if (data.seoImage?.length && !existingSeoImage) {
 			const createdSeoImage = await tx.image.create({
@@ -934,12 +853,14 @@ export async function createProduct(data: TProductFormValues): Promise<ActionRes
 			seoImageId = createdSeoImage.id;
 		}
 
+		const productImages = await prepareProductImages(tx, data.images);
+
 		const created = await tx.product.create({
 			data: {
 				sku: data.sku,
 				brandId: data.brand || null,
 				categoryId: data.category || null,
-				type: data.type || null,
+				type: data.combinations && data.combinations.length > 0 ? ProductType.VARIABLE : data.type || ProductType.SIMPLE,
 				basePrice: data.basePrice,
 				compareAtPrice: data.compareAtPrice || null,
 				cost: data.cost || null,
@@ -953,32 +874,9 @@ export async function createProduct(data: TProductFormValues): Promise<ActionRes
 				length: data.length || null,
 				width: data.width || null,
 				height: data.height || null,
-
-				// Main image
 				imageId: existingMainImage?.id || null,
-
-				// SEO Image (set by id to match Prisma types)
 				seoImageId: seoImageId || undefined,
-
-				// Product images
-				images: data.images?.length
-					? {
-							create: await Promise.all(
-								data.images.map(async (img, idx) => {
-									const existingImage = await tx.image.findFirst({ where: { fileId: img.fileId } });
-									return {
-										sortOrder: idx,
-										isPrimary: idx === 0,
-										image: existingImage
-											? { connect: { id: existingImage.id } }
-											: { create: { fileId: img.fileId, url: img.url } },
-									};
-								})
-							),
-					  }
-					: undefined,
-
-				// Translations
+				images: productImages,
 				translations: {
 					create: [
 						{
@@ -1003,220 +901,48 @@ export async function createProduct(data: TProductFormValues): Promise<ActionRes
 						},
 					],
 				},
-
-				// Collections
 				collections: data.collections?.length
-					? { create: data.collections.map((collectionId) => ({ collectionId })) }
+					? { create: data.collections.map((id) => ({ collectionId: id })) }
 					: undefined,
-
-				// Tags
-				tags: data.tags?.length ? { create: data.tags.map((tagId) => ({ tagId })) } : undefined,
-
-				// Specifications
+				tags: data.tags?.length ? { create: data.tags.map((id) => ({ tagId: id })) } : undefined,
 				specifications: data.specifications?.length
 					? {
-							create: data.specifications.map((spec, specIndex) => ({
+							create: data.specifications.map((spec, sIdx) => ({
 								title_ar: spec.title_ar,
 								title_en: spec.title_en,
-								sortOrder: specIndex,
+								sortOrder: sIdx,
 								properties: {
-									create: spec.properties.map((prop, propIndex) => ({
-										key_ar: prop.key_ar,
-										key_en: prop.key_en,
-										value_ar: prop.value_ar,
-										value_en: prop.value_en,
-										sortOrder: propIndex,
+									create: spec.properties.map((p, pIdx) => ({
+										key_ar: p.key_ar,
+										key_en: p.key_en,
+										value_ar: p.value_ar,
+										value_en: p.value_en,
+										sortOrder: pIdx,
 									})),
 								},
 							})),
-					  }
+						}
 					: undefined,
-			},
-			include: {
-				translations: true,
-				brand: { include: { translations: true, image: true } },
-				category: { include: { translations: true, image: true } },
-				image: true,
-				seoImage: true,
-				images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
-				variants: {
-					include: {
-						image: true,
-						images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
-						options: {
-							include: {
-								attribute: { include: { translations: true } },
-								attributeValue: { include: { translations: true } },
-							},
-						},
-					},
-					orderBy: { sortOrder: 'asc' },
-				},
-				attributes: {
-					include: {
-						attribute: { include: { translations: true } },
-						attributeValue: { include: { translations: true } },
-					},
-				},
-				tags: { include: { tag: true } },
-				collections: { include: { collection: { include: { translations: true, image: true } } } },
-				specifications: { include: { properties: { orderBy: { sortOrder: 'asc' } } }, orderBy: { sortOrder: 'asc' } },
-				discounts: true,
 			},
 		});
 
-		// Create variants if provided
 		if (data.combinations && data.combinations.length > 0) {
-			for (const combination of data.combinations) {
-				if (!combination.checked) continue;
-
-				// ✅ sure to create/obtain Attributes and Values
-				const processedAttributes: Array<{
-					attributeId: string;
-					attributeValueId: string;
-				}> = [];
-
-				for (const attr of combination.attributes) {
-					// Ensure attribute exists (create if needed)
-					const attributeId = await ensureAttributeExists(
-						tx,
-						attr.name_ar,
-						attr.name_en
-						// 'VARIANT' // or get from your enum
-					);
-
-					// Ensure attribute value exists (create if needed)
-					const attributeValueId = await ensureAttributeValueExists(
-						tx,
-						attributeId,
-						attr.value_ar,
-						attr.value_en,
-						attr.colorHex
-					);
-
-					// Avoid duplicates in same variant
-					if (!processedAttributes.find((a) => a.attributeId === attributeId)) {
-						processedAttributes.push({
-							attributeId,
-							attributeValueId,
-						});
-					}
-				}
-
-				const variantImages = combination.images || [];
-				const existingVariantImage = combination.imageId
-					? await tx.image.findUnique({ where: { id: combination.imageId } })
-					: null;
-
-				await tx.productVariant.create({
-					data: {
-						productId: created.id,
-						sku: combination.sku || `${data.sku}-${combination.id}`,
-						price: typeof combination.price === 'string' ? parseFloat(combination.price) : combination.price,
-						compareAtPrice:
-							combination.compareAtPrice && typeof combination.compareAtPrice === 'string'
-								? parseFloat(combination.compareAtPrice)
-								: (combination.compareAtPrice as number) || null,
-						cost:
-							combination.cost && typeof combination.cost === 'string'
-								? parseFloat(combination.cost)
-								: (combination.cost as number) || null,
-						stockQuantity: combination.qty || 0,
-						isActive: true,
-						imageId: existingVariantImage?.id || null,
-
-						// Variant images
-						images: variantImages.length
-							? {
-									create: await Promise.all(
-										variantImages.map(async (img, idx) => {
-											const existingImage = await tx.image.findFirst({ where: { fileId: img.fileId } });
-											return {
-												sortOrder: idx,
-												isPrimary: idx === 0,
-												image: existingImage
-													? { connect: { id: existingImage.id } }
-													: { create: { fileId: img.fileId, url: img.url } },
-											};
-										})
-									),
-							  }
-							: undefined,
-
-						// ✅ use processedAttributes (Real IDs from DB)
-						options: {
-							create: processedAttributes,
-						},
-					},
-				});
-			}
+			await createVariantsForProduct(tx, created.id, data.sku, data.combinations);
 		}
 
 		return created;
 	});
 
-	// Fetch the complete product with proper discount relations
 	const completeProduct = await prisma_DB.product.findUnique({
 		where: { id: product.id },
-		include: {
-			translations: true,
-			brand: { include: { translations: true, images: { include: { image: true } } } },
-			category: { include: { translations: true, images: { include: { image: true } } } },
-			seoImage: true,
-			images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
-			variants: {
-				include: {
-					image: true,
-					images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
-					options: {
-						include: {
-							attribute: { include: { translations: true } },
-							attributeValue: { include: { translations: true } },
-						},
-					},
-				},
-				orderBy: { sortOrder: 'asc' },
-			},
-			attributes: {
-				include: {
-					attribute: { include: { translations: true } },
-					attributeValue: { include: { translations: true } },
-				},
-			},
-			tags: { include: { tag: true } },
-			collections: { include: { collection: { include: { translations: true, images: { include: { image: true } } } } } },
-			specifications: { include: { properties: { orderBy: { sortOrder: 'asc' } } }, orderBy: { sortOrder: 'asc' } },
-			discounts: {
-				where: {
-					discount: {
-						isActive: true,
-						startDate: { lte: new Date() },
-						OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
-					},
-				},
-				include: {
-					discount: true,
-				},
-				orderBy: {
-					discount: {
-						priority: 'desc',
-					},
-				},
-				take: 1,
-			},
-		},
+		include: PRODUCT_COMPLETE_INCLUDE,
 	});
 
-	revalidatePath('/dashboard/products');
+	revalidateProductCache();
 	const formattedData = await formatProduct(completeProduct as ProductWithRelations);
 	logger.info(`✅ Product created: ${product.id}`, { context: 'ProductService' });
 
-	return {
-		success: true,
-		status: 201,
-		data: formattedData as TProductFormValues,
-		message: 'api.products.success.create',
-	};
+	return { success: true, status: 201, data: formattedData as TProductFormValues, message: 'api.products.success.create' };
 }
 
 /**
@@ -1227,26 +953,20 @@ export async function updateProduct(id: string, data: TProductFormValues): Promi
 
 	const validation = await ValidateFormAction(formSchemaProduct, data);
 	if (!validation.success) {
-		return {
-			...validation,
-			form_errors: JSON.stringify(validation.form_errors),
-			error: 'api.errors.inputs_validation',
-		};
+		return { ...validation, form_errors: JSON.stringify(validation.form_errors), error: 'api.errors.inputs_validation' };
 	}
 
-	// Validate unique SKU
 	const skuCheck = await validateUniqueSku(data.sku, id);
 	if (!skuCheck.success) return skuCheck as unknown as ActionResult<TProductFormValues>;
+
 	await prisma_DB.$transaction(async (tx) => {
 		const existingSeoImage = data.seoImage?.length
 			? await tx.image.findFirst({ where: { fileId: data.seoImage[0].fileId } })
 			: null;
-
 		const existingMainImage = data.images?.length
 			? await tx.image.findFirst({ where: { fileId: data.images[0].fileId } })
 			: null;
 
-		// If SEO image provided and not existing, create it in transaction and get its id
 		let seoImageId: string | null = existingSeoImage?.id || null;
 		if (data.seoImage?.length && !existingSeoImage) {
 			const createdSeoImage = await tx.image.create({
@@ -1255,13 +975,16 @@ export async function updateProduct(id: string, data: TProductFormValues): Promi
 			seoImageId = createdSeoImage.id;
 		}
 
+		const productImages = await prepareProductImages(tx, data.images);
+
 		await tx.product.update({
 			where: { id },
 			data: {
 				sku: data.sku,
 				brandId: data.brand || null,
 				categoryId: data.category || null,
-				type: data.type || null,
+				type:
+					data.combinations && data.combinations?.length > 0 ? ProductType.VARIABLE : data.type || ProductType.SIMPLE,
 				basePrice: data.basePrice,
 				compareAtPrice: data.compareAtPrice || null,
 				cost: data.cost || null,
@@ -1276,132 +999,77 @@ export async function updateProduct(id: string, data: TProductFormValues): Promi
 				width: data.width || null,
 				height: data.height || null,
 				imageId: existingMainImage?.id || null,
-
-				// SEO Image (set by id to match Prisma types)
 				seoImageId: seoImageId || undefined,
-
-				// Product images - delete and recreate
-				images: data.images?.length
-					? {
-							deleteMany: {},
-							create: await Promise.all(
-								data.images.map(async (img, idx) => {
-									const existingImage = await tx.image.findFirst({ where: { fileId: img.fileId } });
-									return {
-										sortOrder: idx,
-										isPrimary: idx === 0,
-										image: existingImage
-											? { connect: { id: existingImage.id } }
-											: { create: { fileId: img.fileId, url: img.url } },
-									};
-								})
-							),
-					  }
-					: undefined,
+				images: data.images?.length ? { deleteMany: {}, ...productImages } : undefined,
 			},
 		});
 
-		// Update translations
-		const langs = Object.keys(localesData) as TLocalesData[];
-		for (const lang of langs) {
-			const name = data[`name_${lang}`];
-			const slug = data[`slug_${lang}`];
-			const description = data[`description_${lang}`];
-			const shortDescription = data[`shortDescription_${lang}`];
-			const seoTitle = data[`seoTitle_${lang}`];
-			const seoDescription = data[`seoDescription_${lang}`];
-			const seoKeywords = data[`seoKeywords_${lang}`];
+		// update translations
+		for (const lang of Object.keys(localesData) as TLocalesData[]) {
+			const translationData = {
+				name: data[`name_${lang}`],
+				slug: data[`slug_${lang}`],
+				description: data[`description_${lang}`],
+				shortDescription: data[`shortDescription_${lang}`],
+				seoTitle: data[`seoTitle_${lang}`],
+				seoDescription: data[`seoDescription_${lang}`],
+				seoKeywords: data[`seoKeywords_${lang}`],
+			};
 
-			const existing = await tx.productTranslation.findFirst({ where: { productId: id, lang } });
-			if (existing) {
-				await tx.productTranslation.update({
-					where: { id: existing.id },
-					data: { name, slug, description, shortDescription, seoTitle, seoDescription, seoKeywords },
-				});
-			} else {
-				await tx.productTranslation.create({
-					data: {
-						productId: id,
-						lang,
-						name,
-						slug,
-						description,
-						shortDescription,
-						seoTitle,
-						seoDescription,
-						seoKeywords,
-					},
-				});
-			}
+			await tx.productTranslation.upsert({
+				where: { productId_lang: { productId: id, lang } }, // تأكد أن لديك unique index في بريزما على productId و lang معاً
+				update: translationData,
+				create: { productId: id, lang, ...translationData },
+			});
 		}
 
-		// Update collections
+		// update collections
 		if (data.collections !== undefined) {
 			await tx.collectionProduct.deleteMany({ where: { productId: id } });
 			if (data.collections.length > 0) {
 				await tx.collectionProduct.createMany({
-					data: data.collections.map((collectionId) => ({ productId: id, collectionId })),
+					data: data.collections.map((cId) => ({ productId: id, collectionId: cId })),
 				});
 			}
 		}
 
-		// Update tags
+		// update tags
 		if (data.tags !== undefined) {
 			await tx.productTag.deleteMany({ where: { productId: id } });
 			if (data.tags.length > 0) {
-				await tx.productTag.createMany({
-					data: data.tags.map((tagId) => ({ productId: id, tagId })),
-				});
+				await tx.productTag.createMany({ data: data.tags.map((tId) => ({ productId: id, tagId: tId })) });
 			}
 		}
 
-		// Update specifications if provided
+		// update Specifications
 		if (data.specifications !== undefined) {
-			// Get existing specifications
 			const existingSpecs = await tx.productSpecification.findMany({
 				where: { productId: id },
 				include: { properties: true },
 			});
-
-			const existingSpecIds = new Set(existingSpecs.map((s) => s.id));
 			const incomingSpecIds = new Set(data.specifications.filter((s) => s.id).map((s) => s.id!));
 
-			// Delete specifications that are no longer present
 			const specsToDelete = existingSpecs.filter((s) => !incomingSpecIds.has(s.id));
 			if (specsToDelete.length > 0) {
-				await tx.productSpecification.deleteMany({
-					where: {
-						id: { in: specsToDelete.map((s) => s.id) },
-					},
-				});
+				await tx.productSpecification.deleteMany({ where: { id: { in: specsToDelete.map((s) => s.id) } } });
 			}
 
-			// Update or create specifications
 			for (let i = 0; i < data.specifications.length; i++) {
 				const spec = data.specifications[i];
-
-				if (spec.id && existingSpecIds.has(spec.id)) {
-					// Update existing specification
+				if (spec.id && existingSpecs.some((s) => s.id === spec.id)) {
 					const existingSpec = existingSpecs.find((s) => s.id === spec.id)!;
-					const existingPropIds = new Set(existingSpec.properties.map((p) => p.id));
 					const incomingPropIds = new Set(spec.properties.filter((p) => p.id).map((p) => p.id!));
 
-					// Delete properties that are no longer present
 					const propsToDelete = existingSpec.properties.filter((p) => !incomingPropIds.has(p.id));
 					if (propsToDelete.length > 0) {
 						await tx.productSpecificationProperty.deleteMany({
-							where: {
-								id: { in: propsToDelete.map((p) => p.id) },
-							},
+							where: { id: { in: propsToDelete.map((p) => p.id) } },
 						});
 					}
 
-					// Update or create properties
 					for (let j = 0; j < spec.properties.length; j++) {
 						const prop = spec.properties[j];
-
-						if (prop.id && existingPropIds.has(prop.id)) {
-							// Update existing property
+						if (prop.id && existingSpec.properties.some((p) => p.id === prop.id)) {
 							await tx.productSpecificationProperty.update({
 								where: { id: prop.id },
 								data: {
@@ -1413,7 +1081,6 @@ export async function updateProduct(id: string, data: TProductFormValues): Promi
 								},
 							});
 						} else {
-							// Create new property
 							await tx.productSpecificationProperty.create({
 								data: {
 									specificationId: spec.id,
@@ -1427,17 +1094,11 @@ export async function updateProduct(id: string, data: TProductFormValues): Promi
 						}
 					}
 
-					// Update specification title and sortOrder
 					await tx.productSpecification.update({
 						where: { id: spec.id },
-						data: {
-							title_ar: spec.title_ar,
-							title_en: spec.title_en,
-							sortOrder: i,
-						},
+						data: { title_ar: spec.title_ar, title_en: spec.title_en, sortOrder: i },
 					});
 				} else {
-					// Create new specification
 					await tx.productSpecification.create({
 						data: {
 							productId: id,
@@ -1445,12 +1106,12 @@ export async function updateProduct(id: string, data: TProductFormValues): Promi
 							title_en: spec.title_en,
 							sortOrder: i,
 							properties: {
-								create: spec.properties.map((prop, propIndex) => ({
+								create: spec.properties.map((prop, pIdx) => ({
 									key_ar: prop.key_ar,
 									key_en: prop.key_en,
 									value_ar: prop.value_ar,
 									value_en: prop.value_en,
-									sortOrder: propIndex,
+									sortOrder: pIdx,
 								})),
 							},
 						},
@@ -1459,145 +1120,25 @@ export async function updateProduct(id: string, data: TProductFormValues): Promi
 			}
 		}
 
-		// Update variants - delete old and create new
+		// update Variants
 		if (data.combinations !== undefined) {
 			await tx.productVariant.deleteMany({ where: { productId: id } });
-
-			for (const combination of data.combinations) {
-				if (!combination.checked) continue;
-
-				// ✅ sure to create/get Attributes and Values
-				// Use processedAttributes to avoid duplicates
-				const processedAttributes: Array<{
-					attributeId: string;
-					attributeValueId: string;
-				}> = [];
-
-				for (const attr of combination.attributes) {
-					const attributeId = await ensureAttributeExists(tx, attr.name_ar, attr.name_en);
-
-					const attributeValueId = await ensureAttributeValueExists(
-						tx,
-						attributeId,
-						attr.value_ar,
-						attr.value_en,
-						attr.colorHex
-					);
-
-					if (!processedAttributes.find((a) => a.attributeId === attributeId)) {
-						processedAttributes.push({
-							attributeId,
-							attributeValueId,
-						});
-					}
-				}
-
-				const variantImages = combination.images || [];
-				const existingVariantImage = combination.imageId
-					? await tx.image.findUnique({ where: { id: combination.imageId } })
-					: null;
-
-				await tx.productVariant.create({
-					data: {
-						productId: id,
-						sku: combination.sku || `${data.sku}-${combination.id}`,
-						price: typeof combination.price === 'string' ? parseFloat(combination.price) : combination.price,
-						compareAtPrice:
-							combination.compareAtPrice && typeof combination.compareAtPrice === 'string'
-								? parseFloat(combination.compareAtPrice)
-								: (combination.compareAtPrice as number) || null,
-						cost:
-							combination.cost && typeof combination.cost === 'string'
-								? parseFloat(combination.cost)
-								: (combination.cost as number) || null,
-						stockQuantity: combination.qty || 0,
-						isActive: true,
-						imageId: existingVariantImage?.id || null,
-
-						images: variantImages.length
-							? {
-									create: await Promise.all(
-										variantImages.map(async (img, idx) => {
-											const existingImage = await tx.image.findFirst({ where: { fileId: img.fileId } });
-											return {
-												sortOrder: idx,
-												isPrimary: idx === 0,
-												image: existingImage
-													? { connect: { id: existingImage.id } }
-													: { create: { fileId: img.fileId, url: img.url } },
-											};
-										})
-									),
-							  }
-							: undefined,
-
-						// ✅ use processedAttributes
-						options: {
-							create: processedAttributes,
-						},
-					},
-				});
-			}
+			await createVariantsForProduct(tx, id, data.sku, data.combinations);
 		}
 	});
 
 	const product = await prisma_DB.product.findUnique({
 		where: { id },
-		include: {
-			translations: true,
-			brand: { include: { translations: true, images: { include: { image: true } } } },
-			category: { include: { translations: true, images: { include: { image: true } } } },
-			seoImage: true,
-			images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
-			variants: {
-				include: {
-					image: true,
-					images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
-					options: {
-						include: {
-							attribute: { include: { translations: true } },
-							attributeValue: { include: { translations: true } },
-						},
-					},
-				},
-				orderBy: { sortOrder: 'asc' },
-			},
-			attributes: {
-				include: {
-					attribute: { include: { translations: true } },
-					attributeValue: { include: { translations: true } },
-				},
-			},
-			tags: { include: { tag: true } },
-			collections: { include: { collection: { include: { translations: true, images: { include: { image: true } } } } } },
-			specifications: { include: { properties: { orderBy: { sortOrder: 'asc' } } }, orderBy: { sortOrder: 'asc' } },
-			discounts: {
-				where: {
-					discount: {
-						isActive: true,
-						startDate: { lte: new Date() },
-						OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
-					},
-				},
-				include: { discount: true },
-				orderBy: { discount: { priority: 'desc' } },
-				take: 1,
-			},
-		},
+		include: PRODUCT_COMPLETE_INCLUDE,
 	});
 
 	if (!product) throw new AppError('api.errors.not_found', 404);
 
-	revalidateTag('products', 'max');
+	revalidateProductCache();
 	const formattedData = await formatProduct(product as ProductWithRelations);
 	logger.info(`✅ Product updated: ${product.id}`, { context: 'ProductService' });
 
-	return {
-		success: true,
-		status: 200,
-		data: formattedData as TProductFormValues,
-		message: 'api.products.success.update',
-	};
+	return { success: true, status: 200, data: formattedData as TProductFormValues, message: 'api.products.success.update' };
 }
 
 /**
@@ -1605,7 +1146,7 @@ export async function updateProduct(id: string, data: TProductFormValues): Promi
  */
 export async function toggleStateProduct(
 	id: string,
-	isActive: boolean
+	isActive: boolean,
 ): Promise<ActionResult<{ id: string; isActive: boolean }>> {
 	const updated = await prisma_DB.product.update({
 		where: { id },
@@ -1613,7 +1154,7 @@ export async function toggleStateProduct(
 		select: { id: true, isActive: true },
 	});
 
-	revalidateTag('products', 'max');
+	revalidateTag(cacheTag, cacheProfile);
 
 	return {
 		success: true,
@@ -1628,7 +1169,7 @@ export async function toggleStateProduct(
  */
 export async function toggleFeaturedProduct(
 	id: string,
-	isFeatured: boolean
+	isFeatured: boolean,
 ): Promise<ActionResult<{ id: string; isFeatured: boolean }>> {
 	const updated = await prisma_DB.product.update({
 		where: { id },
@@ -1636,14 +1177,9 @@ export async function toggleFeaturedProduct(
 		select: { id: true, isFeatured: true },
 	});
 
-	revalidateTag('products', 'max');
+	revalidateTag(cacheTag, cacheProfile);
 
-	return {
-		success: true,
-		status: 200,
-		data: updated,
-		message: 'api.success.update_status',
-	};
+	return { success: true, status: 200, data: updated, message: 'api.success.update_status' };
 }
 
 /**
@@ -1652,7 +1188,7 @@ export async function toggleFeaturedProduct(
 export async function deleteProduct(id: string): Promise<ActionResult<null>> {
 	await prisma_DB.product.delete({ where: { id } });
 
-	revalidateTag('products', 'max');
+	revalidateTag(cacheTag, cacheProfile);
 	logger.info(`✅ Product deleted: ${id}`, { context: 'ProductService' });
 
 	return {
@@ -1675,7 +1211,7 @@ export async function deleteManyProducts(ids: string[]): Promise<ActionResult<nu
 
 	if (!deleted.count) throw new AppError('api.products.errors.delete', 404);
 
-	revalidateTag('products', 'max');
+	revalidateTag(cacheTag, cacheProfile);
 	logger.info(`✅ ${deleted.count} products deleted`, { context: 'ProductService' });
 
 	return {
@@ -1692,12 +1228,9 @@ export async function deleteManyProducts(ids: string[]): Promise<ActionResult<nu
 export async function updateProductStock(
 	id: string,
 	quantity: number,
-	operation: 'add' | 'subtract' | 'set' = 'set'
+	operation: 'add' | 'subtract' | 'set' = 'set',
 ): Promise<ActionResult<{ id: string; stockQuantity: number }>> {
-	const product = await prisma_DB.product.findUnique({
-		where: { id },
-		select: { stockQuantity: true },
-	});
+	const product = await prisma_DB.product.findUnique({ where: { id }, select: { stockQuantity: true } });
 
 	if (!product) throw new AppError('api.errors.not_found', 404);
 
@@ -1721,7 +1254,7 @@ export async function updateProductStock(
 		select: { id: true, stockQuantity: true },
 	});
 
-	revalidateTag('products', 'max');
+	revalidateTag(cacheTag, cacheProfile);
 
 	return {
 		success: true,
@@ -1742,7 +1275,7 @@ export async function bulkUpdateProductStatus(ids: string[], isActive: boolean):
 		data: { isActive },
 	});
 
-	revalidateTag('products', 'max');
+	revalidateTag(cacheTag, cacheProfile);
 	logger.info(`✅ ${result.count} products status updated`, { context: 'ProductService' });
 
 	return {
@@ -1764,58 +1297,9 @@ export async function getFeaturedProducts(limit = 10, locale?: TLocalesData): Pr
 		},
 		take: limit,
 		include: {
-			translations: true,
-			brand: { include: { translations: true, images: { include: { image: true } } } },
-			category: { include: { translations: true, images: { include: { image: true } } } },
-			image: true,
-			seoImage: true,
-			images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
-			variants: {
-				include: {
-					image: true,
-					images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
-					options: {
-						include: {
-							attribute: { include: { translations: true } },
-							attributeValue: { include: { translations: true } },
-						},
-					},
-				},
-				orderBy: { sortOrder: 'asc' },
-			},
-			attributes: {
-				include: {
-					attribute: { include: { translations: true } },
-					attributeValue: { include: { translations: true } },
-				},
-			},
-			tags: { include: { tag: true } },
-			collections: { include: { collection: { include: { translations: true, images: { include: { image: true } } } } } },
-			specifications: { include: { properties: { orderBy: { sortOrder: 'asc' } } }, orderBy: { sortOrder: 'asc' } },
-			// discounts: {
-			// 	where: {
-			// 		discount: {
-			// 			isActive: true,
-			// 			startDate: { lte: new Date() },
-			// 			OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
-			// 		},
-			// 	},
-			// 	orderBy: { discount: { priority: 'desc' } },
-			// },
-			discounts: {
-				where: {
-					discount: {
-						isActive: true,
-						startDate: { lte: new Date() },
-						OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
-					},
-				},
-				include: { discount: true },
-				orderBy: { discount: { priority: 'desc' } },
-				take: 1,
-			},
+			...PRODUCT_COMPLETE_INCLUDE,
+			orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
 		},
-		orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
 	});
 
 	const data = await Promise.all(products.map((p) => formatProduct(p, locale)));
@@ -1833,7 +1317,7 @@ export async function getFeaturedProducts(limit = 10, locale?: TLocalesData): Pr
 export async function getRelatedProducts(
 	productId: string,
 	limit = 6,
-	locale?: TLocalesData
+	locale?: TLocalesData,
 ): Promise<ActionResult<TProduct>> {
 	const product = await prisma_DB.product.findUnique({
 		where: { id: productId },
@@ -1849,59 +1333,7 @@ export async function getRelatedProducts(
 			OR: [{ categoryId: product.categoryId }, { brandId: product.brandId }],
 		},
 		take: limit,
-		include: {
-			translations: true,
-			brand: { include: { translations: true, images: { include: { image: true } } } },
-			category: { include: { translations: true, images: { include: { image: true } } } },
-			image: true,
-			seoImage: true,
-			images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
-			variants: {
-				include: {
-					image: true,
-					images: { include: { image: true }, orderBy: { sortOrder: 'asc' } },
-					options: {
-						include: {
-							attribute: { include: { translations: true } },
-							attributeValue: { include: { translations: true } },
-						},
-					},
-				},
-				orderBy: { sortOrder: 'asc' },
-			},
-			attributes: {
-				include: {
-					attribute: { include: { translations: true } },
-					attributeValue: { include: { translations: true } },
-				},
-			},
-			tags: { include: { tag: true } },
-			collections: { include: { collection: { include: { translations: true, images: { include: { image: true } } } } } },
-			specifications: { include: { properties: { orderBy: { sortOrder: 'asc' } } }, orderBy: { sortOrder: 'asc' } },
-			// discounts: {
-			// 	where: {
-			// 		discount: {
-			// 			isActive: true,
-			// 			startDate: { lte: new Date() },
-			// 			OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
-			// 		},
-			// 	},
-			// 	orderBy: { discount: { priority: 'desc' } },
-			// },
-
-			discounts: {
-				where: {
-					discount: {
-						isActive: true,
-						startDate: { lte: new Date() },
-						OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
-					},
-				},
-				include: { discount: true },
-				orderBy: { discount: { priority: 'desc' } },
-				take: 1,
-			},
-		},
+		include: PRODUCT_COMPLETE_INCLUDE,
 	});
 
 	const data = await Promise.all(products.map((p) => formatProduct(p, locale)));
@@ -1954,18 +1386,11 @@ export async function getProductStockStatus(id: string): Promise<
  */
 export async function checkSkuAvailability(sku: string, excludeId?: string): Promise<ActionResult<{ available: boolean }>> {
 	const product = await prisma_DB.product.findFirst({
-		where: {
-			sku,
-			...(excludeId && { id: { not: excludeId } }),
-		},
+		where: { sku, ...(excludeId && { id: { not: excludeId } }) },
 		select: { id: true },
 	});
 
-	return {
-		success: true,
-		status: 200,
-		data: { available: !product },
-	};
+	return { success: true, status: 200, data: { available: !product } };
 }
 
 /**
@@ -1974,7 +1399,7 @@ export async function checkSkuAvailability(sku: string, excludeId?: string): Pro
 export async function checkSlugAvailability(
 	slug: string,
 	lang: 'ar' | 'en',
-	excludeProductId?: string
+	excludeProductId?: string,
 ): Promise<ActionResult<{ available: boolean }>> {
 	const translation = await prisma_DB.productTranslation.findFirst({
 		where: {
@@ -1985,9 +1410,5 @@ export async function checkSlugAvailability(
 		select: { id: true },
 	});
 
-	return {
-		success: true,
-		status: 200,
-		data: { available: !translation },
-	};
+	return { success: true, status: 200, data: { available: !translation } };
 }

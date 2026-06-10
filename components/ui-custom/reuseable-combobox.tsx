@@ -2,13 +2,12 @@
 
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { imagesPlaceholder } from '@/configs/general';
 import { cn, renderErrorMessage } from '@/lib/utils';
 import { CheckIcon, ChevronsUpDown, CircleSlash2Icon, Loader2, Trash2Icon, XIcon } from 'lucide-react';
-import { ReactNode, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
-
-import { imagesPlaceholder } from '@/configs/general';
 import Image from 'next/image';
 import Link from 'next/link';
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import TagForm from '../Dashboard/forms/tag-form';
@@ -48,13 +47,12 @@ interface ComboboxProps<T extends ComboboxOption> {
 
 	linkHref?: string;
 	customColumn?: (option: T) => ReactNode;
-	// القيمة يمكن أن تكون: string | string[] | T | T[]
 	value?: string | string[] | T | T[];
 	onChange?: (value: string | string[] | T | T[]) => void;
 	multiple?: boolean;
 
-	// خيار جديد: إرجاع الكائن الكامل أو ID فقط
-	returnFullObject?: boolean; // default: false
+	// new option: return the full object or just the ID // default: false
+	returnFullObject?: boolean;
 
 	placeholder?: string;
 	searchPlaceholder?: string;
@@ -68,6 +66,8 @@ interface ComboboxProps<T extends ComboboxOption> {
 	debounceMs?: number;
 	pageSize?: number;
 	enableInfiniteScroll?: boolean;
+
+	initialItems?: T[];
 }
 
 /**
@@ -117,6 +117,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 	debounceMs = 300,
 	pageSize = 10,
 	enableInfiniteScroll = true,
+	initialItems = [], // 1. Destructured initialItems with default empty array
 }: ComboboxProps<T>) {
 	const { t } = useTranslation();
 	const [open, setOpen] = useState(false);
@@ -133,7 +134,22 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const observerTarget = useRef<HTMLDivElement>(null);
 
-	// extract IDs from the passed value (whether objects or strings)
+	// ✅ Merge initial items with current value
+	const initialSelectedOptions = useMemo(() => {
+		// If value contains full objects, use them
+		const valueArray = value ? (Array.isArray(value) ? value : [value]) : [];
+		const objectsFromValue = valueArray.filter((v) => typeof v === 'object' && v.id) as T[];
+
+		// Merge with initialItems (from backend)
+		const initialItemsArray = initialItems && Array.isArray(initialItems) ? initialItems : [initialItems];
+		const combined = [...initialItemsArray, ...objectsFromValue];
+
+		// Remove duplicates by ID
+		const uniqueMap = new Map(combined.map((opt) => [opt.id, opt]));
+		return Array.from(uniqueMap.values());
+	}, [value, initialItems]);
+
+	// ✅ Extract IDs from value (whether it's IDs or full objects)
 	const selectedIds = useMemo(() => {
 		if (!value) return [];
 
@@ -148,19 +164,10 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 			.filter(Boolean);
 	}, [value]);
 
-	// extract full objects from the passed value (for direct display)
-	const initialSelectedOptions = useMemo(() => {
-		if (!value) return [];
-
-		const valueArray = Array.isArray(value) ? value : [value];
-
-		return valueArray.filter((v) => typeof v === 'object' && v.id).map((v) => v as T);
-	}, [value]);
-
-	// marge options from static, server, and initial selected
+	// ✅ Merge all options (static + server + initial)
 	const allOptions = useMemo(() => {
 		const combined = [
-			...initialSelectedOptions, // add initially selected options to avoid missing data
+			...initialSelectedOptions, // ← Important: Show selected items immediately
 			...staticOptions,
 			...serverOptions,
 		];
@@ -168,13 +175,52 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 		return Array.from(uniqueMap.values());
 	}, [staticOptions, serverOptions, initialSelectedOptions]);
 
-	// select full objects based on selected IDs
+	// ✅ Get selected options (full objects)
 	const selectedOptions = useMemo(() => {
 		return allOptions.filter((opt) => selectedIds.includes(opt.id));
 	}, [allOptions, selectedIds]);
 
+	// ✅ Handle selection
+	const handleSelect = useCallback(
+		(optionId: string) => {
+			if (disabled) return;
+
+			const selectedOption = allOptions.find((opt) => opt.id === optionId);
+			if (!selectedOption) return;
+
+			let newValue: string | string[] | T | T[];
+
+			if (multiple) {
+				const isAlreadySelected = selectedIds.includes(optionId);
+
+				if (returnFullObject) {
+					// Return full objects
+					newValue = isAlreadySelected
+						? selectedOptions.filter((opt) => opt.id !== optionId)
+						: [...selectedOptions, selectedOption];
+				} else {
+					// Return IDs only (default)
+					newValue = isAlreadySelected ? selectedIds.filter((id) => id !== optionId) : [...selectedIds, optionId];
+				}
+			} else {
+				const isAlreadySelected = selectedIds.includes(optionId);
+
+				if (returnFullObject) {
+					newValue = isAlreadySelected ? ([] as T[]) : selectedOption;
+				} else {
+					newValue = isAlreadySelected ? '' : optionId;
+				}
+				setOpen(false);
+			}
+
+			onChange?.(newValue);
+		},
+		[multiple, selectedIds, selectedOptions, allOptions, onChange, disabled, returnFullObject],
+	);
+
+	// ✅ Fetch data
 	const fetchData = useCallback(
-		async (query: string, page: number, append = false) => {
+		async (query: string, page: number, append = !query) => {
 			if (!fetchOptions) return;
 
 			const loadingState = page === 1 ? setIsSearching : setIsLoadingMore;
@@ -190,7 +236,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 
 				if (Array.isArray(result)) {
 					newOptions = result;
-					paginationData.hasMore = result.length >= pageSize;
+					paginationData.hasMore = result.hasMore || result.length >= pageSize;
 				} else {
 					newOptions = result.data || [];
 					paginationData.hasMore = result.pagination?.hasMore ?? result.hasMore ?? false;
@@ -209,7 +255,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 				loadingState(false);
 			}
 		},
-		[fetchOptions, pageSize]
+		[fetchOptions, pageSize],
 	);
 
 	const debouncedSearch = useCallback(
@@ -225,7 +271,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 				}, debounceMs);
 			};
 		})(),
-		[fetchData, debounceMs]
+		[fetchData, debounceMs],
 	);
 
 	const loadMore = useCallback(async () => {
@@ -244,7 +290,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 			setSearchQuery(query);
 			if (fetchOptions) debouncedSearch(query);
 		},
-		[fetchOptions, debouncedSearch]
+		[fetchOptions, debouncedSearch],
 	);
 
 	const filteredOptions = useMemo(() => {
@@ -255,7 +301,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 	}, [allOptions, searchQuery, fetchOptions]);
 
 	const hasImage = useMemo(() => {
-		return allOptions.some((opt) => opt?.images?.length || 0 > 0);
+		return allOptions.some((opt) => opt?.images?.length || allOptions.some((e) => (e?.image ? true : false)));
 	}, [allOptions]);
 
 	useEffect(() => {
@@ -266,7 +312,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 					loadMore();
 				}
 			},
-			{ threshold: 0.1 }
+			{ threshold: 0.1 },
 		);
 
 		const currentTarget = observerTarget.current;
@@ -285,41 +331,41 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [open]);
 
-	const handleSelect = useCallback(
-		(optionId: string) => {
-			if (disabled) return;
+	// const handleSelect = useCallback(
+	// 	(optionId: string) => {
+	// 		if (disabled) return;
 
-			const selectedOption = allOptions.find((opt) => opt.id === optionId);
-			if (!selectedOption) return;
+	// 		const selectedOption = allOptions.find((opt) => opt.id === optionId);
+	// 		if (!selectedOption) return;
 
-			let newValue: string | string[] | T | T[];
+	// 		let newValue: string | string[] | T | T[];
 
-			if (multiple) {
-				const isAlreadySelected = selectedIds.includes(optionId);
+	// 		if (multiple) {
+	// 			const isAlreadySelected = selectedIds.includes(optionId);
 
-				if (returnFullObject) {
-					const currentObjects = selectedOptions;
-					newValue = isAlreadySelected
-						? currentObjects.filter((opt) => opt.id !== optionId)
-						: [...currentObjects, selectedOption];
-				} else {
-					newValue = isAlreadySelected ? selectedIds.filter((id) => id !== optionId) : [...selectedIds, optionId];
-				}
-			} else {
-				const isAlreadySelected = selectedIds.includes(optionId);
+	// 			if (returnFullObject) {
+	// 				const currentObjects = selectedOptions;
+	// 				newValue = isAlreadySelected
+	// 					? currentObjects.filter((opt) => opt.id !== optionId)
+	// 					: [...currentObjects, selectedOption];
+	// 			} else {
+	// 				newValue = isAlreadySelected ? selectedIds.filter((id) => id !== optionId) : [...selectedIds, optionId];
+	// 			}
+	// 		} else {
+	// 			const isAlreadySelected = selectedIds.includes(optionId);
 
-				if (returnFullObject) {
-					newValue = isAlreadySelected ? ([] as T[]) : selectedOption;
-				} else {
-					newValue = isAlreadySelected ? '' : optionId;
-				}
-				setOpen(false);
-			}
+	// 			if (returnFullObject) {
+	// 				newValue = isAlreadySelected ? ([] as T[]) : selectedOption;
+	// 			} else {
+	// 				newValue = isAlreadySelected ? '' : optionId;
+	// 			}
+	// 			setOpen(false);
+	// 		}
 
-			onChange?.(newValue);
-		},
-		[multiple, selectedIds, selectedOptions, allOptions, onChange, disabled, returnFullObject]
-	);
+	// 		onChange?.(newValue);
+	// 	},
+	// 	[multiple, selectedIds, selectedOptions, allOptions, onChange, disabled, returnFullObject],
+	// );
 
 	const handleRemove = useCallback(
 		(optionId: string, e: React.MouseEvent) => {
@@ -334,7 +380,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 				onChange?.(multiple ? newIds : '');
 			}
 		},
-		[selectedIds, selectedOptions, onChange, disabled, multiple, returnFullObject]
+		[selectedIds, selectedOptions, onChange, disabled, multiple, returnFullObject],
 	);
 
 	const renderTriggerContent = () => {
@@ -359,24 +405,15 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 		}
 
 		if (!multiple && !isProducts && selectedOptions.length > 0) {
-			return (
-				<span>{selectedOptions[0].name}</span>
-				// <div className='flex flex-wrap gap-1 flex-1 min-w-0'>
-				// 	{selectedOptions.slice(0, 2).map((opt) => (
-				// 		<Badge key={opt.id} variant='secondary' className='mr-1'>
-				// 			{opt.name}
-				// 			<button type='button' className='ml-1 hover:text-destructive' onClick={(e) => handleRemove(opt.id, e)}>
-				// 				<XIcon className='h-3 w-3' />
-				// 			</button>
-				// 		</Badge>
-				// 	))}
-				// 	{selectedOptions.length > 2 && <Badge variant='secondary'>+{selectedOptions.length - 2}</Badge>}
-				// </div>
-			);
+			return <span>{selectedOptions[0].name}</span>;
 		}
 
 		if (selectedOptions.length === 1) {
 			return selectedOptions[0].name;
+		}
+
+		if (multiple && isProducts && selectedOptions.length > 0) {
+			return `${selectedOptions.length} ${t('common.messages.items_selected')}`;
 		}
 
 		return <span className='text-muted-foreground'>{renderErrorMessage(placeholder, t)}</span>;
@@ -396,7 +433,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 						className={cn(
 							'w-full justify-between px-3 min-h-max',
 							!selectedOptions.length && 'text-muted-foreground',
-							className
+							className,
 						)}
 					>
 						<div className='flex items-center gap-2 flex-1 min-w-0 overflow-hidden'>
@@ -423,6 +460,10 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 								<XIcon className='h-4 w-4 opacity-50' />
 							</Button>
 						</div>
+						{/* <CommandInput
+							// Hidden input or dummy space just to keep Command happy if needed, but standard custom layout continues
+							className='hidden'
+						/> */}
 						<CommandList ref={scrollContainerRef} className='border-t border-muted-foreground/30'>
 							{isLoading && currentPage === 1 ? (
 								<div className='flex items-center justify-center gap-1 py-6'>
@@ -470,7 +511,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 															<Image
 																src={
 																	typeof option.image === 'string'
-																		? option.image
+																		? option.image || imagesPlaceholder.imgMedium
 																		: option.images?.[0]?.url || imagesPlaceholder.imgMedium
 																}
 																alt={option.name}
@@ -539,7 +580,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 							</span>
 						) : (
 							selectedOptions.map((option) => {
-								const isSelected = selectedIds.includes(option.id);
+								// const isSelected = selectedIds.includes(option.id);
 
 								return (
 									<div

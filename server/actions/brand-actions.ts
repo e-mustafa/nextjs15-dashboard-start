@@ -17,13 +17,13 @@ export async function getAllBrandsAction(
 		sortBy?: string;
 		sortOrder?: 'asc' | 'desc';
 	},
-	locale?: TLocalesData
+	locale?: TLocalesData,
 ) {
 	return runAction(() => brandService.getAllBrands(params, locale));
 }
 
-export async function getBrandAction(id: string) {
-	return runAction(() => brandService.getBrand(id));
+export async function getBrandAction(id: string, locale?: TLocalesData) {
+	return runAction(() => brandService.getBrand(id, locale));
 }
 
 export async function createBrandAction(data: TBrandFormValues) {

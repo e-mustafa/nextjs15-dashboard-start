@@ -1,7 +1,7 @@
 'use client';
 
 import { url_segment } from '@/app/[locale]/dashboard/(products-management)/categories/page';
-import { url_segment as url_Product } from '@/app/[locale]/dashboard/(products-management)/products/page';
+import { url_segment as url_products } from '@/app/[locale]/dashboard/(products-management)/products/page';
 import LoaderInstElement from '@/components/Shared/loaders/loader-inst-element';
 import { Form } from '@/components/ui-custom/custom-form';
 import { config_env } from '@/configs/general';
@@ -23,83 +23,6 @@ import SubmitButton from './submit-button';
 
 type TFormValues = TCategoryFormValues;
 
-export const formSections_category: SectionConfig<TFormValues>[] = [
-	{
-		title: 'forms.sections.category_info',
-		fields: [
-			{
-				type: 'text',
-				name: 'name_ar',
-				label: 'forms.labels.name_ar',
-				placeholder: 'forms.placeholders.name_ar',
-				required: true,
-			},
-			{
-				type: 'text',
-				name: 'name_en',
-				label: 'forms.labels.name_en',
-				placeholder: 'forms.placeholders.name_en',
-				required: true,
-			},
-			{
-				type: 'switch',
-				name: 'isActive',
-				label: 'forms.labels.is_active',
-				placeholder: 'forms.placeholders.is_active',
-				required: true,
-				// parentClass: 'min-w-full',
-				variants: 'input', // 'switch',
-			},
-			{
-				type: 'empty',
-				name: 'isActive',
-			},
-			{
-				type: 'richtext',
-				name: 'description_ar',
-				label: 'forms.labels.description_ar',
-				placeholder: 'forms.placeholders.description_ar',
-				parentClass: 'min-w-full xl:min-w-[calc(50%-1.5rem)]',
-			},
-			{
-				type: 'richtext',
-				name: 'description_en',
-				label: 'forms.labels.description_en',
-				placeholder: 'forms.placeholders.description_en',
-				parentClass: 'min-w-full xl:min-w-[calc(50%-1.5rem)]',
-			},
-			{
-				type: 'imageUpload',
-				name: 'images',
-				label: 'forms.labels.image',
-				placeholder: 'forms.placeholders.image',
-				parentClass: 'min-w-full',
-				folder: 'categories',
-				// file: {
-				// 	// accept: 'image/*',
-				// 	// multiple: false,
-				// },
-				multiple: true,
-			},
-		],
-	},
-	{
-		title: 'forms.sections.extra_info',
-		fields: [
-			{
-				type: 'combobox',
-				name: 'products',
-				label: msg('common.actions.choose_', { item: 'common.sections.products' }),
-				placeholder: 'forms.placeholders.choose_categorys_products',
-				optionUrl: `${config_env.domainAPI}${url_Product}`,
-				multiple: true
-			},
-		],
-	},
-	// SEO sections inputs with mockup card
-	formSectionSEO as SectionConfig<TFormValues>,
-];
-
 export default function CategoryForm({
 	type = EnumFormTypes.CREATE,
 	response,
@@ -114,11 +37,94 @@ export default function CategoryForm({
 	// for handling server response errors & messages
 	useServerResponse(response);
 
+	const initialItems = (response?.data as TFormValues)?.initialItems || defaultValues?.initialItems;
+
 	const form = useForm<TFormValues>({
 		resolver: zodResolver(formSchemaCategory),
 		defaultValues,
 		// delayError: 1000,
 	});
+	
+	const formSections_category: SectionConfig<TFormValues>[] = [
+		{
+			title: 'forms.sections.category_info',
+			fields: [
+				{
+					type: 'text',
+					name: 'name_ar',
+					label: 'forms.labels.name_ar',
+					placeholder: 'forms.placeholders.name_ar',
+					required: true,
+				},
+				{
+					type: 'text',
+					name: 'name_en',
+					label: 'forms.labels.name_en',
+					placeholder: 'forms.placeholders.name_en',
+					required: true,
+				},
+				{
+					type: 'switch',
+					name: 'isActive',
+					label: 'forms.labels.is_active',
+					placeholder: 'forms.placeholders.is_active',
+					required: true,
+					// parentClass: 'min-w-full',
+					variants: 'input', // 'switch',
+				},
+				{
+					type: 'empty',
+					name: 'isActive',
+				},
+				{
+					type: 'richtext',
+					name: 'description_ar',
+					label: 'forms.labels.description_ar',
+					placeholder: 'forms.placeholders.description_ar',
+					parentClass: 'min-w-full xl:min-w-[calc(50%-1.5rem)]',
+				},
+				{
+					type: 'richtext',
+					name: 'description_en',
+					label: 'forms.labels.description_en',
+					placeholder: 'forms.placeholders.description_en',
+					parentClass: 'min-w-full xl:min-w-[calc(50%-1.5rem)]',
+				},
+				{
+					type: 'imageUpload',
+					name: 'images',
+					label: 'forms.labels.image',
+					placeholder: 'forms.placeholders.image',
+					parentClass: 'min-w-full',
+					folder: 'categories',
+					// file: {
+					// 	// accept: 'image/*',
+					// 	// multiple: false,
+					// },
+					multiple: true,
+				},
+			],
+		},
+		{
+			title: 'forms.sections.extra_info',
+			fields: [
+				{
+					type: 'combobox',
+					name: 'products',
+					label: msg('common.actions.choose_', { item: 'common.sections.products' }),
+					placeholder: 'forms.placeholders.choose_categorys_products',
+					optionUrl: `${config_env.domainAPI}${url_products}/options`,
+					// linkHref: `${config_env.domain}${url_products}`,
+					linkHref: url_products,
+					multiple: true,
+					isProducts: true,
+					initialItems: initialItems?.products || [],
+				},
+			],
+		},
+		// SEO sections inputs with mockup card
+		formSectionSEO as SectionConfig<TFormValues>,
+	];
 
 	const [result, setResult] = useState<ActionResult<TFormValues> | null>(null);
 	const [isPending, startTransition] = useTransition();

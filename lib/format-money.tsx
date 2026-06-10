@@ -13,7 +13,7 @@ export function formatMoney(amount: string | number, currency = 'EGP', locale: T
 	const formatter = new Intl.NumberFormat(`${locale}`, { maximumFractionDigits: 2, minimumFractionDigits: 2 });
 
 	return (
-		<span className='flex items-center gap-1 text-inherit' style={{ fontSize: 'inherit' }}>
+		<span className='flex items-center gap-1 text-inherit' dir='ltr' style={{ fontSize: 'inherit' }}>
 			{currency === 'SAR' && <SaudiRiyalIcon />}
 			<span>{currency === 'EGP' ? currenciesData.egp.symbol : currenciesData.usd.symbol}</span>
 			{formatter.format(amount)}

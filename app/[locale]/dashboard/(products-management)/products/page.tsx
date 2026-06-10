@@ -15,7 +15,7 @@ const ProductsDataTable = dynamic(() => import('@/components/Dashboard/dataTable
 });
 
 export const url_segment = `${dash_url}/products`;
-export const tags = ['products'];
+export const tags = ['products', 'tags'];
 
 export default async function ProductsPage({ params }: TLayoutProps) {
 	const { locale } = await params;

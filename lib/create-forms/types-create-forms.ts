@@ -1,5 +1,6 @@
 import { EnumDatePickerMode } from '@/components/inputs/multi-date-picker';
 import { ComboboxOption, PaginatedResponse } from '@/components/ui-custom/reuseable-combobox';
+import { TImage } from '@/types/api';
 import { ChangeEvent, ComponentType, ElementType, ReactNode } from 'react';
 import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
 
@@ -161,6 +162,7 @@ export interface ComboboxFieldConfig<T extends FieldValues> extends BaseFieldCon
 	// passed functions for custom actions
 	deleteTag?: (id: string) => Promise<void>;
 	customColumn?: (option: T extends ComboboxOption ? T : ComboboxOption) => ReactNode;
+	initialItems?: ComboboxOption[];
 }
 
 export interface ImageUploadFieldConfig<T extends FieldValues> extends BaseFieldConfig<T, 'imageUpload'> {

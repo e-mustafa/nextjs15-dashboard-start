@@ -36,9 +36,11 @@ export async function getDataInServer<T>({
 		Authorization: `Bearer ${await getToken()}`,
 	};
 
-	if (!id) {
-		headers['accept-language'] = locale || (await getCurrentLocale());
-	}
+	// if (!id) {
+	// 	headers['accept-language'] = locale || (await getCurrentLocale());
+	// }
+
+	headers['accept-language'] = locale || (await getCurrentLocale());
 
 	// ✅ Use URL and URLSearchParams for better handling of query parameters
 	const url = new URL(`${config_env.domainAPI}/${url_segment}/${id}`);
@@ -47,8 +49,6 @@ export async function getDataInServer<T>({
 	});
 
 	const useCache = !id && tags.length > 0;
-
-	console.log('tags--', tags);
 
 	console.log('🔗 Fetching from:', url.toString());
 	// console.log('🧾 Headers:', headers);

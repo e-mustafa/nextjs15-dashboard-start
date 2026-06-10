@@ -1,8 +1,6 @@
 'use server';
-
 import { TLocalesData } from '@/configs/general';
 import { runAction } from '@/lib/error-handler/error-handler.server';
-// import * as productService from '@/server/services/product-service';
 import { TProductFormValues } from '@/validation/product-validation';
 import {
 	bulkUpdateProductStatus,
@@ -14,6 +12,7 @@ import {
 	getAllProducts,
 	getFeaturedProducts,
 	getProduct,
+	getProductsAsOptions,
 	getProductStockStatus,
 	getRelatedProducts,
 	toggleFeaturedProduct,
@@ -39,9 +38,23 @@ export async function getAllProductsAction(
 		sortBy?: string;
 		sortOrder?: 'asc' | 'desc';
 	},
-	locale?: TLocalesData
+	locale?: TLocalesData,
 ) {
 	return runAction(() => getAllProducts(params, locale));
+}
+
+/**
+ * Get products for combobox (optimized for dropdowns)
+ */
+export async function getProductsAsOptionsAction(
+	params?: {
+		search?: string;
+		limit?: number;
+		page?: number;
+	},
+	locale?: TLocalesData,
+) {
+	return runAction(() => getProductsAsOptions({ ...params }, locale));
 }
 
 /**
@@ -138,6 +151,6 @@ export async function checkSkuAvailabilityAction(sku: string, excludeId?: string
 /**
  * Check slug availability
  */
-export async function checkSlugAvailabilityAction(slug: string, lang: 'ar' | 'en', excludeProductId?: string) {
+export async function checkSlugAvailabilityAction(slug: string, lang: TLocalesData, excludeProductId?: string) {
 	return runAction(() => checkSlugAvailability(slug, lang, excludeProductId));
 }

@@ -5,11 +5,11 @@ import { isDEV } from '@/configs/general';
 import useLocale from '@/hooks/useLocale';
 import { RenderFieldProps } from '@/lib/create-forms/types-create-forms';
 import { renderErrorMessage } from '@/lib/utils';
-import { JSX } from 'react';
+import { JSX, ReactNode } from 'react';
 import { FieldValues } from 'react-hook-form';
 import InfoIconTooltip from '../Shared/info-icon-tooltip';
 import { FormMessageTranslated } from '../ui-custom/custom-form';
-import ReusableCombobox from '../ui-custom/reuseable-combobox';
+import ReusableCombobox, { ComboboxOption } from '../ui-custom/reuseable-combobox';
 
 /**
  * Combobox input field
@@ -51,8 +51,9 @@ export default function ComboboxInputField<T extends FieldValues>({
 		fetchOptions,
 		isTags,
 		multiple = isTags,
-		returnObject = false,
+		returnObject = false, // Default: return IDs only
 		linkHref,
+		initialItems, // ← From backend response
 	} = fieldConfig;
 
 	const { t, locale } = useLocale();
@@ -64,7 +65,6 @@ export default function ComboboxInputField<T extends FieldValues>({
 			limit: '10',
 		});
 
-		// try {
 		const response = await fetch(`${optionUrl}?${params}`, {
 			headers: { 'Accept-Language': locale },
 			next: { tags: revalidateTags },
@@ -77,20 +77,16 @@ export default function ComboboxInputField<T extends FieldValues>({
 
 		const result = await response.json();
 
-		// Map the API response to the ComboboxOption format
 		return {
 			data: result.data.map((item: any) => ({
 				id: item.id,
 				name: item.name,
-				image: item.logo, // adjust if your API uses a different field for image
+				image: item.image || item.logo,
+				basePrice: item.basePrice, // For products
 				...item,
 			})),
 			pagination: result.pagination,
 		};
-		// } catch (error) {
-		// 	isDEV && console.error('Error fetching data:', error);
-		// 	throw new Error('Failed to fetch list of data');
-		// }
 	}
 
 	return (
@@ -98,17 +94,13 @@ export default function ComboboxInputField<T extends FieldValues>({
 			control={form.control}
 			name={name}
 			render={({ field }) => {
-				const value = field.value;
-				console.log('field.value', field.value);
 				return (
 					<FormItem className={fieldConfig.class}>
 						{!fieldConfig.infoContent ? (
 							<FormLabel aria-required={!!required}>{renderErrorMessage(label as string, t)}</FormLabel>
 						) : (
-							// info icon
 							<div className='relative flex items-center justify-between h-3.5'>
 								<FormLabel aria-required={!!required}>{renderErrorMessage(label as string, t)}</FormLabel>
-
 								<InfoIconTooltip
 									info={t(fieldConfig.infoContent as string) || ''}
 									t={t}
@@ -130,15 +122,15 @@ export default function ComboboxInputField<T extends FieldValues>({
 								isProducts={fieldConfig.isProducts}
 								isTags={fieldConfig.isTags}
 								deleteTag={fieldConfig.deleteTag}
-								returnFullObject={returnObject}
+								returnFullObject={returnObject} // ← Default: false (return IDs)
 								linkHref={linkHref}
-								customColumn={fieldConfig.customColumn}
+								customColumn={fieldConfig.customColumn as ((option: ComboboxOption) => ReactNode) | undefined}
+								initialItems={initialItems} // ← Pass initial items from backend
 								{...field}
-								// ={fieldConfig.customColumn}
-								// onChange={(val) => setBrandsValue(val as string[])}
-								// onChange={field.onChange}
-								// options={Array.isArray(value) ? value : [value]}
-								// value={value && Array.isArray(value) ? value?.map((v: T) => v.id) : value?.id}
+								// ✅ field.value can be:
+								// - Create mode: [] (empty)
+								// - Edit mode: ['id1', 'id2'] (IDs)
+								// - Edit mode with initialItems: full objects will be shown
 							/>
 						</FormControl>
 						{description && <FormDescription>{t(description)}</FormDescription>}

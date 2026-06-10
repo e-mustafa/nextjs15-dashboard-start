@@ -8,7 +8,7 @@ import {
 	deleteManyCategoriesAction,
 	toggleStateCategoryAction,
 } from '@/server/actions/category-actions';
-import { Category } from '@/server/services/category-service';
+import { Category } from '@/server/services/category-service/types';
 import { ActionResult, ApiMeta, TImage, TQueryParams } from '@/types/api';
 import { ColumnDef } from '@tanstack/react-table';
 import Image from 'next/image';

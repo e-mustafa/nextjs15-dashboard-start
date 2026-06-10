@@ -58,7 +58,8 @@ export default function TagForm({ defaultValue = '', onSuccess }: Props) {
 				if (result?.success && onSuccess) {
 					onSuccess(result.data);
 				}
-			} catch (error) {
+			} catch (error: unknown) {
+				setResult({ success: false, status: 500, error: (error as Error).message || 'Tag creation failed' });
 				console.error('Tag creation failed:', error);
 			}
 		});
@@ -116,6 +117,7 @@ export default function TagForm({ defaultValue = '', onSuccess }: Props) {
 				<Button
 					type='button'
 					form='tag-form'
+					className='self-end'
 					onClick={() => form.handleSubmit(handleSubmit)()}
 					disabled={isPending || form.formState.isSubmitting}
 				>

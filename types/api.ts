@@ -26,8 +26,9 @@ export type ApiMeta = {
 	pagination?: {
 		page: number;
 		limit: number;
-		total: number;
-		totalPages: number;
+		total?: number;
+		totalPages?: number;
+		hasMore?: boolean;
 	};
 	sort?: {
 		by: string;

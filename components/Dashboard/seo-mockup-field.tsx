@@ -32,7 +32,7 @@ export default function seoMockupField<T extends FieldValues, K extends FieldTyp
 			render={() => (
 				<FormItem className={fieldConfig.class}>
 					<FormLabel aria-required={!!required}>{t(label as string)}</FormLabel>
-					<SEOMockupCard data={data} image={image} />;
+					<SEOMockupCard data={data} image={image} />
 					{description && <FormDescription>{t(description as string)}</FormDescription>}
 					<FormMessageTranslated />
 				</FormItem>

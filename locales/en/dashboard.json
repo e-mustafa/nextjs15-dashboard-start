@@ -125,7 +125,9 @@
 			"no_blogs": "No blogs found.",
 			"no_attributes": "No attributes found.",
 			"no_tags": "No tags found.",
-			"drag_to_reorder": "You can drag images to reorder them."
+			"drag_to_reorder": "You can drag images to reorder them.",
+			"items_selected": "item(s) selected",
+			"stock": "Stock"
 		},
 		"options": {
 			"yes": "Yes",
@@ -296,7 +298,8 @@
 			"stock_quantity": "Stock Quantity",
 			"unit": "Unit",
 			"low_stock_Alert": "Low Stock Alert",
-			"keep_selling": "Track Inventory",
+			"track_inventory": "Track Inventory",
+			"keep_selling": "Keep Selling",
 			"product_type": "Product Type",
 			"weight": "Weight",
 			"length": "Length",
@@ -429,6 +432,7 @@
 			"stock_quantity": "Enter stock quantity",
 			"unit": "Enter unit",
 			"low_stock_Alert": "Enter minimum threshold for low stock alert",
+			"track_inventory": "Track Inventory",
 			"keep_selling": "Continue selling after stock runs out",
 			"weight": "Enter weight",
 			"length": "Enter length",
@@ -873,6 +877,7 @@
 				"delete": "Failed to delete coupon",
 				"not_found": "Coupon not found",
 				"exists": "Coupon already exists",
+				"fetch_failed": "Failed to fetch coupons",
 
 				"apply_failed": "Failed to apply coupon",
 				"usage_record_failed": "Failed to record coupon usage",

@@ -1,13 +1,16 @@
+import { TLocalesData } from '@/configs/general';
 import { HandlerContext, errorHandler } from '@/lib/error-handler/error-handler-route';
 import { AppError } from '@/lib/error-handler/error-handler.server';
+import getCurrentLocale from '@/lib/utils.server/getCurrentLocale.server';
 import { deleteCollection, getCollection, updateCollection } from '@/server/services/collection-service';
 
 // GET /api/collections/:id
 
-async function getCollectionAction(_req: Request, ctx?: HandlerContext) {
+async function getCollectionAction(req: Request, ctx?: HandlerContext) {
 	const { id } = (await ctx?.params) ?? {};
 	if (!id) throw new AppError('api.errors.invalid_id', 400);
-	return getCollection(id);
+	const locale = (req.headers.get('accept-language') as TLocalesData) || (await getCurrentLocale());
+	return getCollection(id, locale);
 }
 
 async function updateCollectionAction(req: Request, ctx?: HandlerContext) {

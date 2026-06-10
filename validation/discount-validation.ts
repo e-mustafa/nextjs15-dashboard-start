@@ -1,11 +1,17 @@
 // import { DiscountType } from '@/constant/enums';
-import { DiscountType } from '@prisma/client';
 import { msg } from '@/lib/utils';
+import { DiscountProduct } from '@/server/services/discount-service/types';
+import { DiscountType } from '@prisma/client';
 import z from 'zod';
-import { intNotNegativeField, nameArField, nameEnField, preprocessNumber } from './fields-validation';
-// import z from 'zod';
+import { IInitialItems, intNotNegativeField, nameArField, nameEnField, preprocessNumber } from './fields-validation';
 
-export type TDiscountFormValues = z.infer<typeof formSchemaDiscount> & { id?: string, productId?: string};
+export type TDiscountFormInput = z.input<typeof formSchemaDiscount> & {
+	id?: string;
+	initialItems?: IInitialItems;
+	discountProducts?: DiscountProduct[];
+};
+export type TDiscountFormOutput = z.output<typeof formSchemaDiscount>; // & { id?: string; productId?: string };
+export type TDiscountFormValues = TDiscountFormInput;
 
 /** ✅ Unified fields using camelCase naming */
 export const fields = [];
@@ -15,13 +21,15 @@ export const defaultValuesDiscount = {
 	name_en: '',
 	type: DiscountType.FIXED,
 	value: 0,
-	products: [],
 	startDate: Date.now().toString(),
 	endDate: null,
 	isActive: true,
 	priority: 0,
 	minDiscountValue: null,
 	maxDiscountValue: null,
+
+	products: [],
+	discountProducts: [] as DiscountProduct[],
 };
 
 export const formSchemaDiscount = z
@@ -30,8 +38,13 @@ export const formSchemaDiscount = z
 		name_en: nameEnField,
 		type: z.enum(DiscountType),
 		value: intNotNegativeField,
-		startDate: z.string(),
-		endDate: z.string().nullable(),
+
+		startDate: z.union([z.date(), z.string()]).transform((val) => new Date(val)),
+		endDate: z
+			.union([z.date(), z.string()])
+			.transform((val) => (val ? new Date(val) : null))
+			.nullable()
+			.optional(),
 
 		minDiscountValue: intNotNegativeField.nullable(),
 		maxDiscountValue: intNotNegativeField.nullable(),
@@ -71,9 +84,7 @@ export const formSchemaDiscount = z
 			}
 		}
 
-		/** 3) Additional recommended rules */
-
-		// max >= min
+		/** 3) Additional rules */
 		if (
 			data.type === DiscountType.PERCENTAGE &&
 			data.minDiscountValue != null &&

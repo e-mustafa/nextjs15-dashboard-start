@@ -1,5 +1,7 @@
+import { TLocalesData } from '@/configs/general';
 import { HandlerContext, errorHandler } from '@/lib/error-handler/error-handler-route';
 import { AppError } from '@/lib/error-handler/error-handler.server';
+import getCurrentLocale from '@/lib/utils.server/getCurrentLocale.server';
 import { deleteCategory, getCategory, updateCategory } from '@/server/services/category-service';
 
 // GET /api/categories/:id
@@ -7,7 +9,9 @@ import { deleteCategory, getCategory, updateCategory } from '@/server/services/c
 async function getCategoryAction(_req: Request, ctx?: HandlerContext) {
 	const { id } = (await ctx?.params) ?? {};
 	if (!id) throw new AppError('api.errors.invalid_id', 400);
-	return getCategory(id);
+
+	const locale = (_req.headers.get('accept-language') as TLocalesData) || (await getCurrentLocale());
+	return getCategory(id, locale);
 }
 
 async function updateCategoryAction(req: Request, ctx?: HandlerContext) {

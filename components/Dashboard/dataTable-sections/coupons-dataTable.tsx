@@ -5,7 +5,7 @@ import { useServerResponse } from '@/hooks/use-server-response';
 import { formDate } from '@/lib/utils';
 import { getDataInPage } from '@/lib/utils.server/api.server';
 import { deleteCouponAction, deleteManyCouponsAction, toggleStateCouponAction } from '@/server/actions/coupon-actions';
-import { FormattedCoupon } from '@/server/services/coupon-service';
+import { FormattedCoupon } from '@/server/services/coupon-service/types';
 import { ActionResult, ApiMeta, TQueryParams } from '@/types/api';
 import { DiscountType } from '@prisma/client';
 import { ColumnDef } from '@tanstack/react-table';
@@ -30,7 +30,7 @@ export default function CouponDataTable({ result, locale }: { result: ActionResu
 	// ✅ Optimistic UI state
 	const [optimisticData, setOptimisticData] = useOptimistic<TFormValues[]>((result.data as TFormValues[]) ?? []);
 	const [meta, setMeta] = useState<ApiMeta>(result.meta as ApiMeta);
-	
+
 	// ---------------------------------------------------------
 	// URL Query Parameters
 	// ---------------------------------------------------------
@@ -110,7 +110,7 @@ export default function CouponDataTable({ result, locale }: { result: ActionResu
 			header: 'columns.name',
 			cell: ({ row }) => (
 				<Link
-					href={`/${url_segment}/${row.original.id}`}
+					href={`${url_segment}/${row.original.id}`}
 					className='font-medium hover:underline text-primary'
 					onClick={(e) => e.stopPropagation()}
 				>

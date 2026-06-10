@@ -1,6 +1,15 @@
+import { ComboboxOption } from '@/components/ui-custom/reuseable-combobox';
 import { TLocalesData } from '@/configs/general';
 import { msg } from '@/lib/utils';
 import z from 'zod';
+
+export interface IInitialItems {
+	products?: ComboboxOption['products'] ;
+	categories?: ComboboxOption['categories'];
+	collections?: ComboboxOption['collections'];
+	brands?: ComboboxOption['brands'];
+	tags?: ComboboxOption['tags'];
+}
 
 export const preprocessNumber = (ctx: z.ZodNumber) =>
 	z.preprocess((val) => {
@@ -88,3 +97,10 @@ export const shortDescription = z
 	.trim()
 	.min(20, { message: msg('forms.validation.short_description_min', { min: 20 }) })
 	.max(500, { message: msg('forms.validation.short_description_max', { max: 500 }) });
+
+export const dateRequired = z.union([z.date(), z.string()]).transform((val) => new Date(val));
+export const dateOptional = z
+	.union([z.date(), z.string()])
+	.transform((val) => (val ? new Date(val) : null))
+	.nullable()
+	.optional();
