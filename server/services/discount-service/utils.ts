@@ -4,8 +4,7 @@ import { prisma_DB } from '@/prisma/prisma.db';
 import { TDiscountFormValues } from '@/validation/discount-validation';
 import { DiscountType, Prisma } from '@prisma/client';
 import { calculateDiscountedPrice } from '../utils';
-import { DiscountWithRelations } from './prisma-includes';
-import { DiscountProduct, FormattedDiscount } from './types';
+import { DiscountProduct, DiscountWithRelations, FormattedDiscount } from './types';
 
 /** * Format Single Product for Discount
  */
@@ -54,7 +53,10 @@ export async function formatDiscountProduct(
 
 /** * Handle core formatting logic for discounts
  */
-export async function handleFormatDiscount(discount: DiscountWithRelations, acceptLanguage?: string): Promise<FormattedDiscount> {
+export async function handleFormatDiscount(
+	discount: DiscountWithRelations,
+	acceptLanguage?: string,
+): Promise<FormattedDiscount> {
 	const { products, startDate, endDate, createdAt, updatedAt, ...rest } = discount;
 
 	const formattedProducts = await Promise.all(
@@ -117,6 +119,8 @@ export async function formatDiscountForEdit(
 		name_ar: translationData.name_ar || '',
 		name_en: translationData.name_en || '',
 		...discountData,
+
+		initialItems: { products: discountData.discountProducts },
 	} as TDiscountFormValues;
 }
 

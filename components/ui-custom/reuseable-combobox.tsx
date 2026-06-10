@@ -2,13 +2,12 @@
 
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { imagesPlaceholder } from '@/configs/general';
 import { cn, renderErrorMessage } from '@/lib/utils';
 import { CheckIcon, ChevronsUpDown, CircleSlash2Icon, Loader2, Trash2Icon, XIcon } from 'lucide-react';
-import { ReactNode, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
-
-import { imagesPlaceholder } from '@/configs/general';
 import Image from 'next/image';
 import Link from 'next/link';
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import TagForm from '../Dashboard/forms/tag-form';
@@ -142,7 +141,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 		const objectsFromValue = valueArray.filter((v) => typeof v === 'object' && v.id) as T[];
 
 		// Merge with initialItems (from backend)
-		const initialItemsArray = Array.isArray(initialItems) ? initialItems : [initialItems];
+		const initialItemsArray = initialItems && Array.isArray(initialItems) ? initialItems : [initialItems];
 		const combined = [...initialItemsArray, ...objectsFromValue];
 
 		// Remove duplicates by ID
@@ -221,7 +220,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 
 	// ✅ Fetch data
 	const fetchData = useCallback(
-		async (query: string, page: number, append = false) => {
+		async (query: string, page: number, append = !query) => {
 			if (!fetchOptions) return;
 
 			const loadingState = page === 1 ? setIsSearching : setIsLoadingMore;
@@ -237,7 +236,7 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 
 				if (Array.isArray(result)) {
 					newOptions = result;
-					paginationData.hasMore = result.length >= pageSize;
+					paginationData.hasMore = result.hasMore || result.length >= pageSize;
 				} else {
 					newOptions = result.data || [];
 					paginationData.hasMore = result.pagination?.hasMore ?? result.hasMore ?? false;
@@ -411,6 +410,10 @@ export default function ReusableCombobox<T extends ComboboxOption>({
 
 		if (selectedOptions.length === 1) {
 			return selectedOptions[0].name;
+		}
+
+		if (multiple && isProducts && selectedOptions.length > 0) {
+			return `${selectedOptions.length} ${t('common.messages.items_selected')}`;
 		}
 
 		return <span className='text-muted-foreground'>{renderErrorMessage(placeholder, t)}</span>;

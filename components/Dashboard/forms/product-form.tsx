@@ -279,6 +279,7 @@ export default function ProductForm({
 				label: msg('common.actions.choose_', { item: 'common.sections.the_brand' }),
 				placeholder: 'forms.placeholders.choose_products_brand',
 				optionUrl: `${config_env.domainAPI}${url_brands}`,
+				linkHref: url_brands,
 				initialItems: initialItems?.brands || [],
 			},
 			{
@@ -287,6 +288,7 @@ export default function ProductForm({
 				label: msg('common.actions.choose_', { item: 'common.sections.the_category' }),
 				placeholder: 'forms.placeholders.choose_products_category',
 				optionUrl: `${config_env.domainAPI}${url_categories}`,
+				linkHref: url_categories,
 				initialItems: initialItems?.categories || [],
 			},
 			{
@@ -295,6 +297,7 @@ export default function ProductForm({
 				label: msg('common.actions.choose_', { item: 'common.sections.collections' }),
 				placeholder: 'forms.placeholders.choose_products_collection',
 				optionUrl: `${config_env.domainAPI}${url_collections}`,
+				linkHref: url_collections,
 				multiple: true,
 				initialItems: initialItems?.collections || [],
 			},

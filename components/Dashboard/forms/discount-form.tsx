@@ -1,6 +1,9 @@
 'use client';
 import { url_segment } from '@/app/[locale]/dashboard/(products-management)/discounts/page';
-import { url_segment as url_products } from '@/app/[locale]/dashboard/(products-management)/products/page';
+import {
+	url_segment as url_products,
+	tags as tags_products,
+} from '@/app/[locale]/dashboard/(products-management)/products/page';
 import LoaderInstElement from '@/components/Shared/loaders/loader-inst-element';
 import { Form } from '@/components/ui-custom/custom-form';
 import { config_env, currenciesData } from '@/configs/general';
@@ -187,9 +190,9 @@ export default function DiscountForm({
 							name: 'products',
 							label: msg('common.actions.choose_', { item: 'common.sections.products' }),
 							placeholder: 'forms.placeholders.choose_products_to_discount',
-							optionUrl: `${config_env.domainAPI}${url_products}`,
-							linkHref: '/dashboard/products',
-							revalidateTags: ['products'],
+							optionUrl: `${config_env.domainAPI}${url_products}/options`,
+							linkHref: url_products,
+							revalidateTags: tags_products,
 							multiple: true,
 							isProducts: true,
 							required: true,

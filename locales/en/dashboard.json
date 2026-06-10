@@ -125,7 +125,9 @@
 			"no_blogs": "No blogs found.",
 			"no_attributes": "No attributes found.",
 			"no_tags": "No tags found.",
-			"drag_to_reorder": "You can drag images to reorder them."
+			"drag_to_reorder": "You can drag images to reorder them.",
+			"items_selected": "item(s) selected",
+			"stock": "Stock"
 		},
 		"options": {
 			"yes": "Yes",

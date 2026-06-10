@@ -156,6 +156,9 @@ export async function createBrand(data: TFormValues): Promise<ActionResult<TForm
 					},
 				],
 			},
+
+			// 🔹 connect products
+			products: data?.products?.length ? { connect: data.products.map((id) => ({ id })) } : undefined,
 		},
 		include: BRAND_COMPLETE_INCLUDE,
 	});
@@ -237,6 +240,9 @@ export async function updateBrand(id: string, data: TFormValues): Promise<Action
 						},
 					})),
 				},
+
+				// 🔹 sync products (connect new, disconnect removed)
+				products: data.products !== undefined ? { set: data.products.map((id) => ({ id })) } : undefined,
 			},
 		});
 

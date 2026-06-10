@@ -11,7 +11,7 @@ import { formSchemaProduct, TProductFormValues } from '@/validation/product-vali
 import { ProductType } from '@prisma/client';
 import { revalidateTag } from 'next/cache';
 import { PRODUCT_COMPLETE_INCLUDE } from './prisma-includes';
-import { ProductWithRelations, TProduct } from './types';
+import { OptionProduct, ProductWithRelations, TProduct } from './types';
 import {
 	buildProductWhereClause,
 	createVariantsForProduct,
@@ -27,6 +27,99 @@ import {
 /////////////////////////
 // MAIN SERVICES
 /////////////////////////
+
+/** * 🔹 Get Products for Combobox (Optimized for Dropdowns) */
+export async function getProductsAsOptions(
+	params?: {
+		search?: string;
+		limit?: number;
+		page?: number;
+	},
+	locale?: TLocalesData,
+): Promise<ActionResult<OptionProduct>> {
+	const { search, limit = 20, page = 1 } = params || {};
+	const skip = (page - 1) * limit;
+
+	const localeKey = (locale?.split('-')[0] as 'ar' | 'en') || 'en';
+
+	// 1. Build a lightweight where clause for the combobox (fetch active products only)
+	const where: any = { isActive: true };
+
+	if (search?.trim()) {
+		where.translations = {
+			some: {
+				name: {
+					contains: search.trim(),
+					mode: 'insensitive',
+				},
+			},
+		};
+	}
+
+	// 2. High Performance: Select only the required fields to optimize DB queries
+	const products = await prisma_DB.product.findMany({
+		where,
+		skip,
+		take: limit + 1, // Fetch limit + 1 to check for the next page without a COUNT query
+		select: {
+			id: true,
+			basePrice: true,
+
+			stockQuantity: true,
+			isActive: true,
+			compareAtPrice: true,
+			createdAt: true,
+
+			// Fetch translation for the active language only to save memory
+			translations: {
+				where: { lang: localeKey },
+				select: { name: true },
+			},
+			// Fetch only the primary image
+			images: {
+				take: 1,
+				orderBy: { sortOrder: 'asc' },
+				select: {
+					image: { select: { url: true } },
+				},
+			},
+		},
+		orderBy: {
+			createdAt: 'desc', // Sort newest first to ensure stable pagination during scrolling
+		},
+	});
+
+	// 3. Check if there is a next page and remove the extra item used for checking
+	const hasMore = products.length > limit;
+	if (hasMore) {
+		products.pop(); // Remove the extra record
+	}
+
+	// 4. Fast data mapping to format the final output response
+	const data = products.map((product) => {
+		const { translations, images, ...rest } = product;
+		const translation = translations[0];
+		const primaryImage = images[0]?.image?.url || '';
+
+		return {
+			...rest,
+			price: product.basePrice,
+			name: translation?.name || '',
+			image: primaryImage,
+		};
+	});
+
+	// 5. Return formatted data with metadata tailored for Infinite Scroll
+	return {
+		success: true,
+		status: 200,
+		data,
+		meta: {
+			// search: search || '',
+			pagination: { page, limit, hasMore },
+		},
+	};
+}
 
 /**
  * 🔹 Get All Products with Pagination and Filters
@@ -58,7 +151,7 @@ export async function getAllProducts(
 	const localizedFields = ['name', 'slug'];
 	const finalSortKey = localizedFields.includes(sortBy) ? `${sortBy}_${localeKey}` : sortBy;
 
-	const orderBy = { [finalSortKey]: sortOrder }  
+	const orderBy = { [finalSortKey]: sortOrder };
 
 	const where = buildProductWhereClause({
 		search,
@@ -325,7 +418,7 @@ export async function updateProduct(id: string, data: TProductFormValues): Promi
 			};
 
 			await tx.productTranslation.upsert({
-				where: { productId_lang: { productId: id, lang } }, // تأكد أن لديك unique index في بريزما على productId و lang معاً
+				where: { productId_lang: { productId: id, lang } }, // need to add unique index on prisma on productId and lang together
 				update: translationData,
 				create: { productId: id, lang, ...translationData },
 			});

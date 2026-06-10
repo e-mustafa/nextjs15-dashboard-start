@@ -61,7 +61,7 @@ export async function formatBrand(
 
 	let formattedProducts: BrandProduct[] = [];
 	if (forEdit && products) {
-		formattedProducts = await Promise.all(brand.products.map((p) => formatBrandProduct(p, acceptLanguage)));
+		formattedProducts = await Promise.all(products.map((p) => formatBrandProduct(p, acceptLanguage)));
 	}
 
 	return {
@@ -76,9 +76,11 @@ export async function formatBrand(
 
 		...(translationData as TFormValues),
 
+		products: products?.map((p) => p.id) || [],
+
 		...(forEdit && {
 			initialItems: {
-				products: formattedProducts,
+				products: formattedProducts || [],
 			},
 		}),
 	};

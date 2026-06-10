@@ -165,6 +165,9 @@ export async function createCategory(data: TFormValues): Promise<ActionResult<TF
 					},
 				],
 			},
+			
+			// 🔹 connect products
+			products: data?.products?.length ? { connect: data.products.map((id) => ({ id })) } : undefined,
 		},
 		include: CATEGORY_COMPLETE_INCLUDE,
 	});
@@ -244,6 +247,9 @@ export async function updateCategory(id: string, data: TFormValues): Promise<Act
 						},
 					})),
 				},
+
+				// 🔹 sync products (connect new, disconnect removed)
+				products: data.products !== undefined ? { set: data.products.map((id) => ({ id })) } : undefined,
 			},
 		});
 	});

@@ -156,6 +156,16 @@ export async function createCollection(data: TFormValues): Promise<ActionResult<
 					},
 				],
 			},
+
+			// 🔹 connect products in injection table
+			products: data?.products?.length
+				? {
+						create: data.products.map((id: string, idx: number) => ({
+							productId: id,
+							sortOrder: idx, // depend on sent ids order from frontend UI
+						})),
+					}
+				: undefined,
 		},
 		include: COLLECTION_COMPLETE_INCLUDE,
 	});
@@ -236,6 +246,18 @@ export async function updateCollection(id: string, data: TFormValues): Promise<A
 						},
 					})),
 				},
+
+				// 🔹 sync products (remove old, add new)
+				products:
+					data.products !== undefined
+						? {
+								deleteMany: {}, // delete all existing by Cascade
+								create: data.products.map((id: string, idx: number) => ({
+									productId: id,
+									sortOrder: idx,
+								})),
+							}
+						: undefined,
 			},
 		});
 	});

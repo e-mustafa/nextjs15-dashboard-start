@@ -12,6 +12,7 @@ import {
 	getAllProducts,
 	getFeaturedProducts,
 	getProduct,
+	getProductsAsOptions,
 	getProductStockStatus,
 	getRelatedProducts,
 	toggleFeaturedProduct,
@@ -40,6 +41,20 @@ export async function getAllProductsAction(
 	locale?: TLocalesData,
 ) {
 	return runAction(() => getAllProducts(params, locale));
+}
+
+/**
+ * Get products for combobox (optimized for dropdowns)
+ */
+export async function getProductsAsOptionsAction(
+	params?: {
+		search?: string;
+		limit?: number;
+		page?: number;
+	},
+	locale?: TLocalesData,
+) {
+	return runAction(() => getProductsAsOptions({ ...params }, locale));
 }
 
 /**

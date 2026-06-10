@@ -124,3 +124,18 @@ interface ProductVariant {
 		attributeValue: { value_ar: string; value_en: string; colorHex?: string | null };
 	}>;
 }
+
+
+export type OptionProduct = {
+	price: number;
+	name: string;
+	image: string;
+	isActive: boolean;
+	id: string;
+	basePrice: number;
+	createdAt: Date;
+	compareAtPrice: number | null;
+	stockQuantity: number;
+	discountAmount?: number;
+	priceAfterDiscount?: number;
+};

@@ -45,6 +45,8 @@ export default function BrandForm({
 		// delayError: 1000,
 	});
 
+	console.log('response?.data', response?.data);
+
 	const initialItems = (response?.data as TFormValues)?.initialItems || defaultValues?.initialItems;
 
 	const formSections_brand: SectionConfig<TFormValues>[] = [
@@ -114,7 +116,9 @@ export default function BrandForm({
 					name: 'products',
 					label: msg('common.actions.choose_', { item: 'common.sections.products' }),
 					placeholder: 'forms.placeholders.choose_brands_products',
-					optionUrl: `${config_env.domainAPI}${url_products}`,
+					optionUrl: `${config_env.domainAPI}${url_products}/options`,
+					// linkHref: `${config_env.domain}${url_products}`,
+					linkHref: url_products,
 					revalidateTags: tags,
 					multiple: true,
 					isProducts: true,
